@@ -1,0 +1,22 @@
+doctype html
+html
+  head
+    title= title
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    script(src='/javascripts/lib/underscore.min.js')
+    script(src='/javascripts/lib/classie.js')
+    //- script(src='/javascripts/lib/jquery.min.js')
+    script(src='/javascripts/app.js')
+  body
+
+    //- header#header
+    //-   block header
+
+    #content
+      block content
+
+    //- footer
+    //-   block footer
+
+    script. 
+      Game.init().randomWorld().createPlayer()

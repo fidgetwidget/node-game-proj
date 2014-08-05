@@ -1,0 +1,29 @@
+body * {
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+}
+
+
+.center {
+  margin: 0 auto;
+}
+
+.content-center {
+  width: 1024px;
+  .center;
+}
+
+body {
+  background-color: #babab8;
+  // background-image: url('../images/background.png');
+  background-position: top center;
+  background-repeat: no-repeat;
+}
+
+body > #content {
+  .content-center;
+  position: relative;
+  height: 768px;
+  background-color: #0f1f05;
+}
+

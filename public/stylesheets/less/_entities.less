@@ -1,0 +1,25 @@
+.entity {
+  position: absolute;
+  box-sizing: border-box;
+}
+
+.entity {
+  .tile;
+
+  &.Player {
+    background-color: #547AD2;
+  }
+  &.wood,
+  &.stone {
+    background-color: transparent;
+    background-image: url('../images/tiles.png');
+  }
+  &.wood {
+    background-position-x:-(@TILESIZE)*6;
+    background-position-y:-(@TILESIZE)*4;
+  }
+  &.stone {
+    background-position-x:-(@TILESIZE)*7;
+    background-position-y:-(@TILESIZE)*4; 
+  }
+}

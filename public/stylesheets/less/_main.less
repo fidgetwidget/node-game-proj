@@ -1,0 +1,100 @@
+// tile position function
+.tile-pos(@n, @i: 0) when (@i =< @n) {
+  &.x@{i} {
+    left:  @i * @TILESIZE;
+  }
+  &.y@{i} {
+    top: @i * @TILESIZE;
+  }
+  .tile-pos(@n, (@i + 1));
+}
+
+.tile-offset(@target, @n, @i: 0) when (@i =< @n) {
+  &.x@{i} {
+    .@{target} {
+      left: -(@i * @TILESIZE);
+    }
+  }
+  &.y@{i} {
+    .@{target} {
+      top: -(@i * @TILESIZE);
+    }
+  }
+  .tile-offset(@target, @n, (@i + 1));
+}
+
+#main,
+#stats,
+#inventory,
+#combat {
+  position: absolute;
+  background-color: #0f1f05;
+}
+
+#main {
+  width:  @DISPLAY_SIZE;
+  height: @DISPLAY_SIZE;
+  top: 0;
+  left: @HALF;
+  overflow: hidden;
+
+  .tiles,
+  .elements,
+  .entities {
+    position: absolute;
+    width: @GRID_SIZE;
+    height: @GRID_SIZE;
+    transition: all 0.1s;
+  }
+  .tiles {
+    background-image: url('../images/grass.png');
+    -webkit-transform: translate3D(0,0,0);
+  }
+
+  .tile-offset(tiles, @CHUNKSIZE);
+  .tile-offset(elements, @CHUNKSIZE);
+  .tile-offset(entities, @CHUNKSIZE);
+}
+
+#stats {
+  top: 0;
+  left: 0;
+  height: @DISPLAY_SIZE;
+  width: @HALF;
+}
+
+#inventory {
+  top: 0;
+  left: @SCREEN_WIDTH - @HALF;
+  height: @DISPLAY_SIZE;
+  width: @HALF;
+}
+
+#combat {
+  top: @DISPLAY_SIZE;
+  left: 0;
+  height: @SCREEN_HEIGHT - @DISPLAY_SIZE;
+  width: @SCREEN_WIDTH;
+}
+
+.tile,
+.entity {
+  position: absolute;
+  box-sizing: border-box;
+}
+.tile {
+  .tile-pos( @CHUNKSIZE );
+  width: @TILESIZE;
+  height: @TILESIZE;
+
+  &.top     { border-top:     1px solid #aaa; }
+  &.left    { border-left:    1px solid #aaa; }
+  &.bottom  { border-bottom:  1px solid #aaa; }
+  &.right   { border-right:   1px solid #aaa; }
+}
+
+.entity.Player {
+  .tile;
+  background: #303030;
+  transition: all 0.1s;
+}

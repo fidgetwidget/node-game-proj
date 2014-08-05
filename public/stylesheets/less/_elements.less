@@ -1,0 +1,59 @@
+.elm {
+  position: absolute;
+  box-sizing: border-box;
+}
+
+.elm {
+  .tile;
+
+  background-color: transparent;
+  background-image: url('../images/tiles.png');
+
+  &.soil,
+  &.wateredSoil,
+  &.weed,
+  &.stump,
+  &.bush {
+    background-position-y: -@TILESIZE*1;
+  }
+
+  &.soil {
+    background-position-x: 0;
+  }
+  &.wateredSoil {
+    background-position-x: -@TILESIZE*1;
+  }
+  &.weed {
+    background-position-x: -@TILESIZE*2;
+  }
+  &.stump {
+    background-position-x: -@TILESIZE*4;
+  }
+  &.bush {
+    background-position-x: -@TILESIZE*5;
+  }
+
+  &.branch,
+  &.stones,
+  &.rock,
+  &.ore,
+  &.fence {
+    background-position-y: -@TILESIZE*2;
+  }
+
+  &.branch {
+    background-position-x: 0;
+  }
+  &.stones {
+    background-position-x: -@TILESIZE*1;
+  }
+  &.rock {
+    background-position-x: -@TILESIZE*2;
+  }
+  &.ore {
+    background-position-x: -@TILESIZE*3;
+  }
+  &.fence {
+    background-position-x: -@TILESIZE*4;
+  }
+}

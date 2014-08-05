@@ -1,0 +1,81 @@
+#inventory {
+  padding-top: @double-gutter;
+
+  .inventory-item {
+    height: @TILESIZE;
+    width: 100%;
+    line-height: @TILESIZE;
+    padding: @half-gutter @double-gutter;
+    transition: all 0.3s;
+
+    &.fade {
+      opacity: 0;
+      &.in {
+        opacity: 1;
+      }
+    }
+
+    .icon,
+    .count {
+      display: inline-block;
+    }
+
+    .icon {
+      width: @TILESIZE;
+      height: @TILESIZE;
+      background-image: url('../images/tiles.png'); 
+      margin-right: @half-gutter;
+      float: left;
+    }
+    &.wood .icon {
+      background-position-x:-(@TILESIZE)*6;
+      background-position-y:-(@TILESIZE)*4;
+    }
+    &.stone .icon {
+      background-position-x:-(@TILESIZE)*7;
+      background-position-y:-(@TILESIZE)*4;
+    }
+
+    .count {
+      color: white;
+    }
+    
+  }
+}
+
+.Player {
+  .item-icon {
+    position: absolute;
+    top:     -@TILESIZE;
+    left:    -4px;
+    width:    @TILESIZE + 8px;
+    height:   (@TILESIZE/4)*3;
+    padding:  4px;
+    background-color: white;
+    border-radius: 4px;
+    
+    .icon,
+    .count {
+      display: inline-block;
+      width:  @TILESIZE/2;
+      height: @TILESIZE/2;
+      float:  left;
+      line-height: @TILESIZE/2;
+    }
+
+    .icon {
+      background-image: url('../images/Tiles.gif');
+      background-size: 160px;
+    }
+    .count { text-align: right; }
+
+    &.wood .icon {
+      background-position-x:-(@TILESIZE/2)*6;
+      background-position-y:-(@TILESIZE/2)*4;
+    }
+    &.stone .icon {
+      background-position-x:-(@TILESIZE/2)*7;
+      background-position-y:-(@TILESIZE/2)*4;
+    }
+  }
+}

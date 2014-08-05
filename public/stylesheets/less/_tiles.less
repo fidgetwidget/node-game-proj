@@ -1,0 +1,36 @@
+.tile{
+  position: absolute;
+  box-sizing: border-box;
+}
+.tile {
+  .tile-pos( @CHUNKSIZE );
+  width: @TILESIZE;
+  height: @TILESIZE;
+
+  &.top     { border-top:     1px solid #aaa; }
+  &.left    { border-left:    1px solid #aaa; }
+  &.bottom  { border-bottom:  1px solid #aaa; }
+  &.right   { border-right:   1px solid #aaa; }
+}
+
+.tile {
+  background-image: url('../images/tiles.png');
+  &.soil {
+    background-position-x:0;
+  }
+  &.grass {
+    background-position-x:-(@TILESIZE)*5;
+  }
+  &.grassR {
+    background-position-x:-(@TILESIZE)*1;
+  }
+  &.grassB {
+    background-position-x:-(@TILESIZE)*2;
+  }
+  &.grassL {
+    background-position-x:-(@TILESIZE)*3;
+  }
+  &.grassT {
+    background-position-x:-(@TILESIZE)*4;
+  }
+}
