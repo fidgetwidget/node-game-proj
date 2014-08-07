@@ -17,7 +17,10 @@ exports.post = function(req, res) {
     if (err) res.send(false);
     if (!chnk) chnk = new Chunk({ x:x, y:y }).save()
     
-    // TODO: save the tiles, elemeents, and items
+    chnk._tiles = tiles ? tiles : void 0;
+    chnk._elements = elements ? elements : void 0;
+    chnk._items = items ? items : void 0;
+    chnk.save()
 
     res.send(true);
   });
@@ -34,11 +37,13 @@ exports.show = (function(req, res) {
   y = args[1];
   // get and return the chunk
   Chunk.findOne({ x: x, y: y })
+    .populate('_tiles')
+    .populate('_elements')
+    .populate('_items')
     .exec(function (err, chnk) {
       if (err) return handleError(err);
-      res.send([
+      res.send(
         { chunk: chnk }
-        ])
-      // prints "The creator is Aaron"
+        )
     });
 });
