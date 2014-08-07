@@ -35,15 +35,15 @@ class @Chunk
 
   load: (json) =>
     if json
-      Game.unloadChunk @x, @y
+      Game._unloadChunk @x, @y
       @x = json.x
       @y = json.y
-      Game.loadChunk @x, @y, this
-      if json.tiles?
-        for tile in json.tiles 
+      Game._loadChunk @x, @y, this
+      if json._tiles?
+        for tile in json._tiles 
           Game.setTile_at tile.x, tile.y, @x, @y, tile.value
-      if json.elements?
-        for elm in json.elements
+      if json._elements?
+        for elm in json._elements
           Game.setElement_at elm.x, elm.y, @x, @y, elm.value
       # if json.items?
       #   for item in json.items 

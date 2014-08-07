@@ -176,8 +176,25 @@ class @Game
 
   # Unload a chunk
   @_unloadChunk: (cx, cy) ->
-    @chunks[cx][cy] = null if @chunks[cx]
+    if @chunks[cx]
+      if @chunks[cx][cy]
 
+        @_removeAllTiles(cx, cy)
+        @_removeAllElements(cx, cy)
+
+      @chunks[cx][cy] = null
+
+  @_removeAllTiles: (cx, cy) ->
+    $tiles = @$tiles.querySelectorAll ".tile.cx#{cx}.cy#{cy}"
+    if $tiles
+      for $tile in $tiles
+        $tile.parentNode.removeChild $tile
+
+  @_removeAllElements: (cx, cy) ->
+    $elms = @$elements.querySelectorAll ".elm.cx#{cx}.cy#{cy}"
+    if $elms
+      for $elm in $elms
+        $elm.parentNode.removeChild $elm
 
   # Load a Chunk
   @_loadChunk: (cx, cy, chunk=null) ->
