@@ -60,6 +60,8 @@
 
     Chunk.prototype.items = void 0;
 
+    Chunk.prototype.keepEmpty = false;
+
     Chunk.prototype.width = CHUNK_WIDTH * TILE_SIZE;
 
     Chunk.prototype.height = CHUNK_HEIGHT * TILE_SIZE;
@@ -87,10 +89,11 @@
       this.tiles = {};
       this.elements = {};
       this.items = {};
+      this.keepEmpty = false;
     }
 
     Chunk.prototype.load = function(json) {
-      var elm, item, tile, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
+      var elm, tile, _i, _j, _len, _len1, _ref, _ref1, _results;
       if (json) {
         Game.unloadChunk(this.x, this.y);
         this.x = json.x;
@@ -100,22 +103,15 @@
           _ref = json.tiles;
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             tile = _ref[_i];
-            Game.setTile_at(tile.x, tile.y, this.x, this.y, tile.tile_type);
+            Game.setTile_at(tile.x, tile.y, this.x, this.y, tile.value);
           }
         }
         if (json.elements != null) {
           _ref1 = json.elements;
+          _results = [];
           for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
             elm = _ref1[_j];
-            Game.setElement_at(elm.x, elm.y, this.x, this.y, elm.elm_type);
-          }
-        }
-        if (json.items != null) {
-          _ref2 = json.items;
-          _results = [];
-          for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-            item = _ref2[_k];
-            _results.push(Game.addItem_at(item.x, item.y, this.x, this.y(item.item)));
+            _results.push(Game.setElement_at(elm.x, elm.y, this.x, this.y, elm.value));
           }
           return _results;
         }
@@ -148,9 +144,13 @@
         this.tiles[x] = {};
       }
       if (value === null || value === void 0) {
-        delete this.tiles[x][y];
-        if (Object.keys(this.tiles[x]).length === 0) {
-          delete this.tiles[x];
+        if (!this.keepEmpty) {
+          this.tiles[x][y] = null;
+        } else {
+          delete this.tiles[x][y];
+          if (Object.keys(this.tiles[x]).length === 0) {
+            delete this.tiles[x];
+          }
         }
       } else {
         this.tiles[x][y] = value;
@@ -163,9 +163,13 @@
         this.elements[x] = {};
       }
       if (value === null || value === void 0) {
-        delete this.elements[x][y];
-        if (Object.keys(this.elements[x]).length === 0) {
-          delete this.elements[x];
+        if (!this.keepEmpty) {
+          this.elements[x][y] = null;
+        } else {
+          delete this.elements[x][y];
+          if (Object.keys(this.elements[x]).length === 0) {
+            delete this.elements[x];
+          }
         }
       } else {
         this.elements[x][y] = value;
@@ -178,9 +182,13 @@
         this.items[x] = {};
       }
       if (item === null || item === void 0) {
-        delete this.items[x][y];
-        if (Object.keys(this.items[x]).length === 0) {
-          delete this.items[x];
+        if (!this.keepEmpty) {
+          this.items[x][y] = null;
+        } else {
+          delete this.items[x][y];
+          if (Object.keys(this.items[x]).length === 0) {
+            delete this.items[x];
+          }
         }
       } else {
         this.items[x][y] = item;
@@ -189,12 +197,60 @@
     };
 
     Chunk.prototype.empty = function(_delete) {
-      if (_delete == null) {
-        _delete = false;
+      var x, y, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _len5, _m, _n, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _results;
+      _delete = _delete || this.keepEmpty;
+      _ref = this.tiles;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        x = _ref[_i];
+        _ref1 = this.tiles[x];
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          y = _ref1[_j];
+          this.tiles[x][y] = null;
+          if (_delete) {
+            delete this.tiles[x][y];
+          }
+        }
+        if (_delete) {
+          delete this.tiles[x];
+        }
       }
+      _ref2 = this.elements;
+      for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+        x = _ref2[_k];
+        _ref3 = this.elements[x];
+        for (_l = 0, _len3 = _ref3.length; _l < _len3; _l++) {
+          y = _ref3[_l];
+          this.elements[x][y] = null;
+          if (_delete) {
+            delete this.elements[x][y];
+          }
+        }
+        if (_delete) {
+          delete this.elements[x];
+        }
+      }
+      _ref4 = this.items;
+      _results = [];
+      for (_m = 0, _len4 = _ref4.length; _m < _len4; _m++) {
+        x = _ref4[_m];
+        _ref5 = this.items[x];
+        for (_n = 0, _len5 = _ref5.length; _n < _len5; _n++) {
+          y = _ref5[_n];
+          this.items[x][y] = null;
+          if (_delete) {
+            delete this.items[x][y];
+          }
+        }
+        if (_delete) {
+          _results.push(delete this.items[x]);
+        } else {
+          _results.push(void 0);
+        }
+      }
+      return _results;
     };
 
-    Chunk.prototype["export"] = function() {
+    Chunk.prototype.toJSON = function() {
       var element, item, tile, x, y, _elements, _i, _items, _j, _ref, _ref1, _tiles;
       _tiles = [];
       _elements = [];
@@ -206,7 +262,7 @@
             _tiles.push({
               x: x,
               y: y,
-              tile_type: tile
+              value: tile
             });
           }
           element = this.getElement(x, y);
@@ -214,7 +270,7 @@
             _elements.push({
               x: x,
               y: y,
-              ele_type: element
+              value: element
             });
           }
           item = this.getItem(x, y);
@@ -222,7 +278,8 @@
             _items.push({
               x: x,
               y: y,
-              item: item
+              value: item.type,
+              count: item.count
             });
           }
         }
@@ -231,9 +288,8 @@
         x: this.x,
         y: this.y,
         tiles: _tiles,
-        elements: _elements({
-          items: _items
-        })
+        elements: _elements,
+        items: _items
       };
     };
 
@@ -368,7 +424,7 @@
     Game._gridWidth = 0;
 
     Game.init = function() {
-      var $wrapper;
+      var $wrapper, _fragment;
       if (Game._debug) {
         console.log("Game.init() was called.");
       }
@@ -386,9 +442,11 @@
       this.$entities = document.createElement('div');
       this.$entities.className = 'entities';
       this.listeners = {};
-      $wrapper.appendChild(this.$tiles);
-      $wrapper.appendChild(this.$elements);
-      $wrapper.appendChild(this.$entities);
+      _fragment = document.createDocumentFragment();
+      _fragment.appendChild(this.$tiles);
+      _fragment.appendChild(this.$elements);
+      _fragment.appendChild(this.$entities);
+      $wrapper.appendChild(_fragment);
       Game.$container.appendChild($wrapper);
       Game._width = Game.$container.offsetWidth;
       Game._gridWidth = Game._width / TILE_SIZE;
@@ -402,16 +460,10 @@
     };
 
     Game.randomWorld = function() {
-      var elm_type, i, min_chunk_cols, min_chunk_rows, rv, rx, ry, x, y, _i, _j, _k;
-      min_chunk_rows = Math.ceil(Game._gridHeight / (CHUNK_HEIGHT * TILE_SIZE));
-      min_chunk_cols = Math.ceil(Game._gridWidth / (CHUNK_WIDTH * TILE_SIZE));
-      for (x = _i = 0; _i < min_chunk_cols; x = _i += 1) {
-        this.chunks[x] = {};
-        for (y = _j = 0; _j < min_chunk_rows; y = _j += 1) {
-          this.chunks[x][y] = new Chunk(x, y);
-        }
-      }
-      for (i = _k = 0; _k < 32; i = ++_k) {
+      var elm_type, i, rv, rx, ry, _i;
+      this.chunks[0] = {};
+      this.chunks[0][0] = new Chunk(0, 0);
+      for (i = _i = 0; _i < 32; i = ++_i) {
         rx = _.random(0, CHUNK_WIDTH);
         ry = _.random(0, CHUNK_HEIGHT);
         rv = _.random(1, 12);
@@ -481,13 +533,59 @@
       return classie.add(this.$container, "y" + this.offsetY);
     };
 
-    Game.unloadChunk = function(cx, cy) {
+    Game.loadChunks = function(cx, cy) {
+      var jqXHR;
+      cx = cx || 0;
+      cy = cy || 0;
+      if (!this.chunks[cx]) {
+        this.chunks[cx] = {};
+      }
+      jqXHR = $.getJSON("/chunk/" + cx + "_" + cy + ".json");
+      return jqXHR.done((function(_this) {
+        return function(data, status, jqXHR) {
+          if (data && data.chunk) {
+            return _this._loadChunk(cx, cy, Chunk.fromJSON(data.chunk));
+          } else {
+            console.log("status: " + status + " ");
+            return console.log(data);
+          }
+        };
+      })(this)).fail((function(_this) {
+        return function(jqXHR, status, error) {
+          return console.error("" + status);
+        };
+      })(this));
+    };
+
+    Game.saveChunk = function(cx, cy) {
+      var jqXHR;
+      if (!(this.chunks[cx] && this.chunks[cx][cy])) {
+        console.warn("no clunk @ " + cx + "_" + cy);
+        return;
+      }
+      jqXHR = $.ajax({
+        url: "/chunk",
+        method: 'post',
+        data: this.chunks[cx][cy].toJSON()
+      });
+      return jqXHR.done((function(_this) {
+        return function(data, status, jqXHR) {
+          return console.log(status);
+        };
+      })(this)).fail((function(_this) {
+        return function(jqXHR, status, error) {
+          return console.error(status);
+        };
+      })(this));
+    };
+
+    Game._unloadChunk = function(cx, cy) {
       if (this.chunks[cx]) {
         return this.chunks[cx][cy] = null;
       }
     };
 
-    Game.loadChunk = function(cx, cy, chunk) {
+    Game._loadChunk = function(cx, cy, chunk) {
       if (chunk == null) {
         chunk = null;
       }

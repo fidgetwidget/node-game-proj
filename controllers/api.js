@@ -34,9 +34,6 @@ exports.show = (function(req, res) {
   y = args[1];
   // get and return the chunk
   Chunk.findOne({ x: x, y: y })
-    .populate('_tiles')
-    .populate('_elements')
-    .populate('_items')
     .exec(function (err, chnk) {
       if (err) return handleError(err);
       res.send([
