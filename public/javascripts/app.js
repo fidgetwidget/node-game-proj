@@ -95,19 +95,19 @@
     Chunk.prototype.load = function(json) {
       var elm, tile, _i, _j, _len, _len1, _ref, _ref1, _results;
       if (json) {
-        Game.unloadChunk(this.x, this.y);
+        Game._unloadChunk(this.x, this.y);
         this.x = json.x;
         this.y = json.y;
-        Game.loadChunk(this.x, this.y, this);
-        if (json.tiles != null) {
-          _ref = json.tiles;
+        Game._loadChunk(this.x, this.y, this);
+        if (json._tiles != null) {
+          _ref = json._tiles;
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             tile = _ref[_i];
             Game.setTile_at(tile.x, tile.y, this.x, this.y, tile.value);
           }
         }
-        if (json.elements != null) {
-          _ref1 = json.elements;
+        if (json._elements != null) {
+          _ref1 = json._elements;
           _results = [];
           for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
             elm = _ref1[_j];
@@ -581,7 +581,37 @@
 
     Game._unloadChunk = function(cx, cy) {
       if (this.chunks[cx]) {
+        if (this.chunks[cx][cy]) {
+          this._removeAllTiles(cx, cy);
+          this._removeAllElements(cx, cy);
+        }
         return this.chunks[cx][cy] = null;
+      }
+    };
+
+    Game._removeAllTiles = function(cx, cy) {
+      var $tile, $tiles, _i, _len, _results;
+      $tiles = this.$tiles.querySelectorAll(".tile.cx" + cx + ".cy" + cy);
+      if ($tiles) {
+        _results = [];
+        for (_i = 0, _len = $tiles.length; _i < _len; _i++) {
+          $tile = $tiles[_i];
+          _results.push($tile.parentNode.removeChild($tile));
+        }
+        return _results;
+      }
+    };
+
+    Game._removeAllElements = function(cx, cy) {
+      var $elm, $elms, _i, _len, _results;
+      $elms = this.$elements.querySelectorAll(".elm.cx" + cx + ".cy" + cy);
+      if ($elms) {
+        _results = [];
+        for (_i = 0, _len = $elms.length; _i < _len; _i++) {
+          $elm = $elms[_i];
+          _results.push($elm.parentNode.removeChild($elm));
+        }
+        return _results;
       }
     };
 
