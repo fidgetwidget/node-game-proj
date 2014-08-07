@@ -53,11 +53,15 @@ class @Game
 
     @listeners = {}
 
-    $wrapper.appendChild @$tiles
-    $wrapper.appendChild @$elements
-    $wrapper.appendChild @$entities
+    # Optimization, use a document fragment
+    _fragment = document.createDocumentFragment()
+    _fragment.appendChild @$tiles
+    _fragment.appendChild @$elements
+    _fragment.appendChild @$entities
+    $wrapper.appendChild _fragment
 
     Game.$container.appendChild $wrapper
+
     Game._width = Game.$container.offsetWidth
     Game._gridWidth = Game._width / TILE_SIZE
     Game._height = Game.$container.offsetHeight
@@ -69,6 +73,7 @@ class @Game
     return Game  
 
 
+  # Create a random World
   @randomWorld: () ->
     # TODO: move away from this...
     min_chunk_rows = Math.ceil(Game._gridHeight / (CHUNK_HEIGHT*TILE_SIZE))
@@ -103,14 +108,18 @@ class @Game
 
       unless elm_type is null
         Game.setElement_at(rx, ry, 0, 0, elm_type)
-    @
 
+    return this
+
+
+  # Create Player
   @createPlayer: () ->
     p1 = new PlayerEntity()
     @addEntity p1
     @setCenter p1.x, p1.y
 
 
+  # Set Center
   @setCenter: (x, y) ->
     classie.remove @$container, "x#{@offsetX}"
     classie.remove @$container, "y#{@offsetY}"
@@ -134,10 +143,12 @@ class @Game
     classie.add @$container, "y#{@offsetY}"
 
 
+  # Unload a chunk
   @unloadChunk: (cx, cy) ->
     @chunks[cx][cy] = null if @chunks[cx]
 
 
+  # Load a Chunk
   @loadChunk: (cx, cy, chunk=null) ->
     @chunks[cx] = {} unless @chunks[cx]
     if chunk
@@ -165,6 +176,7 @@ class @Game
     return @entities[type][name]
 
 
+  # Remoge an Entity
   @removeEntity: (entitiy) ->
     type = entitiy.type
     return false unless @entities[type]
@@ -178,24 +190,28 @@ class @Game
   #
   # Items
   #
-
   # TODO: allow for multiple items in a tile
+  
+  # Add an Item @ world location
   @addItem: (type, x, y, cx, cy, count=1) ->
     item = new Item(type, x, y, count)
     @addEntity(item)
     @chunks[cx][cy].setItem(x, y, item)
 
 
+  # Add an Item @ grid location
   @addItem_at: (xi, yi, cx, cy, item) ->
     _item = new Item(item.type, xi, yi, item.count)
     @addEntity(_item)
     @chunks[cx][cy].setItem(xi, yi, _item)
 
 
+  # Get an Item
   @getItem: (x, y, cx, cy) ->
     return @chunks[cx][cy].getItem(x, y)
 
 
+  # Remove an Item
   @removeItem: (x, y, cx, cy) ->
     item = @chunks[cx][cy].getItem(x, y)
     return false unless item

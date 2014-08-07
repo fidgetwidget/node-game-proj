@@ -3,16 +3,15 @@
 var Chunk = require('../models/chunks.js');
 
 exports.post = function(req, res) {
+  var chunk_x, chunk_y;
+  chunk_x = req.body.x;
+  chunk_y = req.body.y;
+  
+  var chunk = new Chunk(
+    { x: chunk_x, y: chunk_y }
+  );
 
-  new Chunk(
-    {
-      x:        req.body.x, 
-      y:        req.body.y,
-      tiles:    [{}],
-      elements: [{}],
-      items:    [{}]
-    }
-  ).save();
+  chunk.save();
 
 }
 
@@ -24,9 +23,15 @@ exports.show = (function(req, res) {
   x = args[0];
   y = args[1];
   // get and return the chunk
-  Chunk.findOne(
-    { x: x, y: y },
-    function(err, chnk) {
-      res.send([{chunk: chnk}]);
-    })
+  Chunk.findOne({ x: x, y: y })
+    .populate('_tiles')
+    .populate('_elements')
+    .populate('_items')
+    .exec(function (err, chnk) {
+      if (err) return handleError(err);
+      res.send([
+        { chunk: chnk }
+        ])
+      // prints "The creator is Aaron"
+    });
 });
