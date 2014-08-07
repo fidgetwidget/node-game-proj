@@ -3,15 +3,25 @@
 var Chunk = require('../models/chunks.js');
 
 exports.post = function(req, res) {
-  var chunk_x, chunk_y;
-  chunk_x = req.body.x;
-  chunk_y = req.body.y;
   
-  var chunk = new Chunk(
-    { x: chunk_x, y: chunk_y }
-  );
+  var params = req['body']
+  var x = params['x']
+  var y = params['y']
+  var tiles = params['tiles']
+  var elements = params['elements']
+  var items = params['items']
+  
 
-  chunk.save();
+  var query = Chunk.findOne({ x:x, y:y })
+  query.exec(function (err, chnk) {
+    if (err) res.send(false);
+    if (!chnk) chnk = new Chunk({ x:x, y:y }).save()
+    
+    // TODO: save the tiles, elemeents, and items
+
+    res.send(true);
+  });
+  
 
 }
 

@@ -75,16 +75,10 @@ class @Game
 
   # Create a random World
   @randomWorld: () ->
-    # TODO: move away from this...
-    min_chunk_rows = Math.ceil(Game._gridHeight / (CHUNK_HEIGHT*TILE_SIZE))
-    min_chunk_cols = Math.ceil(Game._gridWidth / (CHUNK_WIDTH*TILE_SIZE))
-
-    for x in [0...min_chunk_cols] by 1
-      @chunks[x] = {}
-      for y in [0...min_chunk_rows] by 1
-        # @chunks[x][y] = null
-        @chunks[x][y] = new Chunk(x, y)
     
+    @chunks[0] = {}
+    @chunks[0][0] = new Chunk(0, 0)
+      
     for i in [0...32]
       rx = _.random(0,CHUNK_WIDTH)
       ry = _.random(0,CHUNK_HEIGHT)
@@ -143,13 +137,50 @@ class @Game
     classie.add @$container, "y#{@offsetY}"
 
 
+  @loadChunks: (cx, cy) ->
+    cx = cx || 0
+    cy = cy || 0
+    unless @chunks[cx]
+      @chunks[cx] = {}
+    
+    jqXHR = $.getJSON "/chunk/#{cx}_#{cy}.json"
+    jqXHR
+      .done (data, status, jqXHR) =>
+        if data and data.chunk
+          @_loadChunk(cx, cy, Chunk.fromJSON(data.chunk))
+        else
+          console.log "status: #{status} "
+          console.log data
+
+      .fail (jqXHR, status, error) =>
+        console.error "#{status}"
+
+  # attempt to save the chunk to the server
+  @saveChunk: (cx, cy) ->
+    unless @chunks[cx] and @chunks[cx][cy]
+      console.warn "no clunk @ #{cx}_#{cy}"
+      return  
+
+    jqXHR = $.ajax {
+        url: "/chunk"
+        method: 'post'
+        data: @chunks[cx][cy].toJSON()
+      }
+
+    jqXHR
+      .done (data, status, jqXHR) =>
+        console.log status
+      .fail (jqXHR, status, error) =>
+        console.error status
+
+
   # Unload a chunk
-  @unloadChunk: (cx, cy) ->
+  @_unloadChunk: (cx, cy) ->
     @chunks[cx][cy] = null if @chunks[cx]
 
 
   # Load a Chunk
-  @loadChunk: (cx, cy, chunk=null) ->
+  @_loadChunk: (cx, cy, chunk=null) ->
     @chunks[cx] = {} unless @chunks[cx]
     if chunk
       @chunks[cx][cy] = chunk
