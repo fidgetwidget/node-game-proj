@@ -38,6 +38,16 @@
   left: @HALF;
   overflow: hidden;
 
+  &.edit {
+    overflow: auto;
+  }
+
+  .wrapper {
+    .clearfix;
+    width: @GRID_SIZE;
+    height: @GRID_SIZE;
+  }
+
   .tiles,
   .elements,
   .entities {

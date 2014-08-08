@@ -74,18 +74,16 @@
 
     Chunk.prototype.y = 0;
 
-    Chunk.prototype.base_type = 0;
+    Chunk.prototype.base = 0;
 
-    function Chunk(x, y) {
-      if (x == null) {
-        x = 0;
-      }
-      if (y == null) {
-        y = 0;
-      }
+    function Chunk(x, y, base) {
       this.load = __bind(this.load, this);
+      x = x || 0;
+      y = y || 0;
+      base = base || _.indexOf(TILE_TYPES, 'dirt');
       this.x = x;
       this.y = y;
+      this.base = base;
       this.tiles = {};
       this.elements = {};
       this.items = {};
@@ -93,11 +91,12 @@
     }
 
     Chunk.prototype.load = function(json) {
-      var elm, tile, _i, _j, _len, _len1, _ref, _ref1, _results;
+      var elm, item, tile, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
       if (json) {
         Game._unloadChunk(this.x, this.y);
         this.x = json.x;
         this.y = json.y;
+        this.base = json.base;
         Game._loadChunk(this.x, this.y, this);
         if (json._tiles != null) {
           _ref = json._tiles;
@@ -108,10 +107,17 @@
         }
         if (json._elements != null) {
           _ref1 = json._elements;
-          _results = [];
           for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
             elm = _ref1[_j];
-            _results.push(Game.setElement_at(elm.x, elm.y, this.x, this.y, elm.value));
+            Game.setElement_at(elm.x, elm.y, this.x, this.y, elm.value);
+          }
+        }
+        if (json._items != null) {
+          _ref2 = json._items;
+          _results = [];
+          for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+            item = _ref2[_k];
+            _results.push(true);
           }
           return _results;
         }
@@ -287,6 +293,7 @@
       return {
         x: this.x,
         y: this.y,
+        base: this.base,
         tiles: _tiles,
         elements: _elements,
         items: _items

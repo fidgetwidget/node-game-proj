@@ -15,14 +15,18 @@ class @Chunk
   rows:       CHUNK_HEIGHT
   x:          0
   y:          0
-  base_type:  0
+  base:       0
 
   #
   # Constructor
   #
-  constructor: (x=0, y=0) ->
+  constructor: (x, y, base) ->
+    x = x || 0
+    y = y || 0
+    base = base || _.indexOf TILE_TYPES, 'dirt'
     @x = x
     @y = y
+    @base = base
     # Initialize the Tile Arrays
     @tiles = {}
     @elements = {}
@@ -38,6 +42,7 @@ class @Chunk
       Game._unloadChunk @x, @y
       @x = json.x
       @y = json.y
+      @base = json.base
       Game._loadChunk @x, @y, this
       if json._tiles?
         for tile in json._tiles 
@@ -45,9 +50,12 @@ class @Chunk
       if json._elements?
         for elm in json._elements
           Game.setElement_at elm.x, elm.y, @x, @y, elm.value
-      # if json.items?
-      #   for item in json.items 
-      #     Game.addItem_at item.x, item.y, @x, @y item.item
+      if json._items?
+        for item in json._items
+          true
+          # TODO: create the item and add it
+          # itm = new Item(item.x, item.y, item.value);
+          # Game.addItem_at item.x, item.y, @x, @y, itm
 
 
   # 
@@ -151,7 +159,7 @@ class @Chunk
         if item
           _items.push { x: x, y: y, value: item.type, count: item.count }
 
-    return { x: @x, y: @y, tiles: _tiles, elements: _elements, items: _items }
+    return { x: @x, y: @y, base: @base, tiles: _tiles, elements: _elements, items: _items }
 
 
   @fromJSON: (json) ->
