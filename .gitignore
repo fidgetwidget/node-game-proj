@@ -1,7 +1,6 @@
 
 bower_components/*
 node_modules/*
-bin/*
 
 nodeGameProj.sublime-project
 nodeGameProj.sublime-workspace
