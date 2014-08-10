@@ -57,7 +57,13 @@
     transition: all 0.1s;
   }
   .tiles {
-    background-image: url('../images/grass.png');
+    background-color: white;
+    &.grass {
+      background-image: url('../images/grass.png');
+    }
+    &.dirt {
+      background-image: url('../images/dirt.png');
+    }
     -webkit-transform: translate3D(0,0,0);
   }
 

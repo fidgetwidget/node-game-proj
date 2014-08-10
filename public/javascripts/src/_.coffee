@@ -20,11 +20,11 @@ this.TILE_SIZE = 32
 
 this.TILE_TYPES = [
   'dirt'
+  'grass'
   'grassR'
   'grassB'
   'grassL'
   'grassT'
-  'grass'
 ]
 
 this.COLLIDER_TILES = [

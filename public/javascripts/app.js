@@ -32,7 +32,7 @@
 
   this.TILE_SIZE = 32;
 
-  this.TILE_TYPES = ['dirt', 'grassR', 'grassB', 'grassL', 'grassT', 'grass'];
+  this.TILE_TYPES = ['dirt', 'grass', 'grassR', 'grassB', 'grassL', 'grassT'];
 
   this.COLLIDER_TILES = [false, false, false, false, false, false];
 
@@ -467,9 +467,11 @@
     };
 
     Game.randomWorld = function() {
-      var elm_type, i, rv, rx, ry, _i;
+      var chunk, elm_type, i, rv, rx, ry, _i;
       this.chunks[0] = {};
-      this.chunks[0][0] = new Chunk(0, 0);
+      chunk = new Chunk(0, 0);
+      this.chunks[0][0] = chunk;
+      this.setTilesBaseClass(chunk);
       for (i = _i = 0; _i < 32; i = ++_i) {
         rx = _.random(0, CHUNK_WIDTH);
         ry = _.random(0, CHUNK_HEIGHT);
@@ -630,10 +632,20 @@
         this.chunks[cx] = {};
       }
       if (chunk) {
-        return this.chunks[cx][cy] = chunk;
+        this.chunks[cx][cy] = chunk;
+        return this.setTilesBaseClass(chunk);
       } else {
         return this.chunks[cx][cy] = void 0;
       }
+    };
+
+    Game.setTilesBaseClass = function(chunk) {
+      var typ, _i, _len;
+      for (_i = 0, _len = TILE_TYPES.length; _i < _len; _i++) {
+        typ = TILE_TYPES[_i];
+        classie.remove(this.$tiles, typ);
+      }
+      return classie.add(this.$tiles, TILE_TYPES[chunk.base]);
     };
 
     Game.addEntity = function(entity) {
@@ -850,7 +862,7 @@
       if (this.chunks.length < cx || ((_ref = this.chunks[cx]) != null ? _ref.length : void 0) < cy) {
         return -1;
       }
-      return this.chunks[cx][cy].base_type;
+      return this.chunks[cx][cy].base;
     };
 
     Game.addTileElm = function(xi, yi, cx, cy, value) {

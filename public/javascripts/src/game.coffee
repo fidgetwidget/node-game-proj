@@ -77,7 +77,10 @@ class @Game
   @randomWorld: () ->
     
     @chunks[0] = {}
-    @chunks[0][0] = new Chunk(0, 0)
+    chunk = new Chunk(0, 0)
+    @chunks[0][0] = chunk
+
+    @setTilesBaseClass chunk
       
     for i in [0...32]
       rx = _.random(0,CHUNK_WIDTH)
@@ -201,9 +204,15 @@ class @Game
     @chunks[cx] = {} unless @chunks[cx]
     if chunk
       @chunks[cx][cy] = chunk
+      @setTilesBaseClass chunk
     else
       @chunks[cx][cy] = undefined
 
+
+  @setTilesBaseClass: (chunk) ->
+    for typ in TILE_TYPES
+        classie.remove @$tiles, typ
+      classie.add @$tiles, TILE_TYPES[chunk.base]
 
   # Insert an entity to the game
   @addEntity: (entity) ->
@@ -408,7 +417,7 @@ class @Game
 
   @getChunkType: (cx, cy) ->
     return -1 if @chunks.length < cx or @chunks[cx]?.length < cy
-    return @chunks[cx][cy].base_type
+    return @chunks[cx][cy].base
 
 
 
