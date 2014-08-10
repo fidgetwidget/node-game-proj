@@ -7,8 +7,6 @@ class @PlayerEntity extends Entity
   @count: 0
 
   # Instance Variables
-  cx:         0
-  cy:         0
   inventory:  undefined
   tool:       undefined # equiped tool
   #
@@ -20,10 +18,10 @@ class @PlayerEntity extends Entity
   constructor: (name, x, y) ->
     @name = name || "player#{PlayerEntity.count}"
     PlayerEntity.count++
-    super( "Player", @name )
-    
-    @x = x || Game._gridWidth/2
-    @y = y || Game._gridHeight/2
+
+    x = x || Game._gridWidth/2
+    y = y || Game._gridHeight/2
+    super( "Player", @name, x, y )
     @cx = 0
     @cy = 0
 

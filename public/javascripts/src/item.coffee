@@ -8,10 +8,8 @@ class @Item extends Entity
   @initialized:       false
 
   # Instance Variables
-  cx:     0
-  cy:     0
-  type:   undefined
-  count:  0
+  item_type:  undefined
+  count:      0
   
 
   #
@@ -22,13 +20,11 @@ class @Item extends Entity
   ###
   constructor: (type, x, y, count=1) ->
     @name = "#{type}_x#{x}_y#{y}"
-    @type = type
+    @item_type = type
     @count = count
     
-    super( "#{type}", @name )
+    super( 'Item', @name, x, y )
     @facing = DOWN
-    @x = x
-    @y = y
     @cx = 0
     @cy = 0
     @setPosition()

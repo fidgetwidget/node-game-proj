@@ -4,26 +4,38 @@
 #
 class Entity
 
-  name: 'entity_name' # the entities id
-  type: 'entity_type' # the entity type name
-  elm:  undefined
-  $elm: undefined
-  facing: DOWN
+  name:     'entity_name' # the entities id
+  type:     'entity_type' # the entity type name
+
+  cx:       0
+  cy:       0
+  x:        0
+  y:        0
+
+  elm:      undefined
+  $elm:     undefined
+
+  width:    32
+  height:   32
+  offsetX:  0
+  offsetY:  0
+
+  facing:   DOWN
   
   #
   # Entity Constructor
   #
-  constructor: (@type, @name) ->
+  constructor: (@type, @name, @x=0, @y=0) ->
     @$elm = document.createElement('div')
-    @$elm.className = "entity #{@type}"
+    @$elm.className = "entity #{@type} w#{@width} h#{@height}"
 
     ## DEBUG
     console.log "#{@type} #{@name} created." if Game._debug
 
 
   setPosition: () ->
-    @$elm.style.top = "#{@y*TILE_SIZE}px"
-    @$elm.style.left = "#{@x*TILE_SIZE}px"
+    @$elm.style.top   = "#{(@y*TILE_SIZE) - @offsetY}px"
+    @$elm.style.left  = "#{(@x*TILE_SIZE) - @offsetX}px"
     @
 
 
