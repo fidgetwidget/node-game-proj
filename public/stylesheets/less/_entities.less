@@ -1,0 +1,42 @@
+.entity {
+  position: absolute;
+  box-sizing: border-box;
+}
+
+.entity {
+  .tile;
+
+  &.player {
+    background-color: #547AD2;
+    background-image: none;
+  }
+
+  &.tree {    
+    width: @TILESIZE*2;
+    height: @TILESIZE*3;
+    margin-left: -@TILESIZE/2;
+    margin-top: -@TILESIZE*2;
+    background-color: transparent;
+    background-image: url('../images/tiles.png');
+    background-position-x:0;
+    background-position-y:-@TILESIZE*5;
+
+    &.alt {
+      background-position-x:-@TILESIZE*2;
+    }
+    &.bare,
+    &.stump {
+      width: @TILESIZE;
+      margin-left: 0;
+    }
+    &.bare {
+      background-position-x:-@TILESIZE*4;
+    }
+    &.stump {
+      background-position-x:-@TILESIZE*5;
+    }
+  }
+  
+}
+
+
