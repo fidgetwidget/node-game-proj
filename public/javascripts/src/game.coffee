@@ -446,6 +446,9 @@ class @Game
 
   # do any work regarding a tile being added/changed
   @initTile: ($tile, xi, yi, cx, cy, value) ->
+    
+    @setTileKlass($tile, xi, yi, cx, cy, value)
+
     switch TILE_TYPES[value]
       when 'soil'
         @addListener 'soil', $tile, xi, yi, cx, cy
@@ -454,6 +457,84 @@ class @Game
         @addListener 'wateredSoil', $tile, xi, yi, cx, cy
     return @
 
+
+  @setTileKlass: ($tile, xi, yi, cx, cy, value) ->
+    for dir in TILE_DIRECTIONS
+      classie.remove $tile, dir
+    classie.remove $tile, 'none'
+
+    klass = @getNeightbors(value, xi, yi, cx, cy)
+    $tile.className += klass
+
+
+  @getNeightbors: (tile_type, xi, yi, cx, cy) ->
+    klass = ''
+    for dir in TILE_DIRECTIONS
+      klass += " #{dir}" if @getNeightbor(tile_type, dir, xi, yi, cx, cy)
+    klass = ' none' if klass is ''
+    return klass
+
+
+  @getNeightbor: (tile_type, dir, xi, yi, cx, cy) ->
+    switch dir
+      when 'nw' 
+        tile = @getTile_at( xi-1, yi-1, cx, cy)
+        if tile is tile_type
+          classie.add @getTileElm( xi-1, yi-1, cx, cy), 'se'
+          return true
+        return false
+
+      when 'n'  
+        tile = @getTile_at( xi,   yi-1, cx, cy)
+        if tile is tile_type
+          classie.add @getTileElm( xi,   yi-1, cx, cy), 's'
+          return true
+        return false
+
+      when 'ne' 
+        tile = @getTile_at( xi+1, yi-1, cx, cy)
+        if tile is tile_type
+          classie.add @getTileElm( xi+1, yi-1, cx, cy), 'sw'
+          return true
+        return false
+        
+      when 'e'  
+        tile = @getTile_at( xi+1, yi,   cx, cy)
+        if tile is tile_type
+          classie.add @getTileElm( xi+1, yi,   cx, cy), 'w'
+          return true
+        return false
+        
+      when 'se' 
+        tile = @getTile_at( xi+1, yi+1, cx, cy)
+        if tile is tile_type
+          classie.add @getTileElm( xi+1, yi+1, cx, cy), 'nw'
+          return true
+        return false
+
+      when 's'
+        tile = @getTile_at( xi,   yi+1, cx, cy)
+        if tile is tile_type
+          classie.add @getTileElm( xi,   yi+1, cx, cy), 'n'
+          return true
+        return false
+
+      when 'sw' 
+        tile = @getTile_at( xi-1, yi+1, cx, cy)
+        if tile is tile_type
+          classie.add @getTileElm( xi-1, yi+1, cx, cy), 'ne'
+          return true
+        return false
+
+      when 'w'
+        tile = @getTile_at( xi-1, yi,   cx, cy)
+        if tile is tile_type
+          classie.add @getTileElm( xi-1, yi,   cx, cy), 'e'
+          return true
+        return false
+
+      else 
+        return false
 
 
   # TODO: make this cycle more complex (lower chances, shorter times?, chances based on number of times through?)

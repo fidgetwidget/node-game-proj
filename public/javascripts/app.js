@@ -36,9 +36,11 @@
 
   this.ELM_TYPES = ['soil', 'wateredSoil', 'weed', '_0', 'stump', 'bush', 'branch', 'stones', 'rock', 'ore', 'fence', '_1'];
 
-  this.COLLIDER = [false, false, true, false, true, true, true, false, true, true, true, false];
+  this.COLLIDER_ELMS = [false, false, true, false, true, true, true, false, true, true, true, false];
 
   this.ITEM_TYPES = ['small_stick', 'sharp_stick', 'small_stone', 'sharp_stone', 'large_stone', 'large_stick', 'wood', 'stone'];
+
+  this.TILE_DIRECTIONS = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
 
   this.TILE_TYPES = ['dirt', 'grass', 'wall'];
 
@@ -915,6 +917,7 @@
     };
 
     Game.initTile = function($tile, xi, yi, cx, cy, value) {
+      this.setTileKlass($tile, xi, yi, cx, cy, value);
       switch (TILE_TYPES[value]) {
         case 'soil':
           this.addListener('soil', $tile, xi, yi, cx, cy);
@@ -923,6 +926,96 @@
           this.addListener('wateredSoil', $tile, xi, yi, cx, cy);
       }
       return this;
+    };
+
+    Game.setTileKlass = function($tile, xi, yi, cx, cy, value) {
+      var dir, klass, _i, _len;
+      for (_i = 0, _len = TILE_DIRECTIONS.length; _i < _len; _i++) {
+        dir = TILE_DIRECTIONS[_i];
+        classie.remove($tile, dir);
+      }
+      classie.remove($tile, 'none');
+      klass = this.getNeightbors(value, xi, yi, cx, cy);
+      return $tile.className += klass;
+    };
+
+    Game.getNeightbors = function(tile_type, xi, yi, cx, cy) {
+      var dir, klass, _i, _len;
+      klass = '';
+      for (_i = 0, _len = TILE_DIRECTIONS.length; _i < _len; _i++) {
+        dir = TILE_DIRECTIONS[_i];
+        if (this.getNeightbor(tile_type, dir, xi, yi, cx, cy)) {
+          klass += " " + dir;
+        }
+      }
+      if (klass === '') {
+        klass = ' none';
+      }
+      return klass;
+    };
+
+    Game.getNeightbor = function(tile_type, dir, xi, yi, cx, cy) {
+      var tile;
+      switch (dir) {
+        case 'nw':
+          tile = this.getTile_at(xi - 1, yi - 1, cx, cy);
+          if (tile === tile_type) {
+            classie.add(this.getTileElm(xi - 1, yi - 1, cx, cy), 'se');
+            return true;
+          }
+          return false;
+        case 'n':
+          tile = this.getTile_at(xi, yi - 1, cx, cy);
+          if (tile === tile_type) {
+            classie.add(this.getTileElm(xi, yi - 1, cx, cy), 's');
+            return true;
+          }
+          return false;
+        case 'ne':
+          tile = this.getTile_at(xi + 1, yi - 1, cx, cy);
+          if (tile === tile_type) {
+            classie.add(this.getTileElm(xi + 1, yi - 1, cx, cy), 'sw');
+            return true;
+          }
+          return false;
+        case 'e':
+          tile = this.getTile_at(xi + 1, yi, cx, cy);
+          if (tile === tile_type) {
+            classie.add(this.getTileElm(xi + 1, yi, cx, cy), 'w');
+            return true;
+          }
+          return false;
+        case 'se':
+          tile = this.getTile_at(xi + 1, yi + 1, cx, cy);
+          if (tile === tile_type) {
+            classie.add(this.getTileElm(xi + 1, yi + 1, cx, cy), 'nw');
+            return true;
+          }
+          return false;
+        case 's':
+          tile = this.getTile_at(xi, yi + 1, cx, cy);
+          if (tile === tile_type) {
+            classie.add(this.getTileElm(xi, yi + 1, cx, cy), 'n');
+            return true;
+          }
+          return false;
+        case 'sw':
+          tile = this.getTile_at(xi - 1, yi + 1, cx, cy);
+          if (tile === tile_type) {
+            classie.add(this.getTileElm(xi - 1, yi + 1, cx, cy), 'ne');
+            return true;
+          }
+          return false;
+        case 'w':
+          tile = this.getTile_at(xi - 1, yi, cx, cy);
+          if (tile === tile_type) {
+            classie.add(this.getTileElm(xi - 1, yi, cx, cy), 'e');
+            return true;
+          }
+          return false;
+        default:
+          return false;
+      }
     };
 
     Game.addListener = function(type, $elm, xi, yi, cx, cy) {
@@ -1225,7 +1318,7 @@
       }
       e = Game.getElement_at(x, y, this.cx, this.cy);
       if (e !== void 0 && e !== null) {
-        return !COLLIDER[e];
+        return !COLLIDER_ELMS[e];
       } else {
         t = Game.getTile_at(x, y, this.cx, this.cy);
         if (t === null || t === void 0) {

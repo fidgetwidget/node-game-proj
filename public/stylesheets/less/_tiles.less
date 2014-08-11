@@ -19,18 +19,42 @@
     background-position-x:0;
   }
   &.grass {
-    background-position-x:-(@TILESIZE)*5;
-  }
-  &.grassR {
-    background-position-x:-(@TILESIZE)*1;
-  }
-  &.grassB {
-    background-position-x:-(@TILESIZE)*2;
-  }
-  &.grassL {
-    background-position-x:-(@TILESIZE)*3;
-  }
-  &.grassT {
-    background-position-x:-(@TILESIZE)*4;
+    background-position-x:-(@TILESIZE)*12;
+    
+    &.none    { background-position-x:-(@TILESIZE)*12; background-position-y:0; }
+
+    &.e       { background-position-x:-(@TILESIZE)*13; background-position-y:0; }
+    &.w       { background-position-x:-(@TILESIZE)*15; background-position-y:0; }
+    &.e.w     { background-position-x:-(@TILESIZE)*14; background-position-y:0; }
+    
+    &.n       { background-position-x:-(@TILESIZE)*15; background-position-y:-(@TILESIZE)*3; }
+    &.s       { background-position-x:-(@TILESIZE)*15; background-position-y:-(@TILESIZE)*1; }
+    &.n.s     { background-position-x:-(@TILESIZE)*15; background-position-y:-(@TILESIZE)*2; }
+    
+    // bottom right 4
+    &.e.s     { background-position-x:-(@TILESIZE)*14; background-position-y:-(@TILESIZE)*4; }
+    &.w.s     { background-position-x:-(@TILESIZE)*15; background-position-y:-(@TILESIZE)*4; }
+    &.e.n     { background-position-x:-(@TILESIZE)*14; background-position-y:-(@TILESIZE)*5; }
+    &.w.n     { background-position-x:-(@TILESIZE)*15; background-position-y:-(@TILESIZE)*5; }
+
+    // 4 corners
+    &.w.s.sw  { background-position-x:-(@TILESIZE)*14; background-position-y:-(@TILESIZE)*1; }
+    &.w.n.nw  { background-position-x:-(@TILESIZE)*14; background-position-y:-(@TILESIZE)*3; }
+    &.e.s.se  { background-position-x:-(@TILESIZE)*12; background-position-y:-(@TILESIZE)*1; }
+    &.e.n.ne  { background-position-x:-(@TILESIZE)*12; background-position-y:-(@TILESIZE)*3; }
+    // 4 sides
+    &.n.s.e.ne.se       { background-position-x:-(@TILESIZE)*12; background-position-y:-(@TILESIZE)*2; }
+    &.e.s.w.se.sw       { background-position-x:-(@TILESIZE)*13; background-position-y:-(@TILESIZE)*1; }
+    &.n.s.w.nw.sw       { background-position-x:-(@TILESIZE)*14; background-position-y:-(@TILESIZE)*2; }
+    &.n.e.w.ne.nw       { background-position-x:-(@TILESIZE)*13; background-position-y:-(@TILESIZE)*3; }    
+    // center
+    &.n.s.e.w { background-position-x:-(@TILESIZE)*13; background-position-y:-(@TILESIZE)*3; }
+
+    // bottle left 4
+    &.n.s.e.w.nw.ne.sw { background-position-x:-(@TILESIZE)*12; background-position-y:-(@TILESIZE)*4; }
+    &.n.s.e.w.nw.ne.se { background-position-x:-(@TILESIZE)*13; background-position-y:-(@TILESIZE)*4; }
+    &.n.s.e.w.sw.se.nw { background-position-x:-(@TILESIZE)*12; background-position-y:-(@TILESIZE)*5; }
+    &.n.s.e.w.sw.se.ne { background-position-x:-(@TILESIZE)*13; background-position-y:-(@TILESIZE)*5; }
+    
   }
 }
