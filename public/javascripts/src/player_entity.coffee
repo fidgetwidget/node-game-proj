@@ -8,7 +8,10 @@ class @PlayerEntity extends Entity
 
   # Instance Variables
   inventory:  undefined
+  actions:    undefined
+
   tool:       undefined # equiped tool
+  
   #
   # Player Constructor
   #
@@ -21,14 +24,14 @@ class @PlayerEntity extends Entity
 
     x = x || Game._gridWidth/2
     y = y || Game._gridHeight/2
-    super( "Player", @name, x, y )
+    super( "player", @name, x, y )
     @cx = 0
     @cy = 0
 
     @tool = NONE
     @facing = DOWN
     @inventory = new PlayerInventory(this)
-    @actions.player = this
+    @actions = new PlayerActions(this)
     
     @setPosition()
     @bindEvents()
@@ -141,30 +144,32 @@ class @PlayerEntity extends Entity
 
     return if elm_type is undefined
 
+    # TODO: make some of this require/change based on tool
+
     switch ELM_TYPES[elm_type]
       when 'soil'
         @actions.water_soil(x, y, @cx, @cy)
       when 'wateredSoil'
-        # TODO: based on selected tool/item
         false
       when 'weed'
-        @actions.cut_weed(x, y, @cx, @cy)
+        @actions.clear_ground(x, y, @cx, @cy)
       when 'stump'
-        @actions.dig_up_stump(x, y, @cx, @cy)
+        @actions.clear_ground(x, y, @cx, @cy)
       when 'bush'
-        @actions.chop_down_bush(x, y, @cx, @cy)
+        @actions.cut_down_bushes(x, y, @cx, @cy)
       when 'branch'
-        @actions.collect_branch(x, y, @cx, @cy)
+        @actions.clear_ground(x, y, @cx, @cy)
       when 'rock'
-        @actions.smash_rock(x, y, @cx, @cy)
+        @actions.break_rocks(x, y, @cx, @cy)
       when 'ore'
-        @actions.smash_ore(x, y, @cx, @cy)
-      # when 'stones'
-      # when 'fence'
+        @actions.break_rocks(x, y, @cx, @cy)
+      when 'stones'
+        @actions.clear_ground(x, y, @cx, @cy)
+      when 'fence'
+        @actions.clear_ground(x, y, @cx, @cy)
 
       else 
-
-      
+        false
 
 
   actOnTile: (tile_type, x, y) ->
@@ -176,38 +181,6 @@ class @PlayerEntity extends Entity
 
     switch TILE_TYPES[tile_type]
       when "dirt"
-        @actions.till_ground(x, y, @cx, @cy)
-
-        
-
-  #
-  # Player Actions
-  #
-  PlayerEntity::actions = {}
-  PlayerEntity::actions.till_ground = (x, y, cx, cy) ->
-    console.log 'tilled ground'
-    Game.setElement_at x, y, cx, cy, _.indexOf ELM_TYPES, 'soil'
-
-  PlayerEntity::actions.water_soil = (x, y, cx, cy) ->
-    console.log 'watered soil'
-    Game.setElement_at x, y, cx, cy, _.indexOf ELM_TYPES, 'wateredSoil'
-
-  PlayerEntity::actions.cut_weed = (x, y, cx, cy) ->
-    Game.setElement_at x, y, cx, cy
-
-  PlayerEntity::actions.dig_up_stump = (x, y, cx, cy) ->
-    Game.setElement_at x, y, cx, cy
-
-  PlayerEntity::actions.chop_down_bush = (x, y, cx, cy) ->
-    Game.setElement_at x, y, cx, cy, _.indexOf ELM_TYPES, 'stump'
-
-  PlayerEntity::actions.collect_branch = (x, y, cx, cy) ->
-    Game.setElement_at x, y, cx, cy
-
-  PlayerEntity::actions.smash_rock = (x, y, cx, cy, tile_type) ->
-    Game.setElement_at x, y, cx, cy, _.indexOf ELM_TYPES, 'stones'
-
-  PlayerEntity::actions.smash_ore = (x, y, cx, cy, tile_type) ->
-    Game.setElement_at x, y, cx, cy    
+        @actions.till_ground(x, y, @cx, @cy)  
 
        

@@ -57,6 +57,13 @@ class Entity
     @
 
 
+  addElm: (game) =>
+    # DEFAULT add the entity.$elm to the game
+    # add the entity to the game container
+    game.$entities.appendChild @$elm
+    # CUSTOMIZE to add more complex elements
+
+
   #
   # Simple Event Dispatcher
   #

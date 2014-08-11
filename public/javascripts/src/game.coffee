@@ -222,10 +222,10 @@ class @Game
     return null if @entities[type][entity.name]
 
     @entities[type][entity.name] = entity
-    # add the entity to the game container
-    @$entities.appendChild entity.$elm
-    return entity
+    entity.addElm( this )
 
+    return entity
+    
 
   # Get the entity of a given type and name
   @getEntity: (type, name) ->
