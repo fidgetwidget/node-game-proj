@@ -221,8 +221,7 @@ class @Game
       @entities[type] = {}  
     return null if @entities[type][entity.name]
 
-    @entities[type][entity.name] = entity
-    entity.addElm( this )
+    entity.addSelf this
 
     return entity
     
@@ -239,8 +238,7 @@ class @Game
     return false unless @entities[type]
     return false unless @entities[type][entitiy.name]
 
-    delete @entities[type][entitiy.name]
-    entitiy.$elm.parentNode.removeChild(entitiy.$elm) if entitiy.$elm.parentNode
+    entity.removeSelf this
     return true
 
 

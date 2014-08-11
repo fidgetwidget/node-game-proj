@@ -32,26 +32,17 @@
 
   this.TILE_SIZE = 32;
 
-  this.TILE_TYPES = ['dirt', 'grass', 'grassR', 'grassB', 'grassL', 'grassT'];
-
-  this.COLLIDER_TILES = [false, false, false, false, false, false];
+  this.NONE = 'none';
 
   this.ELM_TYPES = ['soil', 'wateredSoil', 'weed', '_0', 'stump', 'bush', 'branch', 'stones', 'rock', 'ore', 'fence', '_1'];
 
   this.COLLIDER = [false, false, true, false, true, true, true, false, true, true, true, false];
 
-  this.ITEM_TYPES = {
-    'small_stick': 'small_stick',
-    'sharp_stick': 'sharp_stick',
-    'small_stone': 'small_stone',
-    'sharp_stone': 'sharp_stone',
-    'large_stone': 'large_stone',
-    'large_stick': 'large_stick',
-    'wood': 'wood',
-    'stone': 'stone'
-  };
+  this.ITEM_TYPES = ['small_stick', 'sharp_stick', 'small_stone', 'sharp_stone', 'large_stone', 'large_stick', 'wood', 'stone'];
 
-  this.NONE = 'none';
+  this.TILE_TYPES = ['dirt', 'grass', 'wall'];
+
+  this.COLLIDER_TILES = [false, false, true];
 
   this.Chunk = (function() {
     Chunk.prototype.tiles = void 0;
@@ -343,7 +334,8 @@
       this.name = name;
       this.x = x != null ? x : 0;
       this.y = y != null ? y : 0;
-      this.addElm = __bind(this.addElm, this);
+      this.removeSelf = __bind(this.removeSelf, this);
+      this.addSelf = __bind(this.addSelf, this);
       this.rename = __bind(this.rename, this);
       this.$elm = document.createElement('div');
       this.$elm.className = "entity " + this.type + " w" + this.width + " h" + this.height;
@@ -377,8 +369,16 @@
 
     Entity;
 
-    Entity.prototype.addElm = function(game) {
+    Entity.prototype.addSelf = function(game) {
+      game.entities[this.type][this.name] = this;
       return game.$entities.appendChild(this.$elm);
+    };
+
+    Entity.prototype.removeSelf = function(game) {
+      delete game.entities[this.type][this.name];
+      if (this.$elm.parentNode) {
+        return this.$elm.parentNode.removeChild(this.$elm);
+      }
     };
 
     Entity.prototype.callbacks = {};
@@ -680,8 +680,7 @@
       if (this.entities[type][entity.name]) {
         return null;
       }
-      this.entities[type][entity.name] = entity;
-      entity.addElm(this);
+      entity.addSelf(this);
       return entity;
     };
 
@@ -701,10 +700,7 @@
       if (!this.entities[type][entitiy.name]) {
         return false;
       }
-      delete this.entities[type][entitiy.name];
-      if (entitiy.$elm.parentNode) {
-        entitiy.$elm.parentNode.removeChild(entitiy.$elm);
-      }
+      entity.removeSelf(this);
       return true;
     };
 

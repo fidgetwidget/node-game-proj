@@ -57,12 +57,23 @@ class Entity
     @
 
 
-  addElm: (game) =>
-    # DEFAULT add the entity.$elm to the game
-    # add the entity to the game container
+  # Allows entities to add themselves to the game
+  # this way complex entities can add tiles and elements to the game
+  # along with themselves
+  # DEFAULT behaviour:
+  # - add self to the games entities
+  # - and selfs element to the entities container
+  addSelf: (game) =>
+    
+    game.entities[@type][@name] = this
     game.$entities.appendChild @$elm
-    # CUSTOMIZE to add more complex elements
+    
 
+  removeSelf: (game) =>
+
+    delete game.entities[@type][@name]
+    @$elm.parentNode.removeChild(@$elm) if @$elm.parentNode
+    
 
   #
   # Simple Event Dispatcher

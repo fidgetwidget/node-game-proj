@@ -125,7 +125,7 @@ class @PlayerEntity extends Entity
     e = Game.getElement_at(x, y, @cx, @cy)
 
     if e != undefined and e != null
-      return !COLLIDER[e]
+      return !COLLIDER_ELMS[e]
 
     else 
       t = Game.getTile_at(x, y, @cx, @cy)
@@ -151,6 +151,7 @@ class @PlayerEntity extends Entity
         @actions.water_soil(x, y, @cx, @cy)
       when 'wateredSoil'
         false
+
       when 'weed'
         @actions.clear_ground(x, y, @cx, @cy)
       when 'stump'
