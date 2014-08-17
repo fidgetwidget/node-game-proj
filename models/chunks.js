@@ -9,7 +9,6 @@ var tileSchema = new Schema({
   updated:  { type: Date,   default: Date.now },
   x:        { type: Number, default: 0 },
   y:        { type: Number, default: 0 },
-  base:     { type: Number, default: 0 },
   value:    { type: Number, default: 0 }
 });
 
@@ -40,6 +39,7 @@ var chunkSchema = new Schema({
   updated:    { type: Date,   default: Date.now },
   x:          { type: Number, default: 0 },
   y:          { type: Number, default: 0 },
+  base:       { type: Number, default: 0 },
   _tiles:     [tileSchema],
   _elements:  [elementSchema],
   _items:     [itemSchema]

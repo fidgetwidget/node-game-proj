@@ -54,7 +54,6 @@
     position: absolute;
     width: @GRID_SIZE;
     height: @GRID_SIZE;
-    transition: all 0.1s;
   }
   .tiles {
     background-color: white;
@@ -112,5 +111,16 @@
 .entity.Player {
   .tile;
   background: #303030;
-  transition: all 0.1s;
+}
+
+
+#main {
+  .tiles,
+  .elements,
+  .entities {
+    transition: all 0.2s;
+  }
+}
+.entity.player {
+  transition: all 0.2s;
 }

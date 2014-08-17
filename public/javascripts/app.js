@@ -26,6 +26,12 @@
 
   this.SPACE_BAR = 32;
 
+  this.NUM_0 = 48;
+
+  this.NUM_1 = 49;
+
+  this.NUM_2 = 50;
+
   this.CHUNK_WIDTH = 32;
 
   this.CHUNK_HEIGHT = 32;
@@ -42,9 +48,9 @@
 
   this.TILE_DIRECTIONS = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
 
-  this.TILE_TYPES = ['dirt', 'grass', 'wall'];
+  this.TILE_TYPES = ['dirt', 'grass', 'water', 'rocks', 'sand', 'weeds'];
 
-  this.COLLIDER_TILES = [false, false, true];
+  this.COLLIDER_TILES = [false, false, true, true, false, false];
 
   this.Chunk = (function() {
     Chunk.prototype.tiles = void 0;
@@ -492,7 +498,7 @@
     };
 
     Game.randomWorld = function() {
-      var chunk, elm_type, i, rv, rx, ry, _i;
+      var chunk, elm_type, i, rv, rx, ry, _i, _j;
       this.chunks[0] = {};
       chunk = new Chunk(0, 0);
       this.chunks[0][0] = chunk;
@@ -533,6 +539,11 @@
         if (elm_type !== null) {
           Game.setElement_at(rx, ry, 0, 0, elm_type);
         }
+      }
+      for (i = _j = 0; _j < 128; i = ++_j) {
+        rx = _.random(CHUNK_WIDTH * 0.25, CHUNK_WIDTH * 0.75);
+        ry = _.random(CHUNK_HEIGHT * 0.25, CHUNK_HEIGHT * 0.75);
+        Game.setTile_at(rx, ry, 0, 0, 1);
       }
       return this;
     };
@@ -604,6 +615,7 @@
       });
       return jqXHR.done((function(_this) {
         return function(data, status, jqXHR) {
+          console.log(data);
           return console.log(status);
         };
       })(this)).fail((function(_this) {
@@ -868,13 +880,13 @@
         } else {
           $tile = this.addTileElm(xi, yi, cx, cy, value);
         }
-        this.initTile($tile, xi, yi, cx, cy, value);
       } else {
         if ($tile) {
           this.removeListener($tile);
           $tile.remove();
         }
       }
+      this.initTile($tile, xi, yi, cx, cy, value);
       return this.chunks[cx][cy].setTile(xi, yi, value);
     };
 
@@ -955,62 +967,86 @@
     };
 
     Game.getNeightbor = function(tile_type, dir, xi, yi, cx, cy) {
-      var tile;
+      var elm, tile;
       switch (dir) {
         case 'nw':
           tile = this.getTile_at(xi - 1, yi - 1, cx, cy);
+          elm = this.getTileElm(xi - 1, yi - 1, cx, cy);
           if (tile === tile_type) {
-            classie.add(this.getTileElm(xi - 1, yi - 1, cx, cy), 'se');
+            classie.add(elm, 'se');
             return true;
+          } else if (elm != null) {
+            classie.remove(elm, 'se');
           }
           return false;
         case 'n':
           tile = this.getTile_at(xi, yi - 1, cx, cy);
+          elm = this.getTileElm(xi, yi - 1, cx, cy);
           if (tile === tile_type) {
-            classie.add(this.getTileElm(xi, yi - 1, cx, cy), 's');
+            classie.add(elm, 's');
             return true;
+          } else if (elm != null) {
+            classie.remove(elm, 's');
           }
           return false;
         case 'ne':
           tile = this.getTile_at(xi + 1, yi - 1, cx, cy);
+          elm = this.getTileElm(xi + 1, yi - 1, cx, cy);
           if (tile === tile_type) {
-            classie.add(this.getTileElm(xi + 1, yi - 1, cx, cy), 'sw');
+            classie.add(elm, 'sw');
             return true;
+          } else if (elm != null) {
+            classie.remove(elm, 'sw');
           }
           return false;
         case 'e':
           tile = this.getTile_at(xi + 1, yi, cx, cy);
+          elm = this.getTileElm(xi + 1, yi, cx, cy);
           if (tile === tile_type) {
-            classie.add(this.getTileElm(xi + 1, yi, cx, cy), 'w');
+            classie.add(elm, 'w');
             return true;
+          } else if (elm != null) {
+            classie.remove(elm, 'w');
           }
           return false;
         case 'se':
           tile = this.getTile_at(xi + 1, yi + 1, cx, cy);
+          elm = this.getTileElm(xi + 1, yi + 1, cx, cy);
           if (tile === tile_type) {
-            classie.add(this.getTileElm(xi + 1, yi + 1, cx, cy), 'nw');
+            classie.add(elm, 'nw');
             return true;
+          } else if (elm != null) {
+            classie.remove(elm, 'nw');
           }
           return false;
         case 's':
           tile = this.getTile_at(xi, yi + 1, cx, cy);
+          elm = this.getTileElm(xi, yi + 1, cx, cy);
           if (tile === tile_type) {
-            classie.add(this.getTileElm(xi, yi + 1, cx, cy), 'n');
+            classie.add(elm, 'n');
             return true;
+          } else if (elm != null) {
+            classie.remove(elm, 'n');
           }
           return false;
         case 'sw':
           tile = this.getTile_at(xi - 1, yi + 1, cx, cy);
+          elm = this.getTileElm(xi - 1, yi + 1, cx, cy);
           if (tile === tile_type) {
-            classie.add(this.getTileElm(xi - 1, yi + 1, cx, cy), 'ne');
+            classie.add(elm, 'ne');
             return true;
+          } else if (elm != null) {
+            classie.remove(elm, 'ne');
           }
           return false;
         case 'w':
           tile = this.getTile_at(xi - 1, yi, cx, cy);
+          elm = this.getTileElm(xi - 1, yi, cx, cy);
           if (tile === tile_type) {
-            classie.add(this.getTileElm(xi - 1, yi, cx, cy), 'e');
+            classie.add(elm, 'e');
             return true;
+          } else if (elm != null) {
+            classie.remove(elm, 'e');
           }
           return false;
         default:
@@ -1164,6 +1200,22 @@
       return Game.setElement_at(x, y, cx, cy, _.indexOf(ELM_TYPES, 'stones'));
     };
 
+    PlayerActions.prototype.plant_grass = function(x, y, cx, cy) {
+      return Game.setTile_at(x, y, cx, cy, _.indexOf(TILE_TYPES, 'grass'));
+    };
+
+    PlayerActions.prototype.remove_grass = function(x, y, cx, cy) {
+      return Game.setTile_at(x, y, cx, cy, _.indexOf(TILE_TYPES, 'dirt'));
+    };
+
+    PlayerActions.prototype.dig_water_hole = function(x, y, cx, cy) {
+      return Game.setTile_at(x, y, cx, cy, _.indexOf(TILE_TYPES, 'water'));
+    };
+
+    PlayerActions.prototype.fill_water_hole = function(x, y, cx, cy) {
+      return Game.setTile_at(x, y, cx, cy, _.indexOf(TILE_TYPES, 'dirt'));
+    };
+
     return PlayerActions;
 
   })();
@@ -1192,7 +1244,7 @@
       PlayerEntity.__super__.constructor.call(this, "player", this.name, x, y);
       this.cx = 0;
       this.cy = 0;
-      this.tool = NONE;
+      this.tool = 'none';
       this.facing = DOWN;
       this.inventory = new PlayerInventory(this);
       this.actions = new PlayerActions(this);
@@ -1216,6 +1268,16 @@
           } else if (e.which === SPACE_BAR) {
             return _this["do"](_this.getXFacing(), _this.getYFacing());
           } else {
+            switch (e.which) {
+              case NUM_1:
+                _this.tool = 'grass';
+                break;
+              case NUM_2:
+                _this.tool = 'water';
+                break;
+              default:
+                _this.tool = 'none';
+            }
             return console.log(e.which);
           }
         };
@@ -1355,7 +1417,7 @@
         case 'branch':
           return this.actions.clear_ground(x, y, this.cx, this.cy);
         case 'rock':
-          return this.actions.break_rocks(x, y, this.cx, this.cy);
+          return this.actions.clear_ground(x, y, this.cx, this.cy);
         case 'ore':
           return this.actions.break_rocks(x, y, this.cx, this.cy);
         case 'stones':
@@ -1371,9 +1433,25 @@
       if (tile_type === void 0) {
         tile_type = Game.getChunkType(this.cx, this.cy);
       }
-      switch (TILE_TYPES[tile_type]) {
-        case "dirt":
-          return this.actions.till_ground(x, y, this.cx, this.cy);
+      switch (this.tool) {
+        case 'grass':
+          if (TILE_TYPES[tile_type] === 'dirt') {
+            return this.actions.plant_grass(x, y, this.cx, this.cy);
+          } else if (TILE_TYPES[tile_type] === 'grass') {
+            return this.actions.remove_grass(x, y, this.cx, this.cy);
+          }
+          break;
+        case 'water':
+          if (TILE_TYPES[tile_type] === 'dirt' || TILE_TYPES[tile_type] === 'grass') {
+            return this.actions.dig_water_hole(x, y, this.cx, this.cy);
+          } else if (TILE_TYPES[tile_type] === 'water') {
+            return this.actions.fill_water_hole(x, y, this.cx, this.cy);
+          }
+          break;
+        case 'none':
+          if (TILE_TYPES[tile_type] === 'dirt') {
+            return this.actions.till_ground(x, y, this.cx, this.cy);
+          }
       }
     };
 

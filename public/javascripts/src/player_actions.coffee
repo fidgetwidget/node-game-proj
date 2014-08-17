@@ -26,3 +26,15 @@ class @PlayerActions
 
   break_rocks: (x, y, cx, cy, tile_type) ->
     Game.setElement_at x, y, cx, cy, _.indexOf ELM_TYPES, 'stones'
+
+  plant_grass: (x, y, cx, cy) ->
+    Game.setTile_at x, y, cx, cy, _.indexOf TILE_TYPES, 'grass'
+
+  remove_grass: (x, y, cx, cy) ->
+    Game.setTile_at x, y, cx, cy, _.indexOf TILE_TYPES, 'dirt'
+
+  dig_water_hole: (x, y, cx, cy) ->
+    Game.setTile_at x, y, cx, cy, _.indexOf TILE_TYPES, 'water'
+
+  fill_water_hole: (x, y, cx, cy) ->
+    Game.setTile_at x, y, cx, cy, _.indexOf TILE_TYPES, 'dirt'

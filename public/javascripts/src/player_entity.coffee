@@ -28,7 +28,7 @@ class @PlayerEntity extends Entity
     @cx = 0
     @cy = 0
 
-    @tool = NONE
+    @tool = 'none'
     @facing = DOWN
     @inventory = new PlayerInventory(this)
     @actions = new PlayerActions(this)
@@ -51,6 +51,14 @@ class @PlayerEntity extends Entity
       else if e.which is SPACE_BAR
         @do @getXFacing(), @getYFacing()
       else 
+        switch e.which
+          when NUM_1
+            @tool = 'grass'
+          when NUM_2
+            @tool = 'water'
+          else
+            @tool = 'none'
+
         console.log e.which
     
   face: (dir) ->
@@ -161,7 +169,7 @@ class @PlayerEntity extends Entity
       when 'branch'
         @actions.clear_ground(x, y, @cx, @cy)
       when 'rock'
-        @actions.break_rocks(x, y, @cx, @cy)
+        @actions.clear_ground(x, y, @cx, @cy)
       when 'ore'
         @actions.break_rocks(x, y, @cx, @cy)
       when 'stones'
@@ -180,8 +188,24 @@ class @PlayerEntity extends Entity
     if tile_type is undefined
       tile_type = Game.getChunkType(@cx, @cy)
 
-    switch TILE_TYPES[tile_type]
-      when "dirt"
-        @actions.till_ground(x, y, @cx, @cy)  
+
+    switch @tool
+      when 'grass'
+        if TILE_TYPES[tile_type] is 'dirt'
+          @actions.plant_grass(x, y, @cx, @cy)
+        else if TILE_TYPES[tile_type] is 'grass'
+          @actions.remove_grass(x, y, @cx, @cy)
+
+      when 'water'
+        if TILE_TYPES[tile_type] is 'dirt' or TILE_TYPES[tile_type] is 'grass'
+          @actions.dig_water_hole(x, y, @cx, @cy)
+        else if TILE_TYPES[tile_type] is 'water'
+          @actions.fill_water_hole(x, y, @cx, @cy)
+
+      when 'none'
+        if TILE_TYPES[tile_type] is 'dirt'
+          @actions.till_ground(x, y, @cx, @cy)
+      
+
 
        

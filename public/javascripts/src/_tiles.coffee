@@ -16,17 +16,19 @@ this.TILE_DIRECTIONS = [
 this.TILE_TYPES = [
   'dirt'
   'grass'
-  'water'
-  'rocks'
   'sand'
-  'weeds'
+  'rocks'
+  'water'
+  'dirt_cliff'
+  'rock_cliff'
 ]
 
 this.COLLIDER_TILES = [
   false
   false
-  true
-  true
   false
   false
+  true
+  true
+  true
 ]

@@ -32,9 +32,6 @@ class @Chunk
     @elements = {}
     @items = {}
     @keepEmpty = false
-    # for x in [0...@cols] by 1
-    #   @tiles[x] = {}
-    #   @items[x] = {}
     
 
   load: (json) =>
@@ -53,9 +50,6 @@ class @Chunk
       if json._items?
         for item in json._items
           true
-          # TODO: create the item and add it
-          # itm = new Item(item.x, item.y, item.value);
-          # Game.addItem_at item.x, item.y, @x, @y, itm
 
 
   # 

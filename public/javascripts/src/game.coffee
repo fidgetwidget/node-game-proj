@@ -105,6 +105,12 @@ class @Game
 
       unless elm_type is null
         Game.setElement_at(rx, ry, 0, 0, elm_type)
+    
+    for i in [0...128]
+      rx = _.random( CHUNK_WIDTH*0.25,  CHUNK_WIDTH*0.75  )
+      ry = _.random( CHUNK_HEIGHT*0.25, CHUNK_HEIGHT*0.75 )
+      
+      Game.setTile_at(rx, ry, 0, 0, 1)
 
     return this
 
@@ -172,6 +178,7 @@ class @Game
 
     jqXHR
       .done (data, status, jqXHR) =>
+        console.log data
         console.log status
       .fail (jqXHR, status, error) =>
         console.error status
@@ -401,14 +408,14 @@ class @Game
         # INSERT TILE AT
         $tile = @addTileElm(xi, yi, cx, cy, value)
 
-      # Init on non remove
-      @initTile($tile, xi, yi, cx, cy, value)
-
     else
       #REMOVE TILE AT
       if $tile
         @removeListener $tile
         $tile.remove()
+
+    # Init on non remove
+    @initTile($tile, xi, yi, cx, cy, value)
           
     return @chunks[cx][cy].setTile(xi, yi, value)
 
@@ -478,59 +485,83 @@ class @Game
   @getNeightbor: (tile_type, dir, xi, yi, cx, cy) ->
     switch dir
       when 'nw' 
-        tile = @getTile_at( xi-1, yi-1, cx, cy)
+        tile  = @getTile_at( xi-1, yi-1, cx, cy)
+        elm   = @getTileElm( xi-1, yi-1, cx, cy)
         if tile is tile_type
-          classie.add @getTileElm( xi-1, yi-1, cx, cy), 'se'
+          classie.add elm, 'se'
           return true
+        else if elm?
+          classie.remove elm, 'se'
         return false
 
       when 'n'  
-        tile = @getTile_at( xi,   yi-1, cx, cy)
+        tile  = @getTile_at( xi,   yi-1, cx, cy)
+        elm   = @getTileElm( xi,   yi-1, cx, cy)
         if tile is tile_type
-          classie.add @getTileElm( xi,   yi-1, cx, cy), 's'
+          classie.add elm, 's'
           return true
+        else if elm?
+          classie.remove elm, 's'
         return false
 
       when 'ne' 
-        tile = @getTile_at( xi+1, yi-1, cx, cy)
+        tile  = @getTile_at( xi+1, yi-1, cx, cy)
+        elm   = @getTileElm( xi+1, yi-1, cx, cy)
         if tile is tile_type
-          classie.add @getTileElm( xi+1, yi-1, cx, cy), 'sw'
+          classie.add elm, 'sw'
           return true
+        else if elm?
+          classie.remove elm, 'sw'
         return false
         
       when 'e'  
-        tile = @getTile_at( xi+1, yi,   cx, cy)
+        tile  = @getTile_at( xi+1, yi,   cx, cy)
+        elm   = @getTileElm( xi+1, yi,   cx, cy)
         if tile is tile_type
-          classie.add @getTileElm( xi+1, yi,   cx, cy), 'w'
+          classie.add elm, 'w'
           return true
+        else if elm?
+          classie.remove elm, 'w'  
         return false
         
       when 'se' 
-        tile = @getTile_at( xi+1, yi+1, cx, cy)
+        tile  = @getTile_at( xi+1, yi+1, cx, cy)
+        elm   = @getTileElm( xi+1, yi+1, cx, cy)
         if tile is tile_type
-          classie.add @getTileElm( xi+1, yi+1, cx, cy), 'nw'
+          classie.add elm, 'nw'
           return true
+        else if elm?
+          classie.remove elm, 'nw'
         return false
 
       when 's'
-        tile = @getTile_at( xi,   yi+1, cx, cy)
+        tile  = @getTile_at( xi,   yi+1, cx, cy)
+        elm   = @getTileElm( xi,   yi+1, cx, cy)
         if tile is tile_type
-          classie.add @getTileElm( xi,   yi+1, cx, cy), 'n'
+          classie.add elm, 'n'
           return true
+        else if elm?
+          classie.remove elm, 'n'
         return false
 
       when 'sw' 
-        tile = @getTile_at( xi-1, yi+1, cx, cy)
+        tile  = @getTile_at( xi-1, yi+1, cx, cy)
+        elm   = @getTileElm( xi-1, yi+1, cx, cy)
         if tile is tile_type
-          classie.add @getTileElm( xi-1, yi+1, cx, cy), 'ne'
+          classie.add elm, 'ne'
           return true
+        else if elm?
+          classie.remove elm, 'ne'
         return false
 
       when 'w'
-        tile = @getTile_at( xi-1, yi,   cx, cy)
+        tile  = @getTile_at( xi-1, yi,   cx, cy)
+        elm   = @getTileElm( xi-1, yi,   cx, cy)
         if tile is tile_type
-          classie.add @getTileElm( xi-1, yi,   cx, cy), 'e'
+          classie.add elm, 'e'
           return true
+        else if elm?
+          classie.remove elm, 'e'
         return false
 
       else 
