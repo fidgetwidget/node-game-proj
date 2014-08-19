@@ -29,7 +29,7 @@ class @PlayerEntity extends Entity
     @cy = 0
 
     @tool = 'none'
-    @facing = DOWN
+    @facing = SOUTH
     @inventory = new PlayerInventory(this)
     @actions = new PlayerActions(this)
     
@@ -50,63 +50,52 @@ class @PlayerEntity extends Entity
           @move e.which
       else if e.which is SPACE_BAR
         @do @getXFacing(), @getYFacing()
-      else 
-        switch e.which
-          when NUM_1
-            @tool = 'grass'
-          when NUM_2
-            @tool = 'water'
-          else
-            @tool = 'none'
+      else
+        if e.which in  NUMBER_KEYS
+          @actions.changeTool(e.which)
 
         console.log e.which
     
   face: (dir) ->
-    # TODO: do this better...
-    dir = LEFT  if dir is A
-    dir = UP    if dir is W
-    dir = RIGHT if dir is D
-    dir = DOWN  if dir is S
     # only change it when it changes
     unless @facing is dir
       @facing = dir
     @
 
   getXFacing: () ->
-    if @facing is LEFT
+    if @facing is WEST
       return @x-1
-    else if @facing is RIGHT
+    else if @facing is EAST
       return @x+1
     else 
       return @x
 
   getYFacing: () ->
-    if @facing is UP
+    if @facing is NORTH
       return @y-1
-    else if @facing is DOWN
+    else if @facing is SOUTH
       return @y+1
     else 
       return @y
 
   # move the player in a given direction
   move: (dir) ->
-    switch dir
-      when LEFT, A
-        @face LEFT
-        if @check @x-1, @y
-          @x--
-      when UP, W
-        @face UP
-        if @check @x, @y-1
-          @y--
-      when RIGHT, D
-        @face RIGHT
-        if @check @x+1, @y
-          @x++
-      when DOWN, S
-        @face DOWN
-        if @check @x, @y+1
-          @y++
+    if dir in DIR_LEFT
+      @face WEST
+      if @check @x-1, @y
+        @x--
+    if dir in DIR_UP
+      @face NORTH
+      if @check @x, @y-1
+        @y--
+    if dir in DIR_RIGHT
+      @face EAST
+      if @check @x+1, @y
+        @x++
+    if dir in DIR_DOWN
+      @face SOUTH
+      if @check @x, @y+1
+        @y++
     
     @collectItems @x, @y
     Game.setCenter @x, @y
@@ -120,12 +109,12 @@ class @PlayerEntity extends Entity
     # get the tile at the desired location
     e = Game.getElement_at(x, y, @cx, @cy)
     if e != undefined and e != null
-      @actOnElement(e, x, y)
+      @actions.actOnElement(e, x, y, @cx, @cy)
       
     else
       t = Game.getTile_at(x, y, @cx, @cy)
       # act on the tile even if the there isn't one (act on the chunk default_tile)
-      @actOnTile(t, x, y)
+      @actions.actOnTile(t, x, y, @cx, @cy)
 
   check: (x, y) ->
     return false if x < 0 or y < 0 or x >= CHUNK_WIDTH or y >= CHUNK_HEIGHT
@@ -146,66 +135,5 @@ class @PlayerEntity extends Entity
     if item != undefined and item != null
       @inventory.addItem(item.type, item.count)
       Game.removeItem(x, y, @cx, @cy)
-
-
-  actOnElement: (elm_type, x, y) ->
-
-    return if elm_type is undefined
-
-    # TODO: make some of this require/change based on tool
-
-    switch ELM_TYPES[elm_type]
-      when 'soil'
-        @actions.water_soil(x, y, @cx, @cy)
-      when 'wateredSoil'
-        false
-
-      when 'weed'
-        @actions.clear_ground(x, y, @cx, @cy)
-      when 'stump'
-        @actions.clear_ground(x, y, @cx, @cy)
-      when 'bush'
-        @actions.cut_down_bushes(x, y, @cx, @cy)
-      when 'branch'
-        @actions.clear_ground(x, y, @cx, @cy)
-      when 'rock'
-        @actions.clear_ground(x, y, @cx, @cy)
-      when 'ore'
-        @actions.break_rocks(x, y, @cx, @cy)
-      when 'stones'
-        @actions.clear_ground(x, y, @cx, @cy)
-      when 'fence'
-        @actions.clear_ground(x, y, @cx, @cy)
-
-      else 
-        false
-
-
-  actOnTile: (tile_type, x, y) ->
-    # depending on the type of tile, do something
-    # and update the state of the tile in the game.
-
-    if tile_type is undefined
-      tile_type = Game.getChunkType(@cx, @cy)
-
-
-    switch @tool
-      when 'grass'
-        if TILE_TYPES[tile_type] is 'dirt'
-          @actions.plant_grass(x, y, @cx, @cy)
-        else if TILE_TYPES[tile_type] is 'grass'
-          @actions.remove_grass(x, y, @cx, @cy)
-
-      when 'water'
-        if TILE_TYPES[tile_type] is 'dirt' or TILE_TYPES[tile_type] is 'grass'
-          @actions.dig_water_hole(x, y, @cx, @cy)
-        else if TILE_TYPES[tile_type] is 'water'
-          @actions.fill_water_hole(x, y, @cx, @cy)
-
-      when 'none'
-        if TILE_TYPES[tile_type] is 'dirt'
-          @actions.till_ground(x, y, @cx, @cy)
-      
-
 
        

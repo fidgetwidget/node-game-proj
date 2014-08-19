@@ -24,7 +24,7 @@ class @Item extends Entity
     @count = count
     
     super( 'Item', @name, x, y )
-    @facing = DOWN
+    @facing = SOUTH
     @cx = 0
     @cy = 0
     @setPosition()

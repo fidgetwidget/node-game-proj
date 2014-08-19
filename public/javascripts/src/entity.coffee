@@ -20,7 +20,7 @@ class Entity
   offsetX:  0
   offsetY:  0
 
-  facing:   DOWN
+  facing:   SOUTH
   
   #
   # Entity Constructor

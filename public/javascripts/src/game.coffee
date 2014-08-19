@@ -487,8 +487,8 @@ class @Game
       when 'nw' 
         tile  = @getTile_at( xi-1, yi-1, cx, cy)
         elm   = @getTileElm( xi-1, yi-1, cx, cy)
-        if tile is tile_type
-          classie.add elm, 'se'
+        if @isNeightbor(tile, tile_type)
+          classie.add elm, 'se' if elm?
           return true
         else if elm?
           classie.remove elm, 'se'
@@ -497,8 +497,8 @@ class @Game
       when 'n'  
         tile  = @getTile_at( xi,   yi-1, cx, cy)
         elm   = @getTileElm( xi,   yi-1, cx, cy)
-        if tile is tile_type
-          classie.add elm, 's'
+        if @isNeightbor(tile, tile_type)
+          classie.add elm, 's' if elm?
           return true
         else if elm?
           classie.remove elm, 's'
@@ -507,8 +507,8 @@ class @Game
       when 'ne' 
         tile  = @getTile_at( xi+1, yi-1, cx, cy)
         elm   = @getTileElm( xi+1, yi-1, cx, cy)
-        if tile is tile_type
-          classie.add elm, 'sw'
+        if @isNeightbor(tile, tile_type)
+          classie.add elm, 'sw' if elm?
           return true
         else if elm?
           classie.remove elm, 'sw'
@@ -517,8 +517,8 @@ class @Game
       when 'e'  
         tile  = @getTile_at( xi+1, yi,   cx, cy)
         elm   = @getTileElm( xi+1, yi,   cx, cy)
-        if tile is tile_type
-          classie.add elm, 'w'
+        if @isNeightbor(tile, tile_type)
+          classie.add elm, 'w' if elm?
           return true
         else if elm?
           classie.remove elm, 'w'  
@@ -527,8 +527,8 @@ class @Game
       when 'se' 
         tile  = @getTile_at( xi+1, yi+1, cx, cy)
         elm   = @getTileElm( xi+1, yi+1, cx, cy)
-        if tile is tile_type
-          classie.add elm, 'nw'
+        if @isNeightbor(tile, tile_type)
+          classie.add elm, 'nw' if elm?
           return true
         else if elm?
           classie.remove elm, 'nw'
@@ -537,8 +537,8 @@ class @Game
       when 's'
         tile  = @getTile_at( xi,   yi+1, cx, cy)
         elm   = @getTileElm( xi,   yi+1, cx, cy)
-        if tile is tile_type
-          classie.add elm, 'n'
+        if @isNeightbor(tile, tile_type)
+          classie.add elm, 'n' if elm?
           return true
         else if elm?
           classie.remove elm, 'n'
@@ -547,8 +547,8 @@ class @Game
       when 'sw' 
         tile  = @getTile_at( xi-1, yi+1, cx, cy)
         elm   = @getTileElm( xi-1, yi+1, cx, cy)
-        if tile is tile_type
-          classie.add elm, 'ne'
+        if @isNeightbor(tile, tile_type)
+          classie.add elm, 'ne' if elm?
           return true
         else if elm?
           classie.remove elm, 'ne'
@@ -557,8 +557,8 @@ class @Game
       when 'w'
         tile  = @getTile_at( xi-1, yi,   cx, cy)
         elm   = @getTileElm( xi-1, yi,   cx, cy)
-        if tile is tile_type
-          classie.add elm, 'e'
+        if @isNeightbor(tile, tile_type)
+          classie.add elm, 'e' if elm?
           return true
         else if elm?
           classie.remove elm, 'e'
@@ -567,6 +567,8 @@ class @Game
       else 
         return false
 
+  @isNeightbor: (tile, tile_type) ->
+    return tile is tile_type
 
   # TODO: make this cycle more complex (lower chances, shorter times?, chances based on number of times through?)
   @addListener: (type, $elm, xi, yi, cx, cy) ->

@@ -6,31 +6,63 @@
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-  this.DIRECTIONS = [37, 38, 39, 40, 65, 87, 68, 83];
+  this.LEFT_KEY = 37;
 
-  this.LEFT = 37;
+  this.A_KEY = 65;
 
-  this.A = 65;
+  this.UP_KEY = 38;
 
-  this.UP = 38;
+  this.W_KEY = 87;
 
-  this.W = 87;
+  this.RIGHT_KEY = 39;
 
-  this.RIGHT = 39;
+  this.D_KEY = 68;
 
-  this.D = 68;
+  this.DOWN_KEY = 40;
 
-  this.DOWN = 40;
-
-  this.S = 83;
-
-  this.SPACE_BAR = 32;
+  this.S_KEY = 83;
 
   this.NUM_0 = 48;
 
   this.NUM_1 = 49;
 
   this.NUM_2 = 50;
+
+  this.NUM_3 = 51;
+
+  this.NUM_4 = 52;
+
+  this.NUM_5 = 53;
+
+  this.NUM_6 = 54;
+
+  this.NUM_7 = 55;
+
+  this.NUM_8 = 56;
+
+  this.NUM_9 = 57;
+
+  this.SPACE_BAR = 32;
+
+  this.DIRECTIONS = [LEFT_KEY, A_KEY, UP_KEY, W_KEY, RIGHT_KEY, D_KEY, DOWN_KEY, S_KEY];
+
+  this.NORTH = 'n';
+
+  this.EAST = 'e';
+
+  this.SOUTH = 's';
+
+  this.WEST = 'w';
+
+  this.DIR_LEFT = [LEFT_KEY, A_KEY];
+
+  this.DIR_UP = [UP_KEY, W_KEY];
+
+  this.DIR_RIGHT = [RIGHT_KEY, D_KEY];
+
+  this.DIR_DOWN = [DOWN_KEY, W_KEY];
+
+  this.NUMBER_KEYS = [NUM_0, NUM_1, NUM_2, NUM_3, NUM_4, NUM_5, NUM_6, NUM_7, NUM_8, NUM_9];
 
   this.CHUNK_WIDTH = 32;
 
@@ -48,9 +80,25 @@
 
   this.TILE_DIRECTIONS = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
 
-  this.TILE_TYPES = ['dirt', 'grass', 'water', 'rocks', 'sand', 'weeds'];
+  this.TILE_TYPES = ['dirt', 'grass', 'sand', 'mud', 'water', 'water_deep', 'dirt_cliff', 'rock_cliff'];
 
-  this.COLLIDER_TILES = [false, false, true, true, false, false];
+  this.COLLIDER_TILES = [false, false, false, false, true, true, true, true];
+
+  this.TOOLS = ['none', 'dirt', 'grass', 'sand', 'rock', 'water'];
+
+  this.TOOL = {};
+
+  this.TOOL.NONE = 'none';
+
+  this.TOOL.DIRT = 'dirt';
+
+  this.TOOL.GRASS = 'grass';
+
+  this.TOOL.SAND = 'sand';
+
+  this.TOOL.ROCK = 'rock';
+
+  this.TOOL.WATER = 'water';
 
   this.Chunk = (function() {
     Chunk.prototype.tiles = void 0;
@@ -335,7 +383,7 @@
 
     Entity.prototype.offsetY = 0;
 
-    Entity.prototype.facing = DOWN;
+    Entity.prototype.facing = SOUTH;
 
     function Entity(type, name, x, y) {
       this.type = type;
@@ -972,8 +1020,10 @@
         case 'nw':
           tile = this.getTile_at(xi - 1, yi - 1, cx, cy);
           elm = this.getTileElm(xi - 1, yi - 1, cx, cy);
-          if (tile === tile_type) {
-            classie.add(elm, 'se');
+          if (this.isNeightbor(tile, tile_type)) {
+            if (elm != null) {
+              classie.add(elm, 'se');
+            }
             return true;
           } else if (elm != null) {
             classie.remove(elm, 'se');
@@ -982,8 +1032,10 @@
         case 'n':
           tile = this.getTile_at(xi, yi - 1, cx, cy);
           elm = this.getTileElm(xi, yi - 1, cx, cy);
-          if (tile === tile_type) {
-            classie.add(elm, 's');
+          if (this.isNeightbor(tile, tile_type)) {
+            if (elm != null) {
+              classie.add(elm, 's');
+            }
             return true;
           } else if (elm != null) {
             classie.remove(elm, 's');
@@ -992,8 +1044,10 @@
         case 'ne':
           tile = this.getTile_at(xi + 1, yi - 1, cx, cy);
           elm = this.getTileElm(xi + 1, yi - 1, cx, cy);
-          if (tile === tile_type) {
-            classie.add(elm, 'sw');
+          if (this.isNeightbor(tile, tile_type)) {
+            if (elm != null) {
+              classie.add(elm, 'sw');
+            }
             return true;
           } else if (elm != null) {
             classie.remove(elm, 'sw');
@@ -1002,8 +1056,10 @@
         case 'e':
           tile = this.getTile_at(xi + 1, yi, cx, cy);
           elm = this.getTileElm(xi + 1, yi, cx, cy);
-          if (tile === tile_type) {
-            classie.add(elm, 'w');
+          if (this.isNeightbor(tile, tile_type)) {
+            if (elm != null) {
+              classie.add(elm, 'w');
+            }
             return true;
           } else if (elm != null) {
             classie.remove(elm, 'w');
@@ -1012,8 +1068,10 @@
         case 'se':
           tile = this.getTile_at(xi + 1, yi + 1, cx, cy);
           elm = this.getTileElm(xi + 1, yi + 1, cx, cy);
-          if (tile === tile_type) {
-            classie.add(elm, 'nw');
+          if (this.isNeightbor(tile, tile_type)) {
+            if (elm != null) {
+              classie.add(elm, 'nw');
+            }
             return true;
           } else if (elm != null) {
             classie.remove(elm, 'nw');
@@ -1022,8 +1080,10 @@
         case 's':
           tile = this.getTile_at(xi, yi + 1, cx, cy);
           elm = this.getTileElm(xi, yi + 1, cx, cy);
-          if (tile === tile_type) {
-            classie.add(elm, 'n');
+          if (this.isNeightbor(tile, tile_type)) {
+            if (elm != null) {
+              classie.add(elm, 'n');
+            }
             return true;
           } else if (elm != null) {
             classie.remove(elm, 'n');
@@ -1032,8 +1092,10 @@
         case 'sw':
           tile = this.getTile_at(xi - 1, yi + 1, cx, cy);
           elm = this.getTileElm(xi - 1, yi + 1, cx, cy);
-          if (tile === tile_type) {
-            classie.add(elm, 'ne');
+          if (this.isNeightbor(tile, tile_type)) {
+            if (elm != null) {
+              classie.add(elm, 'ne');
+            }
             return true;
           } else if (elm != null) {
             classie.remove(elm, 'ne');
@@ -1042,8 +1104,10 @@
         case 'w':
           tile = this.getTile_at(xi - 1, yi, cx, cy);
           elm = this.getTileElm(xi - 1, yi, cx, cy);
-          if (tile === tile_type) {
-            classie.add(elm, 'e');
+          if (this.isNeightbor(tile, tile_type)) {
+            if (elm != null) {
+              classie.add(elm, 'e');
+            }
             return true;
           } else if (elm != null) {
             classie.remove(elm, 'e');
@@ -1052,6 +1116,10 @@
         default:
           return false;
       }
+    };
+
+    Game.isNeightbor = function(tile, tile_type) {
+      return tile === tile_type;
     };
 
     Game.addListener = function(type, $elm, xi, yi, cx, cy) {
@@ -1122,7 +1190,7 @@
       this.item_type = type;
       this.count = count;
       Item.__super__.constructor.call(this, 'Item', this.name, x, y);
-      this.facing = DOWN;
+      this.facing = SOUTH;
       this.cx = 0;
       this.cy = 0;
       this.setPosition();
@@ -1178,6 +1246,112 @@
       this.player = player;
     }
 
+    PlayerActions.prototype.changeTool = function(key) {
+      switch (key) {
+        case NUM_1:
+          return this.player.tool = TOOL.DIRT;
+        case NUM_2:
+          return this.player.tool = TOOL.GRASS;
+        case NUM_3:
+          return this.player.tool = TOOL.SAND;
+        case NUM_4:
+          return this.player.tool = TOOL.ROCK;
+        case NUM_5:
+          return this.player.tool = TOOL.WATER;
+        case NUM_6:
+          return false;
+        case NUM_7:
+          return false;
+        case NUM_8:
+          return false;
+        case NUM_9:
+          return false;
+        case NUM_0:
+          return this.player.tool = TOOL.NONE;
+      }
+    };
+
+    PlayerActions.prototype.actOnElement = function(elm_type, x, y, cx, cy) {
+      if (elm_type === void 0) {
+        return;
+      }
+      switch (ELM_TYPES[elm_type]) {
+        case 'soil':
+          return this.water_soil(x, y, cx, cy);
+        case 'wateredSoil':
+          return false;
+        case 'weed':
+          return this.clear_ground(x, y, cx, cy);
+        case 'stump':
+          return this.clear_ground(x, y, cx, cy);
+        case 'bush':
+          return this.cut_down_bushes(x, y, cx, cy);
+        case 'branch':
+          return this.clear_ground(x, y, cx, cy);
+        case 'rock':
+          return this.clear_ground(x, y, cx, cy);
+        case 'ore':
+          return this.break_rocks(x, y, cx, cy);
+        case 'stones':
+          return this.clear_ground(x, y, cx, cy);
+        case 'fence':
+          return this.clear_ground(x, y, cx, cy);
+        default:
+          return false;
+      }
+    };
+
+    PlayerActions.prototype.actOnTile = function(tile_type, x, y, cx, cy) {
+      if (tile_type === void 0) {
+        tile_type = Game.getChunkType(cx, cy);
+      }
+      switch (this.player.tool) {
+        case TOOL.DIRT:
+          if (TILE_TYPES[tile_type] === 'grass' || TILE_TYPES[tile_type] === 'sand' || TILE_TYPES[tile_type] === 'mud') {
+            return this.set_tile(x, y, cx, cy, 'dirt');
+          } else if (TILE_TYPES[tile_type] === 'water') {
+            return this.set_tile(x, y, cx, cy, 'mud');
+          } else if (TILE_TYPES[tile_type] === 'dirt' || TILE_TYPES[tile_type] === 'dirt_cliff') {
+            return this.set_tile(x, y, cx, cy, 'dirt_cliff');
+          }
+          break;
+        case TOOL.GRASS:
+          if (TILE_TYPES[tile_type] === 'dirt' || TILE_TYPES[tile_type] === 'mud') {
+            return this.set_tile(x, y, cx, cy, 'grass');
+          }
+          break;
+        case TOOL.SAND:
+          if (TILE_TYPES[tile_type] === 'dirt' || TILE_TYPES[tile_type] === 'grass') {
+            return this.set_tile(x, y, cx, cy, 'sand');
+          } else if (TILE_TYPES[tile_type] === 'mud') {
+            return this.set_tile(x, y, cx, cy, 'dirt');
+          } else if (TILE_TYPES[tile_type] === 'water') {
+            return this.set_tile(x, y, cx, cy, 'mud');
+          }
+          break;
+        case TOOL.ROCK:
+          if (TILE_TYPES[tile_type] === 'grass' || TILE_TYPES[tile_type] === 'sand' || TILE_TYPES[tile_type] === 'mud') {
+            return this.set_tile(x, y, cx, cy, 'rock_cliff');
+          }
+          break;
+        case TOOL.WATER:
+          if (TILE_TYPES[tile_type] === 'mud' || TILE_TYPES[tile_type] === 'water') {
+            return this.set_tile(x, y, cx, cy, 'water');
+          } else if (TILE_TYPES[tile_type] === 'dirt' || TILE_TYPES[tile_type] === 'grass' || TILE_TYPES[tile_type] === 'sand') {
+            return this.set_tile(x, y, cx, cy, 'mud');
+          }
+          break;
+        case TOOL.NONE:
+          if (TILE_TYPES[tile_type] === 'dirt') {
+            return this.till_ground(x, y, cx, cy);
+          } else if (TILE_TYPES[tile_type] === 'dirt_cliff') {
+            return this.set_tile(x, y, cx, cy, 'dirt');
+          } else if (TILE_TYPES[tile_type] === 'rock_cliff') {
+            return this.set_tile(x, y, cx, cy, 'dirt');
+          }
+      }
+    };
+
     PlayerActions.prototype.till_ground = function(x, y, cx, cy) {
       console.log('tilled ground');
       return Game.setElement_at(x, y, cx, cy, _.indexOf(ELM_TYPES, 'soil'));
@@ -1216,6 +1390,10 @@
       return Game.setTile_at(x, y, cx, cy, _.indexOf(TILE_TYPES, 'dirt'));
     };
 
+    PlayerActions.prototype.set_tile = function(x, y, cx, cy, tile_type) {
+      return Game.setTile_at(x, y, cx, cy, _.indexOf(TILE_TYPES, tile_type));
+    };
+
     return PlayerActions;
 
   })();
@@ -1245,7 +1423,7 @@
       this.cx = 0;
       this.cy = 0;
       this.tool = 'none';
-      this.facing = DOWN;
+      this.facing = SOUTH;
       this.inventory = new PlayerInventory(this);
       this.actions = new PlayerActions(this);
       this.setPosition();
@@ -1256,7 +1434,7 @@
     PlayerEntity.prototype.bindEvents = function() {
       return document.addEventListener('keyup', (function(_this) {
         return function(e) {
-          var _ref;
+          var _ref, _ref1;
           if (_ref = e.which, __indexOf.call(DIRECTIONS, _ref) >= 0) {
             e.preventDefault();
             e.stopPropagation();
@@ -1268,15 +1446,8 @@
           } else if (e.which === SPACE_BAR) {
             return _this["do"](_this.getXFacing(), _this.getYFacing());
           } else {
-            switch (e.which) {
-              case NUM_1:
-                _this.tool = 'grass';
-                break;
-              case NUM_2:
-                _this.tool = 'water';
-                break;
-              default:
-                _this.tool = 'none';
+            if (_ref1 = e.which, __indexOf.call(NUMBER_KEYS, _ref1) >= 0) {
+              _this.actions.changeTool(e.which);
             }
             return console.log(e.which);
           }
@@ -1285,18 +1456,6 @@
     };
 
     PlayerEntity.prototype.face = function(dir) {
-      if (dir === A) {
-        dir = LEFT;
-      }
-      if (dir === W) {
-        dir = UP;
-      }
-      if (dir === D) {
-        dir = RIGHT;
-      }
-      if (dir === S) {
-        dir = DOWN;
-      }
       if (this.facing !== dir) {
         this.facing = dir;
       }
@@ -1304,9 +1463,9 @@
     };
 
     PlayerEntity.prototype.getXFacing = function() {
-      if (this.facing === LEFT) {
+      if (this.facing === WEST) {
         return this.x - 1;
-      } else if (this.facing === RIGHT) {
+      } else if (this.facing === EAST) {
         return this.x + 1;
       } else {
         return this.x;
@@ -1314,9 +1473,9 @@
     };
 
     PlayerEntity.prototype.getYFacing = function() {
-      if (this.facing === UP) {
+      if (this.facing === NORTH) {
         return this.y - 1;
-      } else if (this.facing === DOWN) {
+      } else if (this.facing === SOUTH) {
         return this.y + 1;
       } else {
         return this.y;
@@ -1324,34 +1483,29 @@
     };
 
     PlayerEntity.prototype.move = function(dir) {
-      switch (dir) {
-        case LEFT:
-        case A:
-          this.face(LEFT);
-          if (this.check(this.x - 1, this.y)) {
-            this.x--;
-          }
-          break;
-        case UP:
-        case W:
-          this.face(UP);
-          if (this.check(this.x, this.y - 1)) {
-            this.y--;
-          }
-          break;
-        case RIGHT:
-        case D:
-          this.face(RIGHT);
-          if (this.check(this.x + 1, this.y)) {
-            this.x++;
-          }
-          break;
-        case DOWN:
-        case S:
-          this.face(DOWN);
-          if (this.check(this.x, this.y + 1)) {
-            this.y++;
-          }
+      if (__indexOf.call(DIR_LEFT, dir) >= 0) {
+        this.face(WEST);
+        if (this.check(this.x - 1, this.y)) {
+          this.x--;
+        }
+      }
+      if (__indexOf.call(DIR_UP, dir) >= 0) {
+        this.face(NORTH);
+        if (this.check(this.x, this.y - 1)) {
+          this.y--;
+        }
+      }
+      if (__indexOf.call(DIR_RIGHT, dir) >= 0) {
+        this.face(EAST);
+        if (this.check(this.x + 1, this.y)) {
+          this.x++;
+        }
+      }
+      if (__indexOf.call(DIR_DOWN, dir) >= 0) {
+        this.face(SOUTH);
+        if (this.check(this.x, this.y + 1)) {
+          this.y++;
+        }
       }
       this.collectItems(this.x, this.y);
       Game.setCenter(this.x, this.y);
@@ -1366,10 +1520,10 @@
       }
       e = Game.getElement_at(x, y, this.cx, this.cy);
       if (e !== void 0 && e !== null) {
-        return this.actOnElement(e, x, y);
+        return this.actions.actOnElement(e, x, y, this.cx, this.cy);
       } else {
         t = Game.getTile_at(x, y, this.cx, this.cy);
-        return this.actOnTile(t, x, y);
+        return this.actions.actOnTile(t, x, y, this.cx, this.cy);
       }
     };
 
@@ -1396,62 +1550,6 @@
       if (item !== void 0 && item !== null) {
         this.inventory.addItem(item.type, item.count);
         return Game.removeItem(x, y, this.cx, this.cy);
-      }
-    };
-
-    PlayerEntity.prototype.actOnElement = function(elm_type, x, y) {
-      if (elm_type === void 0) {
-        return;
-      }
-      switch (ELM_TYPES[elm_type]) {
-        case 'soil':
-          return this.actions.water_soil(x, y, this.cx, this.cy);
-        case 'wateredSoil':
-          return false;
-        case 'weed':
-          return this.actions.clear_ground(x, y, this.cx, this.cy);
-        case 'stump':
-          return this.actions.clear_ground(x, y, this.cx, this.cy);
-        case 'bush':
-          return this.actions.cut_down_bushes(x, y, this.cx, this.cy);
-        case 'branch':
-          return this.actions.clear_ground(x, y, this.cx, this.cy);
-        case 'rock':
-          return this.actions.clear_ground(x, y, this.cx, this.cy);
-        case 'ore':
-          return this.actions.break_rocks(x, y, this.cx, this.cy);
-        case 'stones':
-          return this.actions.clear_ground(x, y, this.cx, this.cy);
-        case 'fence':
-          return this.actions.clear_ground(x, y, this.cx, this.cy);
-        default:
-          return false;
-      }
-    };
-
-    PlayerEntity.prototype.actOnTile = function(tile_type, x, y) {
-      if (tile_type === void 0) {
-        tile_type = Game.getChunkType(this.cx, this.cy);
-      }
-      switch (this.tool) {
-        case 'grass':
-          if (TILE_TYPES[tile_type] === 'dirt') {
-            return this.actions.plant_grass(x, y, this.cx, this.cy);
-          } else if (TILE_TYPES[tile_type] === 'grass') {
-            return this.actions.remove_grass(x, y, this.cx, this.cy);
-          }
-          break;
-        case 'water':
-          if (TILE_TYPES[tile_type] === 'dirt' || TILE_TYPES[tile_type] === 'grass') {
-            return this.actions.dig_water_hole(x, y, this.cx, this.cy);
-          } else if (TILE_TYPES[tile_type] === 'water') {
-            return this.actions.fill_water_hole(x, y, this.cx, this.cy);
-          }
-          break;
-        case 'none':
-          if (TILE_TYPES[tile_type] === 'dirt') {
-            return this.actions.till_ground(x, y, this.cx, this.cy);
-          }
       }
     };
 

@@ -560,7 +560,20 @@
   &.grass {
     .tile-neighbors(1, 0);
   }
-  &.water {
+  &.sand {
     .tile-neighbors(4, 0);
+  }
+  &.mud {
+    .tile-neighbors(4, 4);
+  }
+  &.water {
+    .tile-neighbors(1, 2);
+  }
+
+  &.dirt_cliff {
+    .tile-neighbors(4, 2);
+  }
+  &.rock_cliff {
+    .tile-neighbors(7, 2);
   }
 }
