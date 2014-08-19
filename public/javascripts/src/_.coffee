@@ -37,6 +37,13 @@ this.EAST   = 'e'
 this.SOUTH  = 's'
 this.WEST   = 'w'
 
+this.FACING = [
+  NORTH
+  EAST
+  SOUTH
+  WEST
+]
+
 this.DIR_LEFT   = [ LEFT_KEY, A_KEY ]
 this.DIR_UP     = [ UP_KEY, W_KEY ]  
 this.DIR_RIGHT  = [ RIGHT_KEY, D_KEY ]

@@ -54,6 +54,8 @@
 
   this.WEST = 'w';
 
+  this.FACING = [NORTH, EAST, SOUTH, WEST];
+
   this.DIR_LEFT = [LEFT_KEY, A_KEY];
 
   this.DIR_UP = [UP_KEY, W_KEY];
@@ -107,6 +109,8 @@
 
     Chunk.prototype.items = void 0;
 
+    Chunk.prototype.types = void 0;
+
     Chunk.prototype.keepEmpty = false;
 
     Chunk.prototype.width = CHUNK_WIDTH * TILE_SIZE;
@@ -134,6 +138,7 @@
       this.tiles = {};
       this.elements = {};
       this.items = {};
+      this.types = {};
       this.keepEmpty = false;
     }
 
@@ -197,16 +202,28 @@
         this.tiles[x] = {};
       }
       if (value === null || value === void 0) {
-        if (!this.keepEmpty) {
-          this.tiles[x][y] = null;
-        } else {
-          delete this.tiles[x][y];
-          if (Object.keys(this.tiles[x]).length === 0) {
-            delete this.tiles[x];
+        if (this.tiles[x][y] != null) {
+          this.types["" + TILE_TYPES[this.tiles[x][y]]]--;
+          if (!this.keepEmpty) {
+            this.tiles[x][y] = null;
+          } else {
+            delete this.tiles[x][y];
+            if (Object.keys(this.tiles[x]).length === 0) {
+              delete this.tiles[x];
+            }
           }
         }
       } else {
-        this.tiles[x][y] = value;
+        if (this.tiles[x][y] != null) {
+          this.types[TILE_TYPES[this.tiles[x][y]]]--;
+        }
+        if (this.tiles[x][y] !== value) {
+          if (!this.types[TILE_TYPES[value]]) {
+            this.types[TILE_TYPES[value]] = 0;
+          }
+          this.types[TILE_TYPES[value]]++;
+          this.tiles[x][y] = value;
+        }
       }
       return this;
     };
@@ -1457,7 +1474,9 @@
 
     PlayerEntity.prototype.face = function(dir) {
       if (this.facing !== dir) {
+        classie.removeClass(this.$elm, this.facing);
         this.facing = dir;
+        classie.addClass(this.$elm, this.facing);
       }
       return this;
     };

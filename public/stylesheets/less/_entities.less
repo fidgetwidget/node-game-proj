@@ -7,8 +7,29 @@
   .tile;
 
   &.player {
-    background-color: #547AD2;
-    background-image: none;
+    background-image: url('../images/entities.png');
+    background-position: 0 -@TILESIZE*2;
+    width: @TILESIZE*2;
+    height: @TILESIZE*2;
+    margin-top:-@TILESIZE/2;
+    margin-left:-@TILESIZE/2;
+
+    &.n {
+      background-position-x: -@TILESIZE*2;
+    }
+    &.s {
+      background-position-x: 0; 
+    }
+    &.w {
+      background-position-x: -@TILESIZE*4; 
+    }
+    &.e {
+      background-position-x: -@TILESIZE*4;
+      // temp: I need to change it to not use a flipped sprite, but a unique one
+              transform: scaleX(-1);
+         -moz-transform: scaleX(-1);        
+      -webkit-transform: scaleX(-1);
+    }
   }
 
   &.tree {    

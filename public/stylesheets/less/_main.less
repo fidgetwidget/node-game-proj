@@ -108,19 +108,14 @@
   &.right   { border-right:   1px solid #aaa; }
 }
 
-.entity.Player {
-  .tile;
-  background: #303030;
-}
-
 
 #main {
   .tiles,
   .elements,
   .entities {
-    transition: all 0.2s;
+    transition: top 0.125s 0.025s, left 0.125s 0.025s;
   }
 }
 .entity.player {
-  transition: all 0.2s;
+  transition: top 0.2s, left 0.2s;
 }

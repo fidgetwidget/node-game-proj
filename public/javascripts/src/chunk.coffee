@@ -7,6 +7,7 @@ class @Chunk
   tiles:      undefined
   elements:   undefined
   items:      undefined
+  types:      undefined
   keepEmpty:  false
 
   width:      CHUNK_WIDTH * TILE_SIZE
@@ -31,6 +32,7 @@ class @Chunk
     @tiles = {}
     @elements = {}
     @items = {}
+    @types = {}
     @keepEmpty = false
     
 
@@ -73,14 +75,23 @@ class @Chunk
   setTile: (x, y, value) ->
     @tiles[x] = {} unless @tiles[x]
     if value is null or value is undefined
-      if !@keepEmpty
-        @tiles[x][y] = null
-      else
-        delete @tiles[x][y] 
-        if Object.keys(@tiles[x]).length is 0
-          delete @tiles[x]
+      
+      if @tiles[x][y]?
+        @types["#{TILE_TYPES[@tiles[x][y]]}"]--
+
+        if !@keepEmpty
+          @tiles[x][y] = null
+        else
+          delete @tiles[x][y] 
+          delete @tiles[x] if Object.keys(@tiles[x]).length is 0
+            
     else
-      @tiles[x][y] = value
+      if @tiles[x][y]?
+        @types[TILE_TYPES[@tiles[x][y]]]--
+      unless @tiles[x][y] is value
+        @types[TILE_TYPES[value]] = 0 unless @types[TILE_TYPES[value]]
+        @types[TILE_TYPES[value]]++
+        @tiles[x][y] = value
     return @
 
   setElement: (x, y, value) ->

@@ -59,7 +59,9 @@ class @PlayerEntity extends Entity
   face: (dir) ->
     # only change it when it changes
     unless @facing is dir
+      classie.removeClass @$elm, @facing
       @facing = dir
+      classie.addClass @$elm, @facing
     @
 
   getXFacing: () ->
