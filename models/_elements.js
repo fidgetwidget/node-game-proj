@@ -11,4 +11,7 @@ var elementSchema = new Schema({
   value:    { type: Number, default: 0 }
 });
 
-module.exports = mongoose.model('Element', elementSchema);
+module.exports = {
+  Model: mongoose.model('Element', elementSchema),
+  Schema: elementSchema
+};

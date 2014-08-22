@@ -11,4 +11,7 @@ var tileSchema = new Schema({
   value:    { type: Number, default: 0 }
 });
 
-module.exports = mongoose.model('Tile', tileSchema);
+module.exports = {
+  Model: mongoose.model('Tile', tileSchema),
+  Schema: tileSchema
+};

@@ -12,4 +12,7 @@ var itemSchema = new Schema({
   count:    { type: Number, default: 0 }
 });
 
-module.exports = mongoose.model('Item', itemSchema);
+module.exports = {
+  Model: mongoose.model('Item', itemSchema),
+  Schema: itemSchema
+};
