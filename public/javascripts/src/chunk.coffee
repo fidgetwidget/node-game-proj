@@ -7,6 +7,7 @@ class @Chunk
   tiles:      undefined
   elements:   undefined
   items:      undefined
+  
   types:      undefined
   keepEmpty:  false
 

@@ -2,7 +2,7 @@
 #
 # Abstract Entity
 #
-class Entity
+class @Entity
 
   name:     'entity_name' # the entities id
   type:     'entity_type' # the entity type name

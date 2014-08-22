@@ -1,6 +1,7 @@
 /// RESTful API for getting the chunks
-
-var Chunk = require('../models/chunks.js');
+var mongoose = require('mongoose');
+var models = require('../models/models.js');
+var Chunk = models.Chunk;
 
 // save/update the chunk
 exports.post = (function(req, res) {
