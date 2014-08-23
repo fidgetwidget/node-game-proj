@@ -82,11 +82,11 @@
 
   this.TILE_DIRECTIONS = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
 
-  this.TILE_TYPES = ['dirt', 'grass', 'sand', 'hole', 'dirt_cliff', 'rock_cliff', 'mud', 'water'];
+  this.TILE_TYPES = ['dirt', 'grass', 'sand', 'path', 'hole', 'dirt_cliff', 'rock_cliff', 'mud', 'water'];
 
-  this.COLLIDER_TILES = [false, false, false, true, true, true, false, true];
+  this.COLLIDER_TILES = [false, false, false, false, true, true, true, false, true];
 
-  this.TOOLS = ['none', 'dirt', 'grass', 'sand', 'rock', 'water'];
+  this.TOOLS = ['none', 'dirt', 'grass', 'sand', 'rock', 'water', 'path'];
 
   this.TOOL = {};
 
@@ -101,6 +101,8 @@
   this.TOOL.ROCK = 'rock';
 
   this.TOOL.WATER = 'water';
+
+  this.TOOL.PATH = 'path';
 
   this.Chunk = (function() {
     Chunk.prototype.tiles = void 0;
@@ -1276,7 +1278,7 @@
         case NUM_5:
           return this.player.tool = TOOL.WATER;
         case NUM_6:
-          return false;
+          return this.player.tool = TOOL.PATH;
         case NUM_7:
           return false;
         case NUM_8:
@@ -1398,6 +1400,13 @@
               case 'dirt':
                 return this.set_tile(x, y, cx, cy, 'mud');
             }
+          }
+          break;
+        case TOOL.PATH:
+          if (alt) {
+            return this.set_tile(x, y, cx, cy, 'dirt');
+          } else {
+            return this.set_tile(x, y, cx, cy, 'path');
           }
           break;
         case TOOL.NONE:

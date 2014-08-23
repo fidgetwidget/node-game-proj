@@ -20,7 +20,7 @@ class @PlayerActions
       when NUM_5
         @player.tool = TOOL.WATER
       when NUM_6
-        false
+        @player.tool = TOOL.PATH
       when NUM_7
         false
       when NUM_8
@@ -135,6 +135,12 @@ class @PlayerActions
               @set_tile(x, y, cx, cy, 'mud')
             when 'dirt'
               @set_tile(x, y, cx, cy, 'mud')
+
+      when TOOL.PATH
+        if alt
+          @set_tile(x, y, cx, cy, 'dirt')
+        else
+          @set_tile(x, y, cx, cy, 'worn_path')
 
       # NONE
       when TOOL.NONE

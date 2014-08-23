@@ -17,6 +17,7 @@ this.TILE_TYPES = [
   'dirt'
   'grass'
   'sand'
+  'worn_path'
   'hole'
   'dirt_cliff'
   'rock_cliff'
@@ -25,6 +26,7 @@ this.TILE_TYPES = [
 ]
 
 this.COLLIDER_TILES = [
+  false
   false
   false
   false
