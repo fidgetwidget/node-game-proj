@@ -30,7 +30,7 @@ class @PlayerActions
       when NUM_0
         @player.tool = TOOL.NONE
 
-  actOnElement: (elm_type, x, y, cx, cy) ->
+  actOnElement: (elm_type, x, y, cx, cy, alt=false) ->
 
     return if elm_type is undefined
 
@@ -63,7 +63,7 @@ class @PlayerActions
         false
 
 
-  actOnTile: (tile_type, x, y, cx, cy) ->
+  actOnTile: (tile_type, x, y, cx, cy, alt=false) ->
     # depending on the type of tile, do something
     # and update the state of the tile in the game.
 
@@ -74,52 +74,90 @@ class @PlayerActions
     switch @player.tool
       # DIRT
       when TOOL.DIRT
-        if TILE_TYPES[tile_type] is 'grass' or TILE_TYPES[tile_type] is 'sand' or TILE_TYPES[tile_type] is 'mud'
-          @set_tile(x, y, cx, cy, 'dirt')
+        if alt 
+          switch TILE_TYPES[tile_type]
+            when 'dirt'
+              @set_tile(x, y, cx, cy, 'hole')
+            when 'grass', 'sand'
+              @set_tile(x, y, cx, cy, 'dirt')
 
-        else if TILE_TYPES[tile_type] is 'water'
-          @set_tile(x, y, cx, cy, 'mud')
-
-        else if TILE_TYPES[tile_type] is 'dirt' or TILE_TYPES[tile_type] is 'dirt_cliff'
-          @set_tile(x, y, cx, cy, 'dirt_cliff')
+        else
+          switch TILE_TYPES[tile_type]
+            when 'water'
+              @set_tile(x, y, cx, cy, 'mud')
+            when  'dirt'
+              @set_tile(x, y, cx, cy, 'dirt_cliff')
 
       # GRASS
       when TOOL.GRASS
-        if TILE_TYPES[tile_type] is 'dirt' or TILE_TYPES[tile_type] is 'mud'
+        if alt and TILE_TYPES[tile_type] is 'grass'
+          @set_tile(x, y, cx, cy, 'dirt')
+
+        if !alt and (TILE_TYPES[tile_type] is 'dirt' or TILE_TYPES[tile_type] is 'mud')
           @set_tile(x, y, cx, cy, 'grass')
 
       # SAND
       when TOOL.SAND
-        if TILE_TYPES[tile_type] is 'dirt' or TILE_TYPES[tile_type] is 'grass'
-          @set_tile(x, y, cx, cy, 'sand')
-
-        else if TILE_TYPES[tile_type] is 'mud'
+        if alt and TILE_TYPES[tile_type] is 'sand'
           @set_tile(x, y, cx, cy, 'dirt')
 
-        else if TILE_TYPES[tile_type] is 'water'
-          @set_tile(x, y, cx, cy, 'mud')
+        if !alt
+          switch TILE_TYPES[tile_type]
+            when 'mud'
+              @set_tile(x, y, cx, cy, 'sand')
+            when 'water'
+              @set_tile(x, y, cx, cy, 'mud')
+            when 'dirt', 'grass'
+              @set_tile(x, y, cx, cy, 'sand')
 
       # ROCK
       when TOOL.ROCK
-        if TILE_TYPES[tile_type] is 'grass' or TILE_TYPES[tile_type] is 'sand' or TILE_TYPES[tile_type] is 'mud'
+        if alt and TILE_TYPES[tile_type] is 'rock_cliff'
+          @set_tile(x, y, cx, cy, 'dirt')
+        if !alt and (TILE_TYPES[tile_type] is 'grass' or TILE_TYPES[tile_type] is 'sand' or TILE_TYPES[tile_type] is 'mud')
           @set_tile(x, y, cx, cy, 'rock_cliff')
 
       # WATER
       when TOOL.WATER
-        if TILE_TYPES[tile_type] is 'mud' or TILE_TYPES[tile_type] is 'water'
-          @set_tile(x, y, cx, cy, 'water')
-
-        else if TILE_TYPES[tile_type] is 'dirt' or TILE_TYPES[tile_type] is 'grass' or TILE_TYPES[tile_type] is 'sand'
-          @set_tile(x, y, cx, cy, 'mud')
+        if alt
+          switch TILE_TYPES[tile_type]
+            when 'water'
+              @set_tile(x, y, cx, cy, 'hole')
+            when 'mud'
+              @set_tile(x, y, cx, cy, 'dirt')
+        else
+          switch TILE_TYPES[tile_type]
+            when 'hole'
+              @set_tile(x, y, cx, cy, 'water')
+            when 'sand'
+              @set_tile(x, y, cx, cy, 'dirt')
+            when 'grass'
+              @set_tile(x, y, cx, cy, 'mud')
+            when 'dirt'
+              @set_tile(x, y, cx, cy, 'mud')
 
       # NONE
       when TOOL.NONE
-        if TILE_TYPES[tile_type] is 'dirt'
-          @till_ground(x, y, cx, cy)
-        else if TILE_TYPES[tile_type] is 'dirt_cliff'
-          @set_tile(x, y, cx, cy, 'dirt')
-        else if TILE_TYPES[tile_type] is 'rock_cliff'
-          @set_tile(x, y, cx, cy, 'dirt')
+        if alt
+          switch TILE_TYPES[tile_type]
+            when 'dirt'
+              @set_tile(x, y, cx, cy, 'hole')
+            when 'grass', 'sand', 'mud'
+              @set_tile(x, y, cx, cy, 'dirt')
+            when 'water'
+              @set_tile(x, y, cx, cy, 'mud')
+            when 'dirt_cliff', 'rock_cliff'
+              @set_tile(x, y, cx, cy, 'dirt')
+        else
+          switch TILE_TYPES[tile_type]
+            when 'dirt'
+              @till_ground(x, y, cx, cy)    
+            when 'mud'
+              @set_tile(x, y, cx, cy, 'water')
+            when 'grass'
+              false #TODO: make this grow a grass elm on the grass...
+          
+        
 
 
   #

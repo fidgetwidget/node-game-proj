@@ -17,20 +17,20 @@ this.TILE_TYPES = [
   'dirt'
   'grass'
   'sand'
-  'mud'
-  'water'
-  'water_deep'
+  'hole'
   'dirt_cliff'
   'rock_cliff'
+  'mud'
+  'water'
 ]
 
 this.COLLIDER_TILES = [
   false
   false
   false
+  true
+  true
+  true
   false
-  true
-  true
-  true
   true
 ]

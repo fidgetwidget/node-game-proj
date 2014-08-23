@@ -82,9 +82,9 @@
 
   this.TILE_DIRECTIONS = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
 
-  this.TILE_TYPES = ['dirt', 'grass', 'sand', 'mud', 'water', 'water_deep', 'dirt_cliff', 'rock_cliff'];
+  this.TILE_TYPES = ['dirt', 'grass', 'sand', 'hole', 'dirt_cliff', 'rock_cliff', 'mud', 'water'];
 
-  this.COLLIDER_TILES = [false, false, false, false, true, true, true, true];
+  this.COLLIDER_TILES = [false, false, false, true, true, true, false, true];
 
   this.TOOLS = ['none', 'dirt', 'grass', 'sand', 'rock', 'water'];
 
@@ -1288,7 +1288,10 @@
       }
     };
 
-    PlayerActions.prototype.actOnElement = function(elm_type, x, y, cx, cy) {
+    PlayerActions.prototype.actOnElement = function(elm_type, x, y, cx, cy, alt) {
+      if (alt == null) {
+        alt = false;
+      }
       if (elm_type === void 0) {
         return;
       }
@@ -1318,53 +1321,109 @@
       }
     };
 
-    PlayerActions.prototype.actOnTile = function(tile_type, x, y, cx, cy) {
+    PlayerActions.prototype.actOnTile = function(tile_type, x, y, cx, cy, alt) {
+      if (alt == null) {
+        alt = false;
+      }
       if (tile_type === void 0) {
         tile_type = Game.getChunkType(cx, cy);
       }
       switch (this.player.tool) {
         case TOOL.DIRT:
-          if (TILE_TYPES[tile_type] === 'grass' || TILE_TYPES[tile_type] === 'sand' || TILE_TYPES[tile_type] === 'mud') {
-            return this.set_tile(x, y, cx, cy, 'dirt');
-          } else if (TILE_TYPES[tile_type] === 'water') {
-            return this.set_tile(x, y, cx, cy, 'mud');
-          } else if (TILE_TYPES[tile_type] === 'dirt' || TILE_TYPES[tile_type] === 'dirt_cliff') {
-            return this.set_tile(x, y, cx, cy, 'dirt_cliff');
+          if (alt) {
+            switch (TILE_TYPES[tile_type]) {
+              case 'dirt':
+                return this.set_tile(x, y, cx, cy, 'hole');
+              case 'grass':
+              case 'sand':
+                return this.set_tile(x, y, cx, cy, 'dirt');
+            }
+          } else {
+            switch (TILE_TYPES[tile_type]) {
+              case 'water':
+                return this.set_tile(x, y, cx, cy, 'mud');
+              case 'dirt':
+                return this.set_tile(x, y, cx, cy, 'dirt_cliff');
+            }
           }
           break;
         case TOOL.GRASS:
-          if (TILE_TYPES[tile_type] === 'dirt' || TILE_TYPES[tile_type] === 'mud') {
+          if (alt && TILE_TYPES[tile_type] === 'grass') {
+            this.set_tile(x, y, cx, cy, 'dirt');
+          }
+          if (!alt && (TILE_TYPES[tile_type] === 'dirt' || TILE_TYPES[tile_type] === 'mud')) {
             return this.set_tile(x, y, cx, cy, 'grass');
           }
           break;
         case TOOL.SAND:
-          if (TILE_TYPES[tile_type] === 'dirt' || TILE_TYPES[tile_type] === 'grass') {
-            return this.set_tile(x, y, cx, cy, 'sand');
-          } else if (TILE_TYPES[tile_type] === 'mud') {
-            return this.set_tile(x, y, cx, cy, 'dirt');
-          } else if (TILE_TYPES[tile_type] === 'water') {
-            return this.set_tile(x, y, cx, cy, 'mud');
+          if (alt && TILE_TYPES[tile_type] === 'sand') {
+            this.set_tile(x, y, cx, cy, 'dirt');
+          }
+          if (!alt) {
+            switch (TILE_TYPES[tile_type]) {
+              case 'mud':
+                return this.set_tile(x, y, cx, cy, 'sand');
+              case 'water':
+                return this.set_tile(x, y, cx, cy, 'mud');
+              case 'dirt':
+              case 'grass':
+                return this.set_tile(x, y, cx, cy, 'sand');
+            }
           }
           break;
         case TOOL.ROCK:
-          if (TILE_TYPES[tile_type] === 'grass' || TILE_TYPES[tile_type] === 'sand' || TILE_TYPES[tile_type] === 'mud') {
+          if (alt && TILE_TYPES[tile_type] === 'rock_cliff') {
+            this.set_tile(x, y, cx, cy, 'dirt');
+          }
+          if (!alt && (TILE_TYPES[tile_type] === 'grass' || TILE_TYPES[tile_type] === 'sand' || TILE_TYPES[tile_type] === 'mud')) {
             return this.set_tile(x, y, cx, cy, 'rock_cliff');
           }
           break;
         case TOOL.WATER:
-          if (TILE_TYPES[tile_type] === 'mud' || TILE_TYPES[tile_type] === 'water') {
-            return this.set_tile(x, y, cx, cy, 'water');
-          } else if (TILE_TYPES[tile_type] === 'dirt' || TILE_TYPES[tile_type] === 'grass' || TILE_TYPES[tile_type] === 'sand') {
-            return this.set_tile(x, y, cx, cy, 'mud');
+          if (alt) {
+            switch (TILE_TYPES[tile_type]) {
+              case 'water':
+                return this.set_tile(x, y, cx, cy, 'hole');
+              case 'mud':
+                return this.set_tile(x, y, cx, cy, 'dirt');
+            }
+          } else {
+            switch (TILE_TYPES[tile_type]) {
+              case 'hole':
+                return this.set_tile(x, y, cx, cy, 'water');
+              case 'sand':
+                return this.set_tile(x, y, cx, cy, 'dirt');
+              case 'grass':
+                return this.set_tile(x, y, cx, cy, 'mud');
+              case 'dirt':
+                return this.set_tile(x, y, cx, cy, 'mud');
+            }
           }
           break;
         case TOOL.NONE:
-          if (TILE_TYPES[tile_type] === 'dirt') {
-            return this.till_ground(x, y, cx, cy);
-          } else if (TILE_TYPES[tile_type] === 'dirt_cliff') {
-            return this.set_tile(x, y, cx, cy, 'dirt');
-          } else if (TILE_TYPES[tile_type] === 'rock_cliff') {
-            return this.set_tile(x, y, cx, cy, 'dirt');
+          if (alt) {
+            switch (TILE_TYPES[tile_type]) {
+              case 'dirt':
+                return this.set_tile(x, y, cx, cy, 'hole');
+              case 'grass':
+              case 'sand':
+              case 'mud':
+                return this.set_tile(x, y, cx, cy, 'dirt');
+              case 'water':
+                return this.set_tile(x, y, cx, cy, 'mud');
+              case 'dirt_cliff':
+              case 'rock_cliff':
+                return this.set_tile(x, y, cx, cy, 'dirt');
+            }
+          } else {
+            switch (TILE_TYPES[tile_type]) {
+              case 'dirt':
+                return this.till_ground(x, y, cx, cy);
+              case 'mud':
+                return this.set_tile(x, y, cx, cy, 'water');
+              case 'grass':
+                return false;
+            }
           }
       }
     };
@@ -1461,7 +1520,7 @@
               return _this.move(e.which);
             }
           } else if (e.which === SPACE_BAR) {
-            return _this["do"](_this.getXFacing(), _this.getYFacing());
+            return _this["do"](_this.getXFacing(), _this.getYFacing(), e.shiftKey);
           } else {
             if (_ref1 = e.which, __indexOf.call(NUMBER_KEYS, _ref1) >= 0) {
               _this.actions.changeTool(e.which);
@@ -1532,17 +1591,20 @@
       return this;
     };
 
-    PlayerEntity.prototype["do"] = function(x, y) {
+    PlayerEntity.prototype["do"] = function(x, y, alt) {
       var e, t;
+      if (alt == null) {
+        alt = false;
+      }
       if (x < 0 || y < 0 || x >= CHUNK_WIDTH || y >= CHUNK_HEIGHT) {
         return false;
       }
       e = Game.getElement_at(x, y, this.cx, this.cy);
       if (e !== void 0 && e !== null) {
-        return this.actions.actOnElement(e, x, y, this.cx, this.cy);
+        return this.actions.actOnElement(e, x, y, this.cx, this.cy, alt);
       } else {
         t = Game.getTile_at(x, y, this.cx, this.cy);
-        return this.actions.actOnTile(t, x, y, this.cx, this.cy);
+        return this.actions.actOnTile(t, x, y, this.cx, this.cy, alt);
       }
     };
 

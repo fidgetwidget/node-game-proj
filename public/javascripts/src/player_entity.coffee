@@ -49,7 +49,7 @@ class @PlayerEntity extends Entity
         else
           @move e.which
       else if e.which is SPACE_BAR
-        @do @getXFacing(), @getYFacing()
+        @do @getXFacing(), @getYFacing(), e.shiftKey
       else
         if e.which in  NUMBER_KEYS
           @actions.changeTool(e.which)
@@ -104,19 +104,19 @@ class @PlayerEntity extends Entity
     @setPosition()
     @
 
-  do: (x, y) ->
+  do: (x, y, alt=false) ->
     # test for edges of screen (TEMP: this will be how to move from chunk to chunk later...)
     return false if x < 0 or y < 0 or x >= CHUNK_WIDTH or y >= CHUNK_HEIGHT
 
     # get the tile at the desired location
     e = Game.getElement_at(x, y, @cx, @cy)
     if e != undefined and e != null
-      @actions.actOnElement(e, x, y, @cx, @cy)
+      @actions.actOnElement(e, x, y, @cx, @cy, alt)
       
     else
       t = Game.getTile_at(x, y, @cx, @cy)
       # act on the tile even if the there isn't one (act on the chunk default_tile)
-      @actions.actOnTile(t, x, y, @cx, @cy)
+      @actions.actOnTile(t, x, y, @cx, @cy, alt)
 
   check: (x, y) ->
     return false if x < 0 or y < 0 or x >= CHUNK_WIDTH or y >= CHUNK_HEIGHT
