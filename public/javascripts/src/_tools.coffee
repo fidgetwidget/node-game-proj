@@ -6,6 +6,7 @@ this.TOOLS = [
   'sand'
   'rock'
   'water'
+  'path'
 ]
 this.TOOL = {}
 this.TOOL.NONE = 'none'
@@ -14,3 +15,4 @@ this.TOOL.GRASS = 'grass'
 this.TOOL.SAND = 'sand'
 this.TOOL.ROCK = 'rock'
 this.TOOL.WATER = 'water'
+this.TOOL.PATH = 'path'
