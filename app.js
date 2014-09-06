@@ -30,8 +30,7 @@ var routes = require('./routes/index');
 app.use('/', routes);
 
 var api = require('./controllers/api');
-app.post('/chunk', api.post);
-app.get('/chunk/:x_y.:foramt?', api.show);
+app.use('/api', api)
 
 /// catch 404 and forward to error handler
 app.use(function(req, res, next) {
