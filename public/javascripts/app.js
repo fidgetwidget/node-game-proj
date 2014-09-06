@@ -66,9 +66,13 @@
 
   this.NUMBER_KEYS = [NUM_0, NUM_1, NUM_2, NUM_3, NUM_4, NUM_5, NUM_6, NUM_7, NUM_8, NUM_9];
 
-  this.CHUNK_WIDTH = 32;
+  this.CHUNK_WIDTH = 16;
 
-  this.CHUNK_HEIGHT = 32;
+  this.CHUNK_HEIGHT = 16;
+
+  this.HALF_WIDTH = CHUNK_WIDTH / 2;
+
+  this.HALF_HEIGHT = CHUNK_HEIGHT / 2;
 
   this.TILE_SIZE = 32;
 
@@ -82,7 +86,7 @@
 
   this.TILE_DIRECTIONS = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
 
-  this.TILE_TYPES = ['dirt', 'grass', 'sand', 'path', 'hole', 'dirt_cliff', 'rock_cliff', 'mud', 'water'];
+  this.TILE_TYPES = ['dirt', 'grass', 'sand', 'worn_path', 'hole', 'dirt_cliff', 'rock_cliff', 'mud', 'water'];
 
   this.COLLIDER_TILES = [false, false, false, false, true, true, true, false, true];
 
@@ -498,6 +502,8 @@
 
     Game.entities = void 0;
 
+    Game.players = void 0;
+
     Game.chunks = void 0;
 
     Game.$container = void 0;
@@ -507,6 +513,8 @@
     Game.$elements = void 0;
 
     Game.$entities = void 0;
+
+    Game.$playerLayer = void 0;
 
     Game.listeners = void 0;
 
@@ -534,6 +542,7 @@
         console.log("Game.init() was called.");
       }
       Game.entities = [];
+      Game.players = [];
       Game.$container = document.getElementById('main');
       Game.$inventory = document.getElementById('inventory');
       Game.$stats = document.getElementById('stast');
@@ -544,12 +553,15 @@
       this.$tiles.className = 'tiles';
       this.$elements = document.createElement('div');
       this.$elements.className = 'elements';
+      this.$playerLayer = document.createElement('div');
+      this.$playerLayer.className = 'players';
       this.$entities = document.createElement('div');
       this.$entities.className = 'entities';
       this.listeners = {};
       _fragment = document.createDocumentFragment();
       _fragment.appendChild(this.$tiles);
       _fragment.appendChild(this.$elements);
+      _fragment.appendChild(this.$playerLayer);
       _fragment.appendChild(this.$entities);
       $wrapper.appendChild(_fragment);
       Game.$container.appendChild($wrapper);
@@ -571,8 +583,8 @@
       this.chunks[0][0] = chunk;
       this.setTilesBaseClass(chunk);
       for (i = _i = 0; _i < 32; i = ++_i) {
-        rx = _.random(0, CHUNK_WIDTH);
-        ry = _.random(0, CHUNK_HEIGHT);
+        rx = _.random(0, CHUNK_WIDTH - 1);
+        ry = _.random(0, CHUNK_HEIGHT - 1);
         rv = _.random(1, 12);
         elm_type = null;
         switch (rv) {
@@ -608,8 +620,8 @@
         }
       }
       for (i = _j = 0; _j < 128; i = ++_j) {
-        rx = _.random(CHUNK_WIDTH * 0.25, CHUNK_WIDTH * 0.75);
-        ry = _.random(CHUNK_HEIGHT * 0.25, CHUNK_HEIGHT * 0.75);
+        rx = _.random(0, CHUNK_WIDTH - 1);
+        ry = _.random(0, CHUNK_HEIGHT - 1);
         Game.setTile_at(rx, ry, 0, 0, 1);
       }
       return this;
@@ -618,31 +630,17 @@
     Game.createPlayer = function() {
       var p1;
       p1 = new PlayerEntity();
-      this.addEntity(p1);
+      this.addPlayer(p1);
       return this.setCenter(p1.x, p1.y);
     };
 
     Game.setCenter = function(x, y) {
-      classie.remove(this.$container, "x" + this.offsetX);
-      classie.remove(this.$container, "y" + this.offsetY);
-      this.centerX = x;
-      this.centerY = y;
-      if (this.centerX <= 8) {
-        this.offsetX = 0;
-      } else if (this.centerX > 8 && this.centerX < 24) {
-        this.offsetX = this.centerX - 8;
-      } else {
-        this.offsetX = 16;
-      }
-      if (this.centerY <= 8) {
-        this.offsetY = 0;
-      } else if (this.centerY > 8 && this.centerY < 24) {
-        this.offsetY = this.centerY - 8;
-      } else {
-        this.offsetY = 16;
-      }
-      classie.add(this.$container, "x" + this.offsetX);
-      return classie.add(this.$container, "y" + this.offsetY);
+      classie.remove(this.$container, "x" + this.centerX);
+      classie.remove(this.$container, "y" + this.centerY);
+      this.centerX = x - HALF_WIDTH;
+      this.centerY = y - HALF_HEIGHT;
+      classie.add(this.$container, "x" + this.centerX);
+      return classie.add(this.$container, "y" + this.centerY);
     };
 
     Game.loadChunks = function(cx, cy) {
@@ -652,7 +650,7 @@
       if (!this.chunks[cx]) {
         this.chunks[cx] = {};
       }
-      jqXHR = $.getJSON("/chunk/" + cx + "_" + cy + ".json");
+      jqXHR = $.getJSON("/api/" + cx + "_" + cy + ".json");
       return jqXHR.done((function(_this) {
         return function(data, status, jqXHR) {
           if (data && data.chunk) {
@@ -676,7 +674,7 @@
         return;
       }
       jqXHR = $.ajax({
-        url: "/chunk",
+        url: "/api",
         method: 'post',
         data: this.chunks[cx][cy].toJSON()
       });
@@ -763,6 +761,12 @@
       }
       entity.addSelf(this);
       return entity;
+    };
+
+    Game.addPlayer = function(player) {
+      this.players[player.name] = player;
+      player.addSelf(this);
+      return player;
     };
 
     Game.getEntity = function(type, name) {
@@ -1406,7 +1410,7 @@
           if (alt) {
             return this.set_tile(x, y, cx, cy, 'dirt');
           } else {
-            return this.set_tile(x, y, cx, cy, 'path');
+            return this.set_tile(x, y, cx, cy, 'worn_path');
           }
           break;
         case TOOL.NONE:
@@ -1500,6 +1504,7 @@
      */
 
     function PlayerEntity(name, x, y) {
+      this.addSelf = __bind(this.addSelf, this);
       this.name = name || ("player" + PlayerEntity.count);
       PlayerEntity.count++;
       x = x || Game._gridWidth / 2;
@@ -1515,6 +1520,10 @@
       this.bindEvents();
       this;
     }
+
+    PlayerEntity.prototype.addSelf = function(game) {
+      return game.$playerLayer.appendChild(this.$elm);
+    };
 
     PlayerEntity.prototype.bindEvents = function() {
       return document.addEventListener('keyup', (function(_this) {
@@ -1596,7 +1605,6 @@
       }
       this.collectItems(this.x, this.y);
       Game.setCenter(this.x, this.y);
-      this.setPosition();
       return this;
     };
 

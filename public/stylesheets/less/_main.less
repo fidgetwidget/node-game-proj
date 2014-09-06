@@ -9,7 +9,7 @@
   .tile-pos(@n, (@i + 1));
 }
 
-.tile-offset(@target, @n, @i: 0) when (@i =< @n) {
+.tile-offset(@target, @n, @i: -@n) when (@i =< @n) {
   &.x@{i} {
     .@{target} {
       left: -(@i * @TILESIZE);
@@ -21,6 +21,20 @@
     }
   }
   .tile-offset(@target, @n, (@i + 1));
+}
+
+.chunk-offset(@target, @n, @i: -@n) when (@i =< @n) {
+  &.cx@{i} {
+    .@{target} {
+      left: -(@i * @GRID_SIZE);
+    }
+  }
+  &.cy@{i} {
+    .@{target} {
+      top: -(@i * @GRID_SIZE);
+    }
+  }
+  .chunk-offset(@target, @n, (@i + 1)); 
 }
 
 #main,
@@ -66,9 +80,14 @@
     -webkit-transform: translate3D(0,0,0);
   }
 
-  .tile-offset(tiles, @CHUNKSIZE);
-  .tile-offset(elements, @CHUNKSIZE);
-  .tile-offset(entities, @CHUNKSIZE);
+  .tile-offset(tiles,     @CHUNKSIZE);
+  .tile-offset(elements,  @CHUNKSIZE);
+  .tile-offset(entities,  @CHUNKSIZE);
+
+  .chunk-offset(tiles,    2);
+  .chunk-offset(elements, 2);
+  .chunk-offset(entities, 2);
+
 }
 
 #stats {

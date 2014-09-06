@@ -32,29 +32,34 @@
     }
   }
 
-  &.tree {    
-    width: @TILESIZE*2;
-    height: @TILESIZE*3;
-    margin-left: -@TILESIZE/2;
-    margin-top: -@TILESIZE*2;
+  &.tree {
     background-color: transparent;
-    background-image: url('../images/tiles.png');
-    background-position-x:0;
-    background-position-y:-@TILESIZE*5;
+    background-image: url('../images/elements.png');
 
-    &.alt {
-      background-position-x:-@TILESIZE*2;
+    &.large {
+      background-position-x:0;
+      background-position-y:-@TILESIZE*4;  
+      width:  @TILESIZE*4;
+      height: @TILESIZE*4;
+      margin-left: -@TILESIZE*1.5;
+      margin-top:  -@TILESIZE*3;
     }
-    &.bare,
-    &.stump {
-      width: @TILESIZE;
-      margin-left: 0;
+    
+    &.small {
+      background-position-x:-@TILESIZE*4;
+      background-position-y:-@TILESIZE*5;
+      width:  @TILESIZE*2;
+      height: @TILESIZE*3;
+      margin-left: -@TILESIZE*0.5;
+      margin-top:  -@TILESIZE*2;
     }
     &.bare {
-      background-position-x:-@TILESIZE*4;
-    }
-    &.stump {
-      background-position-x:-@TILESIZE*5;
+      background-position-x:-@TILESIZE*6;
+      background-position-y:-@TILESIZE*5;
+      width:  @TILESIZE*1;
+      height: @TILESIZE*3;
+      margin-left: 0;
+      margin-top:  -@TILESIZE*2;
     }
   }
   

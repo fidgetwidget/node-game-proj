@@ -63,8 +63,10 @@ this.NUMBER_KEYS = [
 ]
 
   
-this.CHUNK_WIDTH    = 32
-this.CHUNK_HEIGHT   = 32
+this.CHUNK_WIDTH    = 16
+this.CHUNK_HEIGHT   = 16
+this.HALF_WIDTH     = CHUNK_WIDTH/2
+this.HALF_HEIGHT    = CHUNK_HEIGHT/2
 this.TILE_SIZE      = 32
 
 # Player tools

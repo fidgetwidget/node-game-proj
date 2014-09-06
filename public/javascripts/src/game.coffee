@@ -9,11 +9,14 @@ class @Game
   @_debug:      true
 
   @entities:    undefined
+  @players:     undefined
   @chunks:      undefined
   @$container:  undefined
   @$tiles:      undefined
   @$elements:   undefined
   @$entities:   undefined
+  @$playerLayer:undefined
+
   @listeners:   undefined
 
   @$inventory:  undefined
@@ -34,6 +37,7 @@ class @Game
     console.log "Game.init() was called." if Game._debug
       
     Game.entities = []
+    Game.players = []
     Game.$container = document.getElementById 'main'
     Game.$inventory = document.getElementById 'inventory'
     Game.$stats = document.getElementById 'stast'
@@ -47,6 +51,9 @@ class @Game
 
     @$elements = document.createElement('div')
     @$elements.className = 'elements'
+
+    @$playerLayer = document.createElement('div')
+    @$playerLayer.className = 'players'
     
     @$entities = document.createElement('div')
     @$entities.className = 'entities'
@@ -57,6 +64,7 @@ class @Game
     _fragment = document.createDocumentFragment()
     _fragment.appendChild @$tiles
     _fragment.appendChild @$elements
+    _fragment.appendChild @$playerLayer
     _fragment.appendChild @$entities
     $wrapper.appendChild _fragment
 
@@ -83,8 +91,8 @@ class @Game
     @setTilesBaseClass chunk
       
     for i in [0...32]
-      rx = _.random(0,CHUNK_WIDTH)
-      ry = _.random(0,CHUNK_HEIGHT)
+      rx = _.random(0,CHUNK_WIDTH-1)
+      ry = _.random(0,CHUNK_HEIGHT-1)
       rv = _.random(1,12)
       elm_type = null
       switch rv
@@ -107,8 +115,8 @@ class @Game
         Game.setElement_at(rx, ry, 0, 0, elm_type)
     
     for i in [0...128]
-      rx = _.random( CHUNK_WIDTH*0.25,  CHUNK_WIDTH*0.75  )
-      ry = _.random( CHUNK_HEIGHT*0.25, CHUNK_HEIGHT*0.75 )
+      rx = _.random( 0, CHUNK_WIDTH-1 )
+      ry = _.random( 0, CHUNK_HEIGHT-1 )
       
       Game.setTile_at(rx, ry, 0, 0, 1)
 
@@ -118,32 +126,18 @@ class @Game
   # Create Player
   @createPlayer: () ->
     p1 = new PlayerEntity()
-    @addEntity p1
+    @addPlayer p1
     @setCenter p1.x, p1.y
 
 
   # Set Center
   @setCenter: (x, y) ->
-    classie.remove @$container, "x#{@offsetX}"
-    classie.remove @$container, "y#{@offsetY}"
-    @centerX = x
-    @centerY = y
-    if @centerX <= 8
-      @offsetX = 0
-    else if @centerX > 8 and @centerX < 24
-      @offsetX = @centerX - 8
-    else
-      @offsetX = 16
-
-    if @centerY <= 8
-      @offsetY = 0
-    else if @centerY > 8 and @centerY < 24
-      @offsetY = @centerY - 8
-    else
-      @offsetY = 16
-
-    classie.add @$container, "x#{@offsetX}"
-    classie.add @$container, "y#{@offsetY}"
+    classie.remove @$container, "x#{@centerX}"
+    classie.remove @$container, "y#{@centerY}"
+    @centerX = x - HALF_WIDTH
+    @centerY = y - HALF_HEIGHT
+    classie.add @$container, "x#{@centerX}"
+    classie.add @$container, "y#{@centerY}"
 
 
   @loadChunks: (cx, cy) ->
@@ -152,7 +146,7 @@ class @Game
     unless @chunks[cx]
       @chunks[cx] = {}
     
-    jqXHR = $.getJSON "/chunk/#{cx}_#{cy}.json"
+    jqXHR = $.getJSON "/api/#{cx}_#{cy}.json"
     jqXHR
       .done (data, status, jqXHR) =>
         if data and data.chunk
@@ -171,7 +165,7 @@ class @Game
       return  
 
     jqXHR = $.ajax {
-        url: "/chunk"
+        url: "/api"
         method: 'post'
         data: @chunks[cx][cy].toJSON()
       }
@@ -231,7 +225,13 @@ class @Game
     entity.addSelf this
 
     return entity
-    
+
+  @addPlayer: (player) ->
+    @players[player.name] = player
+
+    player.addSelf this
+
+    return player
 
   # Get the entity of a given type and name
   @getEntity: (type, name) ->

@@ -38,6 +38,10 @@ class @PlayerEntity extends Entity
     @
 
 
+  addSelf: (game) =>
+    game.$playerLayer.appendChild @$elm
+
+
   # attach events the player should be listenting to
   bindEvents: () ->
     document.addEventListener 'keyup', (e) =>
@@ -101,7 +105,7 @@ class @PlayerEntity extends Entity
     
     @collectItems @x, @y
     Game.setCenter @x, @y
-    @setPosition()
+    # @setPosition()
     @
 
   do: (x, y, alt=false) ->
