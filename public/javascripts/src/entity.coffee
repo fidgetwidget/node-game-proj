@@ -64,13 +64,11 @@ class @Entity
   # - add self to the games entities
   # - and selfs element to the entities container
   addSelf: (game) =>
-    
     game.entities[@type][@name] = this
     game.$entities.appendChild @$elm
     
 
   removeSelf: (game) =>
-
     delete game.entities[@type][@name]
     @$elm.parentNode.removeChild(@$elm) if @$elm.parentNode
     

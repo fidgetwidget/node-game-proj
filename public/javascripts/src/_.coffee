@@ -49,6 +49,13 @@ this.DIR_UP     = [ UP_KEY, W_KEY ]
 this.DIR_RIGHT  = [ RIGHT_KEY, D_KEY ]
 this.DIR_DOWN   = [ DOWN_KEY, W_KEY ]
 
+this.DIR_TO_FACING = {
+  DIR_LEFT: WEST
+  DIR_UP: NORTH
+  DIR_RIGHT: EAST
+  DIR_DOWN: SOUTH
+}
+
 this.NUMBER_KEYS = [
   NUM_0
   NUM_1
@@ -68,6 +75,8 @@ this.CHUNK_HEIGHT   = 16
 this.HALF_WIDTH     = CHUNK_WIDTH/2
 this.HALF_HEIGHT    = CHUNK_HEIGHT/2
 this.TILE_SIZE      = 32
+this.GRID_WIDTH     = CHUNK_WIDTH * TILE_SIZE
+this.GRID_HEIGHT     = CHUNK_HEIGHT * TILE_SIZE
 
 # Player tools
 this.NONE = 'none'

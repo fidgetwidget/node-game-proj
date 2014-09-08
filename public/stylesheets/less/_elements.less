@@ -9,23 +9,86 @@
   background-color: transparent;
   background-image: url('../images/elements.png');
 
-  &.soil          { background-position-x:0;              background-position-y:0; }
-  &.wateredSoil   { background-position-x:-@TILESIZE*1;   background-position-y:0; }
+  &.soil          { 
+    // background-position-x:0;              
+    // background-position-y:0; 
+    .background-pos(0, 0);
+  }
+  &.wateredSoil   { 
+    // background-position-x:-@TILESIZE*1;   
+    // background-position-y:0; 
+    .background-pos(1, 0);
+  }
   
-  &.stick         { background-position-x:0;              background-position-y:-@TILESIZE*1; } 
-  &.branch        { background-position-x:-@TILESIZE*1;   background-position-y:-@TILESIZE*1; }
-  &.roots         { background-position-x:-@TILESIZE*2;   background-position-y:-@TILESIZE*1; }
-  &.stump         { background-position-x:-@TILESIZE*3;   background-position-y:-@TILESIZE*1; }
-  &.thicket       { background-position-x:-@TILESIZE*4;   background-position-y:-@TILESIZE*1; }
+  &.stick         { 
+    // background-position-x:0;              
+    // background-position-y:-@TILESIZE*1; 
+    .background-pos(0, 1);
+  } 
+  &.branch        { 
+    // background-position-x:-@TILESIZE*1;   
+    // background-position-y:-@TILESIZE*1; 
+    .background-pos(1, 1);
+  }
+  &.roots         { 
+    // background-position-x:-@TILESIZE*2;   
+    // background-position-y:-@TILESIZE*1; 
+    .background-pos(2, 1);
+  }
+  &.stump         { 
+    // background-position-x:-@TILESIZE*3;   
+    // background-position-y:-@TILESIZE*1; 
+    .background-pos(3, 1);
+  }
+  &.thicket       { 
+    // background-position-x:-@TILESIZE*4;   
+    // background-position-y:-@TILESIZE*1; 
+    .background-pos(4, 1);
+  }
 
 
-  &.weed          { background-position-x:0;              background-position-y:-@TILESIZE*2; }
-  &.grass         { background-position-x:-@TILESIZE*2;   background-position-y:-@TILESIZE*2; }
-  &.bush          { background-position-x:-@TILESIZE*3;   background-position-y:-@TILESIZE*2; }
+  &.weed          { 
+    // background-position-x:0;              
+    // background-position-y:-@TILESIZE*2; 
+    .background-pos(0, 2);
+  }
+  &.grass         { 
+    // background-position-x:-@TILESIZE*2;   
+    // background-position-y:-@TILESIZE*2; 
+    .background-pos(2, 2);
+  }
+  &.bush          { 
+    // background-position-x:-@TILESIZE*3;   
+    // background-position-y:-@TILESIZE*2; 
+    .background-pos(3, 2);
+  }
 
-  &.rock          { background-position-x:0;              background-position-y:-@TILESIZE*3; }
-  &.stones        { background-position-x:-@TILESIZE*1;   background-position-y:-@TILESIZE*3; }
-  &.ore           { background-position-x:-@TILESIZE*3;   background-position-y:-@TILESIZE*3; }
+  &.rock          { 
+    // background-position-x:0;              
+    // background-position-y:-@TILESIZE*3; 
+    .background-pos(0, 3);
+  }
+  &.stones        { 
+    // background-position-x:-@TILESIZE*1;   
+    // background-position-y:-@TILESIZE*3; 
+    .background-pos(1, 3);
+  }
+  &.ore           { 
+    // background-position-x:-@TILESIZE*3;   
+    // background-position-y:-@TILESIZE*3; 
+    .background-pos(3, 3);
+  }
 
-  &.fence         { background-position-x:-@TILESIZE*5;   background-position-y:-@TILESIZE*1; }
+  &.fence         { 
+    // background-position-x:-@TILESIZE*5;   
+    // background-position-y:-@TILESIZE*1; 
+    .background-pos(5, 1);
+  }
+
+  // Entitiy base Elements
+  &.tree          { 
+    // background-position-x:-@TILESIZE*3;   
+    // background-position-y:-@TILESIZE*1; 
+    .background-pos(3, 1);
+  }
 }

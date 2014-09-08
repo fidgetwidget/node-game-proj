@@ -64,6 +64,13 @@
 
   this.DIR_DOWN = [DOWN_KEY, W_KEY];
 
+  this.DIR_TO_FACING = {
+    DIR_LEFT: WEST,
+    DIR_UP: NORTH,
+    DIR_RIGHT: EAST,
+    DIR_DOWN: SOUTH
+  };
+
   this.NUMBER_KEYS = [NUM_0, NUM_1, NUM_2, NUM_3, NUM_4, NUM_5, NUM_6, NUM_7, NUM_8, NUM_9];
 
   this.CHUNK_WIDTH = 16;
@@ -76,11 +83,15 @@
 
   this.TILE_SIZE = 32;
 
+  this.GRID_WIDTH = CHUNK_WIDTH * TILE_SIZE;
+
+  this.GRID_HEIGHT = CHUNK_HEIGHT * TILE_SIZE;
+
   this.NONE = 'none';
 
-  this.ELM_TYPES = ['soil', 'wateredSoil', 'weed', '_0', 'stump', 'bush', 'branch', 'stones', 'rock', 'ore', 'fence', '_1'];
+  this.ELM_TYPES = ['soil', 'wateredSoil', 'weed', '_0', 'stump', 'bush', 'branch', 'stones', 'rock', 'ore', 'fence', '_1', 'stick', 'roots', 'thicket', 'grass', 'tree'];
 
-  this.COLLIDER_ELMS = [false, false, true, false, true, true, true, false, true, true, true, false];
+  this.COLLIDER_ELMS = [false, false, true, false, true, true, true, false, true, true, true, true, false, true, true, false, true];
 
   this.ITEM_TYPES = ['small_stick', 'sharp_stick', 'small_stone', 'sharp_stone', 'large_stone', 'large_stick', 'wood', 'stone'];
 
@@ -90,7 +101,7 @@
 
   this.COLLIDER_TILES = [false, false, false, false, true, true, true, false, true];
 
-  this.TOOLS = ['none', 'dirt', 'grass', 'sand', 'rock', 'water', 'path'];
+  this.TOOLS = ['none', 'dirt', 'grass', 'sand', 'rock', 'water', 'path', 'tree', 'plant', 'stone'];
 
   this.TOOL = {};
 
@@ -107,6 +118,12 @@
   this.TOOL.WATER = 'water';
 
   this.TOOL.PATH = 'path';
+
+  this.TOOL.TREE = 'tree';
+
+  this.TOOL.PLANT = 'plant';
+
+  this.TOOL.STONE = 'stone';
 
   this.Chunk = (function() {
     Chunk.prototype.tiles = void 0;
@@ -151,7 +168,7 @@
     Chunk.prototype.load = function(json) {
       var elm, item, tile, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _results;
       if (json) {
-        Game._unloadChunk(this.x, this.y);
+        Game._unloadChunk(this.x, this.y, false);
         this.x = json.x;
         this.y = json.y;
         this.base = json.base;
@@ -160,14 +177,14 @@
           _ref = json._tiles;
           for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             tile = _ref[_i];
-            Game.setTile_at(tile.x, tile.y, this.x, this.y, tile.value);
+            Game.setTile_at(tile.x, tile.y, this.x, this.y, tile.value, true);
           }
         }
         if (json._elements != null) {
           _ref1 = json._elements;
           for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
             elm = _ref1[_j];
-            Game.setElement_at(elm.x, elm.y, this.x, this.y, elm.value);
+            Game.setElement_at(elm.x, elm.y, this.x, this.y, elm.value, true);
           }
         }
         if (json._items != null) {
@@ -381,6 +398,38 @@
 
   })();
 
+  this.ChunkElm = (function() {
+    ChunkElm.prototype.$viewport = void 0;
+
+    ChunkElm.prototype.$chunk = void 0;
+
+    ChunkElm.prototype.$tiles = void 0;
+
+    ChunkElm.prototype.$elements = void 0;
+
+    ChunkElm.prototype.$items = void 0;
+
+    function ChunkElm($viewport, cx, cy) {
+      this.$viewport = $viewport;
+      this.$chunk = document.createElement('div');
+      this.$chunk.className = "chunk cx" + cx + " cy" + cy;
+      this.$tiles = document.createElement('div');
+      this.$tiles.className = 'tiles';
+      this.$elements = document.createElement('div');
+      this.$elements.className = 'elements';
+      this.$entities = document.createElement('div');
+      this.$entities.className = 'entities';
+      this.$chunk.appendChild(this.$tiles);
+      this.$chunk.appendChild(this.$elements);
+      this.$chunk.appendChild(this.$entities);
+      this.$viewport.appendChild(this.$chunk);
+      return this;
+    }
+
+    return ChunkElm;
+
+  })();
+
   this.Entity = (function() {
     Entity.prototype.name = 'entity_name';
 
@@ -506,7 +555,9 @@
 
     Game.chunks = void 0;
 
-    Game.$container = void 0;
+    Game.chunksElm = void 0;
+
+    Game.$viewport = void 0;
 
     Game.$tiles = void 0;
 
@@ -517,12 +568,6 @@
     Game.$playerLayer = void 0;
 
     Game.listeners = void 0;
-
-    Game.$inventory = void 0;
-
-    Game.$stats = void 0;
-
-    Game.$combat = void 0;
 
     Game.centerX = 0;
 
@@ -536,51 +581,64 @@
 
     Game._gridWidth = 0;
 
+    Game.socket = void 0;
+
     Game.init = function() {
-      var $wrapper, _fragment;
       if (Game._debug) {
         console.log("Game.init() was called.");
       }
       Game.entities = [];
       Game.players = [];
-      Game.$container = document.getElementById('main');
-      Game.$inventory = document.getElementById('inventory');
-      Game.$stats = document.getElementById('stast');
-      Game.$combat = document.getElementById('combat');
-      $wrapper = document.createElement('div');
-      $wrapper.className = 'wrapper';
-      this.$tiles = document.createElement('div');
-      this.$tiles.className = 'tiles';
-      this.$elements = document.createElement('div');
-      this.$elements.className = 'elements';
+      this.listeners = {};
+      this.chunksElm = {};
+      Game.$viewport = document.getElementById('main');
       this.$playerLayer = document.createElement('div');
       this.$playerLayer.className = 'players';
-      this.$entities = document.createElement('div');
-      this.$entities.className = 'entities';
-      this.listeners = {};
-      _fragment = document.createDocumentFragment();
-      _fragment.appendChild(this.$tiles);
-      _fragment.appendChild(this.$elements);
-      _fragment.appendChild(this.$playerLayer);
-      _fragment.appendChild(this.$entities);
-      $wrapper.appendChild(_fragment);
-      Game.$container.appendChild($wrapper);
-      Game._width = Game.$container.offsetWidth;
+      Game.$viewport.appendChild(this.$playerLayer);
+      Game._width = Game.$viewport.offsetWidth;
       Game._gridWidth = Game._width / TILE_SIZE;
-      Game._height = Game.$container.offsetHeight;
+      Game._height = Game.$viewport.offsetHeight;
       Game._gridHeight = Game._height / TILE_SIZE;
       this.chunks = {};
+      this.connect();
       if (Game._debug) {
         console.log("Game.init() complete.");
       }
       return Game;
     };
 
-    Game.randomWorld = function() {
+    Game.connect = function() {
+      this.socket = io.connect('/');
+      this.socket.on('tiles', function(data) {
+        var tle;
+        if (data.tile != null) {
+          tle = data.tile;
+          Game.setTile_at(tle.x, tle.y, 0, 0, tle.value, true);
+          return console.log(data);
+        } else {
+          return console.error('tiles changed error');
+        }
+      });
+      return this.socket.on('elements', function(data) {
+        var elm;
+        if (data.element != null) {
+          elm = data.element;
+          Game.setElement_at(elm.x, elm.y, 0, 0, elm.value, true);
+          return console.log(data);
+        } else {
+          return console.error('elements changed error');
+        }
+      });
+    };
+
+    Game.randomWorld = function(cx, cy) {
       var chunk, elm_type, i, rv, rx, ry, _i, _j;
-      this.chunks[0] = {};
-      chunk = new Chunk(0, 0);
-      this.chunks[0][0] = chunk;
+      if (!this.chunks[cx]) {
+        this.chunks[cx] = {};
+      }
+      chunk = new Chunk(cx, cy);
+      this.addChunkElm(cx, cy);
+      this.chunks[cx][cy] = chunk;
       this.setTilesBaseClass(chunk);
       for (i = _i = 0; _i < 32; i = ++_i) {
         rx = _.random(0, CHUNK_WIDTH - 1);
@@ -616,81 +674,62 @@
             elm_type = 6;
         }
         if (elm_type !== null) {
-          Game.setElement_at(rx, ry, 0, 0, elm_type);
+          Game.setElement_at(rx, ry, cx, cy, elm_type);
         }
       }
       for (i = _j = 0; _j < 128; i = ++_j) {
         rx = _.random(0, CHUNK_WIDTH - 1);
         ry = _.random(0, CHUNK_HEIGHT - 1);
-        Game.setTile_at(rx, ry, 0, 0, 1);
+        Game.setTile_at(rx, ry, cx, cy, 1, true);
       }
       return this;
     };
 
-    Game.createPlayer = function() {
-      var p1;
-      p1 = new PlayerEntity();
-      this.addPlayer(p1);
-      return this.setCenter(p1.x, p1.y);
+    Game.addChunkElm = function(cx, cy) {
+      var $chnkElm;
+      $chnkElm = new ChunkElm(this.$viewport, cx, cy);
+      if (!this.chunksElm[cx]) {
+        this.chunksElm[cx] = {};
+      }
+      this.chunksElm[cx][cy] = $chnkElm;
+      return $chnkElm;
     };
 
-    Game.setCenter = function(x, y) {
-      classie.remove(this.$container, "x" + this.centerX);
-      classie.remove(this.$container, "y" + this.centerY);
+    Game.hasChunk = function(cx, cy) {
+      return this.chunks[cx] !== void 0 && this.chunks[cx][cy] !== void 0;
+    };
+
+    Game.createPlayer = function() {
+      var p1, x, y;
+      x = 0;
+      y = 0;
+      p1 = new PlayerEntity(null, x, y);
+      this.addPlayer(p1);
+      return this.setCenter(p1.x, p1.y, p1.cx, p1.cy);
+    };
+
+    Game.setCenter = function(x, y, cx, cy) {
+      classie.remove(this.$viewport, "x" + this.centerX);
+      classie.remove(this.$viewport, "y" + this.centerY);
       this.centerX = x - HALF_WIDTH;
       this.centerY = y - HALF_HEIGHT;
-      classie.add(this.$container, "x" + this.centerX);
-      return classie.add(this.$container, "y" + this.centerY);
-    };
-
-    Game.loadChunks = function(cx, cy) {
-      var jqXHR;
-      cx = cx || 0;
-      cy = cy || 0;
-      if (!this.chunks[cx]) {
-        this.chunks[cx] = {};
-      }
-      jqXHR = $.getJSON("/api/" + cx + "_" + cy + ".json");
-      return jqXHR.done((function(_this) {
-        return function(data, status, jqXHR) {
-          if (data && data.chunk) {
-            return _this._loadChunk(cx, cy, Chunk.fromJSON(data.chunk));
-          } else {
-            console.log("status: " + status + " ");
-            return console.log(data);
-          }
-        };
-      })(this)).fail((function(_this) {
-        return function(jqXHR, status, error) {
-          return console.error("" + status);
-        };
-      })(this));
-    };
-
-    Game.saveChunk = function(cx, cy) {
-      var jqXHR;
-      if (!(this.chunks[cx] && this.chunks[cx][cy])) {
-        console.warn("no clunk @ " + cx + "_" + cy);
-        return;
-      }
-      jqXHR = $.ajax({
-        url: "/api",
-        method: 'post',
-        data: this.chunks[cx][cy].toJSON()
+      classie.add(this.$viewport, "x" + this.centerX);
+      classie.add(this.$viewport, "y" + this.centerY);
+      return $(this.$viewport).find('.chunk').css({
+        marginTop: "" + (GRID_HEIGHT * -cy) + "px",
+        marginLeft: "" + (GRID_HEIGHT * -cx) + "px"
       });
-      return jqXHR.done((function(_this) {
-        return function(data, status, jqXHR) {
-          console.log(data);
-          return console.log(status);
-        };
-      })(this)).fail((function(_this) {
-        return function(jqXHR, status, error) {
-          return console.error(status);
-        };
-      })(this));
     };
 
-    Game._unloadChunk = function(cx, cy) {
+    Game._unloadChunk = function(cx, cy, unsub) {
+      if (unsub == null) {
+        unsub = true;
+      }
+      if (unsub) {
+        this.socket.emit('unsubscribe', {
+          room: 'c_' + cx + '_' + cy
+        });
+      }
       if (this.chunks[cx]) {
         if (this.chunks[cx][cy]) {
           this._removeAllTiles(cx, cy);
@@ -702,7 +741,7 @@
 
     Game._removeAllTiles = function(cx, cy) {
       var $tile, $tiles, _i, _len, _results;
-      $tiles = this.$tiles.querySelectorAll(".tile.cx" + cx + ".cy" + cy);
+      $tiles = this.chunksElm[cx][cy].$tiles.querySelectorAll(".tile.cx" + cx + ".cy" + cy);
       if ($tiles) {
         _results = [];
         for (_i = 0, _len = $tiles.length; _i < _len; _i++) {
@@ -715,7 +754,7 @@
 
     Game._removeAllElements = function(cx, cy) {
       var $elm, $elms, _i, _len, _results;
-      $elms = this.$elements.querySelectorAll(".elm.cx" + cx + ".cy" + cy);
+      $elms = this.chunksElm[cx][cy].$elements.querySelectorAll(".elm.cx" + cx + ".cy" + cy);
       if ($elms) {
         _results = [];
         for (_i = 0, _len = $elms.length; _i < _len; _i++) {
@@ -745,9 +784,9 @@
       var typ, _i, _len;
       for (_i = 0, _len = TILE_TYPES.length; _i < _len; _i++) {
         typ = TILE_TYPES[_i];
-        classie.remove(this.$tiles, typ);
+        classie.remove(this.chunksElm[chunk.x][chunk.y].$tiles, typ);
       }
-      return classie.add(this.$tiles, TILE_TYPES[chunk.base]);
+      return classie.add(this.chunksElm[chunk.x][chunk.y].$tiles, TILE_TYPES[chunk.base]);
     };
 
     Game.addEntity = function(entity) {
@@ -761,6 +800,12 @@
       }
       entity.addSelf(this);
       return entity;
+    };
+
+    Game.addTree = function(cx, cy, x, y, treeType) {
+      var entity;
+      entity = new Tree(treeType, x, y, cx, cy);
+      return Game.addEntity(entity);
     };
 
     Game.addPlayer = function(player) {
@@ -794,6 +839,9 @@
       if (count == null) {
         count = 1;
       }
+      if (this.chunks[cx] === void 0 || this.chunks[cx][cy] === void 0) {
+        return null;
+      }
       item = new Item(type, x, y, count);
       this.addEntity(item);
       return this.chunks[cx][cy].setItem(x, y, item);
@@ -801,17 +849,26 @@
 
     Game.addItem_at = function(xi, yi, cx, cy, item) {
       var _item;
+      if (this.chunks[cx] === void 0 || this.chunks[cx][cy] === void 0) {
+        return null;
+      }
       _item = new Item(item.type, xi, yi, item.count);
       this.addEntity(_item);
       return this.chunks[cx][cy].setItem(xi, yi, _item);
     };
 
     Game.getItem = function(x, y, cx, cy) {
+      if (this.chunks[cx] === void 0 || this.chunks[cx][cy] === void 0) {
+        return null;
+      }
       return this.chunks[cx][cy].getItem(x, y);
     };
 
     Game.removeItem = function(x, y, cx, cy) {
       var item;
+      if (this.chunks[cx] === void 0 || this.chunks[cx][cy] === void 0) {
+        return null;
+      }
       item = this.chunks[cx][cy].getItem(x, y);
       if (!item) {
         return false;
@@ -840,31 +897,40 @@
     };
 
     Game.getElement_at = function(xi, yi, cx, cy) {
-      var _ref;
-      if (this.chunks.length < cx || ((_ref = this.chunks[cx]) != null ? _ref.length : void 0) < cy) {
+      if (this.chunks[cx] === void 0 || this.chunks[cx][cy] === void 0) {
         return null;
       }
       return this.chunks[cx][cy].getElement(xi, yi);
     };
 
-    Game.setElement_at = function(xi, yi, cx, cy, element) {
-      var $element, _ref;
-      if (this.chunks.length < cx || ((_ref = this.chunks[cx]) != null ? _ref.length : void 0) < cy) {
+    Game.setElement_at = function(xi, yi, cx, cy, element, dontSave) {
+      var $element;
+      if (dontSave == null) {
+        dontSave = false;
+      }
+      if (this.chunks[cx] === void 0 || this.chunks[cx][cy] === void 0) {
         return null;
       }
       $element = this.getElementElm(xi, yi, cx, cy);
-      if (!(element === void 0)) {
+      if (!(element === void 0 || element === null)) {
         if ($element) {
+          if (classie.has($element, ELM_TYPES[element])) {
+            return;
+          }
           this.removeListener($element);
           this.changeElementElm($element, xi, yi, cx, cy, element);
         } else {
           $element = this.addElementElm(xi, yi, cx, cy, element);
+        }
+        if (!dontSave) {
+          this.saveElement(cx, cy, xi, yi, element);
         }
         this.initElement($element, xi, yi, cx, cy, element);
       } else {
         if ($element) {
           this.removeListener($element);
           $element.remove();
+          this.removeElement(cx, cy, xi, yi);
         }
       }
       return this.chunks[cx][cy].setElement(xi, yi, element);
@@ -873,7 +939,7 @@
     Game.addElementElm = function(xi, yi, cx, cy, element) {
       var $element;
       $element = this.makeElement(cx, cy, xi, yi, ELM_TYPES[element]);
-      this.$elements.appendChild($element);
+      this.chunksElm[cx][cy].$elements.appendChild($element);
       return $element;
     };
 
@@ -890,7 +956,7 @@
     };
 
     Game.getElementElm = function(xi, yi, cx, cy) {
-      return this.$elements.querySelector(".elm.x" + xi + ".y" + yi + ".cx" + cx + ".cy" + cy);
+      return this.chunksElm[cx][cy].$elements.querySelector(".elm.x" + xi + ".y" + yi + ".cx" + cx + ".cy" + cy);
     };
 
     Game.makeElement = function(cx, cy, xi, yi, element_type) {
@@ -931,30 +997,39 @@
     };
 
     Game.getTile_at = function(xi, yi, cx, cy) {
-      var _ref;
-      if (this.chunks.length < cx || ((_ref = this.chunks[cx]) != null ? _ref.length : void 0) < cy) {
+      if (this.chunks[cx] === void 0 || this.chunks[cx][cy] === void 0) {
         return null;
       }
       return this.chunks[cx][cy].getTile(xi, yi);
     };
 
-    Game.setTile_at = function(xi, yi, cx, cy, value) {
+    Game.setTile_at = function(xi, yi, cx, cy, value, dontSave) {
       var $tile, _ref;
+      if (dontSave == null) {
+        dontSave = false;
+      }
       if (this.chunks.length < cx || ((_ref = this.chunks[cx]) != null ? _ref.length : void 0) < cy) {
         return null;
       }
       $tile = this.getTileElm(xi, yi, cx, cy);
-      if (!(value === void 0)) {
+      if (!(value === void 0 || value === null)) {
         if ($tile) {
+          if (classie.has($tile, TILE_TYPES[value])) {
+            return;
+          }
           this.removeListener($tile);
           this.changeTileElm($tile, xi, yi, cx, cy, value);
         } else {
           $tile = this.addTileElm(xi, yi, cx, cy, value);
         }
+        if (!dontSave) {
+          this.saveTile(cx, cy, xi, yi, value);
+        }
       } else {
         if ($tile) {
           this.removeListener($tile);
           $tile.remove();
+          this.removeTile(cx, cy, xi, yi);
         }
       }
       this.initTile($tile, xi, yi, cx, cy, value);
@@ -972,7 +1047,7 @@
     Game.addTileElm = function(xi, yi, cx, cy, value) {
       var $tile;
       $tile = this.makeTile(cx, cy, xi, yi, TILE_TYPES[value]);
-      this.$tiles.appendChild($tile);
+      this.chunksElm[cx][cy].$tiles.appendChild($tile);
       return $tile;
     };
 
@@ -988,7 +1063,10 @@
     };
 
     Game.getTileElm = function(xi, yi, cx, cy) {
-      return this.$tiles.querySelector(".tile.x" + xi + ".y" + yi + ".cx" + cx + ".cy" + cy);
+      if (this.chunksElm[cx] === void 0 || this.chunksElm[cx][cy] === void 0) {
+        return null;
+      }
+      return this.chunksElm[cx][cy].$tiles.querySelector(".tile.x" + xi + ".y" + yi + ".cx" + cx + ".cy" + cy);
     };
 
     Game.makeTile = function(cx, cy, xi, yi, tile_type) {
@@ -1041,8 +1119,19 @@
       var elm, tile;
       switch (dir) {
         case 'nw':
-          tile = this.getTile_at(xi - 1, yi - 1, cx, cy);
-          elm = this.getTileElm(xi - 1, yi - 1, cx, cy);
+          if (xi === 0 && yi === 0) {
+            tile = this.getTile_at(CHUNK_WIDTH - 1, CHUNK_HEIGHT - 1, cx - 1, cy - 1);
+            elm = this.getTileElm(CHUNK_WIDTH - 1, CHUNK_HEIGHT - 1, cx - 1, cy - 1);
+          } else if (xi === 0) {
+            tile = this.getTile_at(CHUNK_WIDTH - 1, yi, cx - 1, cy);
+            elm = this.getTileElm(CHUNK_WIDTH - 1, yi, cx - 1, cy);
+          } else if (yi === 0) {
+            tile = this.getTile_at(xi, CHUNK_HEIGHT - 1, cx, cy - 1);
+            elm = this.getTileElm(xi, CHUNK_HEIGHT - 1, cx, cy - 1);
+          } else {
+            tile = this.getTile_at(xi - 1, yi - 1, cx, cy);
+            elm = this.getTileElm(xi - 1, yi - 1, cx, cy);
+          }
           if (this.isNeightbor(tile, tile_type)) {
             if (elm != null) {
               classie.add(elm, 'se');
@@ -1053,8 +1142,13 @@
           }
           return false;
         case 'n':
-          tile = this.getTile_at(xi, yi - 1, cx, cy);
-          elm = this.getTileElm(xi, yi - 1, cx, cy);
+          if (yi === 0) {
+            tile = this.getTile_at(xi, CHUNK_HEIGHT - 1, cx, cy - 1);
+            elm = this.getTileElm(xi, CHUNK_HEIGHT - 1, cx, cy - 1);
+          } else {
+            tile = this.getTile_at(xi, yi - 1, cx, cy);
+            elm = this.getTileElm(xi, yi - 1, cx, cy);
+          }
           if (this.isNeightbor(tile, tile_type)) {
             if (elm != null) {
               classie.add(elm, 's');
@@ -1065,8 +1159,19 @@
           }
           return false;
         case 'ne':
-          tile = this.getTile_at(xi + 1, yi - 1, cx, cy);
-          elm = this.getTileElm(xi + 1, yi - 1, cx, cy);
+          if (xi === CHUNK_WIDTH && yi === 0) {
+            tile = this.getTile_at(0, CHUNK_HEIGHT - 1, cx + 1, cy - 1);
+            elm = this.getTileElm(0, CHUNK_HEIGHT - 1, cx + 1, cy - 1);
+          } else if (xi === CHUNK_WIDTH) {
+            tile = this.getTile_at(0, yi - 1, cx + 1, cy);
+            elm = this.getTileElm(0, yi - 1, cx + 1, cy);
+          } else if (yi === 0) {
+            tile = this.getTile_at(xi + 1, CHUNK_HEIGHT - 1, cx, cy - 1);
+            elm = this.getTileElm(xi + 1, CHUNK_HEIGHT - 1, cx, cy - 1);
+          } else {
+            tile = this.getTile_at(xi + 1, yi - 1, cx, cy);
+            elm = this.getTileElm(xi + 1, yi - 1, cx, cy);
+          }
           if (this.isNeightbor(tile, tile_type)) {
             if (elm != null) {
               classie.add(elm, 'sw');
@@ -1077,8 +1182,13 @@
           }
           return false;
         case 'e':
-          tile = this.getTile_at(xi + 1, yi, cx, cy);
-          elm = this.getTileElm(xi + 1, yi, cx, cy);
+          if (xi === CHUNK_WIDTH) {
+            tile = this.getTile_at(0, yi, cx + 1, cy);
+            elm = this.getTileElm(0, yi, cx + 1, cy);
+          } else {
+            tile = this.getTile_at(xi + 1, yi, cx, cy);
+            elm = this.getTileElm(xi + 1, yi, cx, cy);
+          }
           if (this.isNeightbor(tile, tile_type)) {
             if (elm != null) {
               classie.add(elm, 'w');
@@ -1089,8 +1199,19 @@
           }
           return false;
         case 'se':
-          tile = this.getTile_at(xi + 1, yi + 1, cx, cy);
-          elm = this.getTileElm(xi + 1, yi + 1, cx, cy);
+          if (xi === CHUNK_WIDTH && yi === CHUNK_HEIGHT) {
+            tile = this.getTile_at(0, 0, cx + 1, cy + 1);
+            elm = this.getTileElm(0, 0, cx + 1, cy + 1);
+          } else if (xi === CHUNK_WIDTH) {
+            tile = this.getTile_at(0, yi + 1, cx + 1, cy);
+            elm = this.getTileElm(0, yi + 1, cx + 1, cy);
+          } else if (yi === CHUNK_HEIGHT) {
+            tile = this.getTile_at(xi + 1, 0, cx, cy + 1);
+            elm = this.getTileElm(xi + 1, 0, cx, cy + 1);
+          } else {
+            tile = this.getTile_at(xi + 1, yi + 1, cx, cy);
+            elm = this.getTileElm(xi + 1, yi + 1, cx, cy);
+          }
           if (this.isNeightbor(tile, tile_type)) {
             if (elm != null) {
               classie.add(elm, 'nw');
@@ -1101,8 +1222,13 @@
           }
           return false;
         case 's':
-          tile = this.getTile_at(xi, yi + 1, cx, cy);
-          elm = this.getTileElm(xi, yi + 1, cx, cy);
+          if (yi === CHUNK_HEIGHT) {
+            tile = this.getTile_at(xi, 0, cx, cy + 1);
+            elm = this.getTileElm(xi, 0, cx, cy + 1);
+          } else {
+            tile = this.getTile_at(xi, yi + 1, cx, cy);
+            elm = this.getTileElm(xi, yi + 1, cx, cy);
+          }
           if (this.isNeightbor(tile, tile_type)) {
             if (elm != null) {
               classie.add(elm, 'n');
@@ -1113,8 +1239,19 @@
           }
           return false;
         case 'sw':
-          tile = this.getTile_at(xi - 1, yi + 1, cx, cy);
-          elm = this.getTileElm(xi - 1, yi + 1, cx, cy);
+          if (xi === 0 && yi === CHUNK_HEIGHT) {
+            tile = this.getTile_at(CHUNK_WIDTH - 1, 0, cx - 1, cy + 1);
+            elm = this.getTileElm(CHUNK_WIDTH - 1, 0, cx - 1, cy + 1);
+          } else if (xi === 0) {
+            tile = this.getTile_at(CHUNK_WIDTH - 1, yi + 1, cx - 1, cy);
+            elm = this.getTileElm(CHUNK_WIDTH - 1, yi + 1, cx - 1, cy);
+          } else if (yi === CHUNK_WIDTH) {
+            tile = this.getTile_at(xi - 1, 0, cx, cy + 1);
+            elm = this.getTileElm(xi - 1, 0, cx, cy + 1);
+          } else {
+            tile = this.getTile_at(xi - 1, yi + 1, cx, cy);
+            elm = this.getTileElm(xi - 1, yi + 1, cx, cy);
+          }
           if (this.isNeightbor(tile, tile_type)) {
             if (elm != null) {
               classie.add(elm, 'ne');
@@ -1125,8 +1262,13 @@
           }
           return false;
         case 'w':
-          tile = this.getTile_at(xi - 1, yi, cx, cy);
-          elm = this.getTileElm(xi - 1, yi, cx, cy);
+          if (xi === 0) {
+            tile = this.getTile_at(CHUNK_WIDTH - 1, yi, cx - 1, cy);
+            elm = this.getTileElm(CHUNK_WIDTH - 1, yi, cx - 1, cy);
+          } else {
+            tile = this.getTile_at(xi - 1, yi, cx, cy);
+            elm = this.getTileElm(xi - 1, yi, cx, cy);
+          }
           if (this.isNeightbor(tile, tile_type)) {
             if (elm != null) {
               classie.add(elm, 'e');
@@ -1181,6 +1323,241 @@
       if (this.listeners[$elm.className]) {
         clearTimeout(this.listeners[$elm.className]);
         delete this.listeners[$elm.className];
+      }
+      return this;
+    };
+
+    Game.loadChunks = function(cx, cy) {
+      var jqXHR;
+      cx = cx || 0;
+      cy = cy || 0;
+      this.addChunkElm(cx, cy);
+      this.socket.emit('subscribe', {
+        room: 'c_' + cx + '_' + cy
+      });
+      if (!this.chunks[cx]) {
+        this.chunks[cx] = {};
+      }
+      jqXHR = $.getJSON("/api/" + cx + "_" + cy + ".json");
+      jqXHR.done((function(_this) {
+        return function(data, status, jqXHR) {
+          if (data && data.chunk) {
+            return _this._loadChunk(cx, cy, Chunk.fromJSON(data.chunk));
+          } else {
+            console.log("status: " + status + " ");
+            return console.log(data);
+          }
+        };
+      })(this)).fail((function(_this) {
+        return function(jqXHR, status, error) {
+          return console.error("" + status);
+        };
+      })(this));
+      return this;
+    };
+
+    Game.saveChunk = function(cx, cy) {
+      var jqXHR;
+      if (!(this.chunks[cx] && this.chunks[cx][cy])) {
+        console.warn("no chunk @ " + cx + "_" + cy);
+        return;
+      }
+      jqXHR = $.ajax({
+        url: "/api",
+        method: 'post',
+        data: this.chunks[cx][cy].toJSON()
+      });
+      jqXHR.done((function(_this) {
+        return function(data, status, jqXHR) {
+          console.log(data);
+          return console.log(status);
+        };
+      })(this)).fail((function(_this) {
+        return function(jqXHR, status, error) {
+          return console.error(status);
+        };
+      })(this));
+      return this;
+    };
+
+    Game.loadTile = function(cx, cy, xi, yi) {
+      var jqXHR;
+      jqXHR = $.getJSON("/api/" + cx + "_" + cy + "/tiles/" + xi + "_" + yi + ".json");
+      jqXHR.done((function(_this) {
+        return function(data, status, jqXHR) {
+          if (data && data.tiles) {
+            if (!(data.tiles instanceof Array)) {
+              return _this.setTile_at(xi, yi, cx, cy, data.tiles.value, true);
+            }
+          } else {
+            console.log("status: " + status + " ");
+            return console.log(data);
+          }
+        };
+      })(this)).fail((function(_this) {
+        return function(jqXHR, status, error) {
+          return console.error("" + status);
+        };
+      })(this));
+      return this;
+    };
+
+    Game.saveTile = function(cx, cy, xi, yi, value) {
+      var jqXHR;
+      jqXHR = $.ajax({
+        url: "/api/" + cx + "_" + cy + "/tiles.json",
+        method: 'post',
+        data: {
+          chunk: {
+            x: cx,
+            y: cy
+          },
+          tile: {
+            x: xi,
+            y: yi,
+            value: value
+          }
+        }
+      });
+      jqXHR.done((function(_this) {
+        return function(data, status, jqXHR) {
+          return _this.sendMessage('tiles', cx, cy, xi, yi, value);
+        };
+      })(this)).fail((function(_this) {
+        return function(jqXHR, status, error) {
+          return console.error(status);
+        };
+      })(this));
+      return this;
+    };
+
+    Game.removeTile = function(cx, cy, xi, yi) {
+      var jqXHR;
+      jqXHR = $.ajax({
+        url: "/api/" + cx + "_" + cy + "/tiles.json",
+        method: 'delete',
+        data: {
+          chunk: {
+            x: cx,
+            y: cy
+          },
+          tile: {
+            x: xi,
+            y: yi
+          }
+        }
+      });
+      jqXHR.done((function(_this) {
+        return function(data, status, jqXHR) {
+          return _this.sendMessage('tiles', cx, cy, xi, yi, null);
+        };
+      })(this)).fail((function(_this) {
+        return function(jqXHR, status, error) {
+          return console.error(status);
+        };
+      })(this));
+      return this;
+    };
+
+    Game.loadElement = function(cx, cy, xi, yi) {
+      var jqXHR;
+      jqXHR = $.getJSON("/api/" + cx + "_" + cy + "/elements/" + xi + "_" + yi + ".json");
+      jqXHR.done((function(_this) {
+        return function(data, status, jqXHR) {
+          if (data && data.elements) {
+            if (!(data.elements instanceof Array)) {
+              return _this.setElement_at(xi, yi, cx, cy, data.elements.value, true);
+            }
+          } else {
+            console.log("status: " + status + " ");
+            return console.log(data);
+          }
+        };
+      })(this)).fail((function(_this) {
+        return function(jqXHR, status, error) {
+          return console.error("" + status);
+        };
+      })(this));
+      return this;
+    };
+
+    Game.saveElement = function(cx, cy, xi, yi, value) {
+      var jqXHR;
+      jqXHR = $.ajax({
+        url: "/api/" + cx + "_" + cy + "/elements.json",
+        method: 'post',
+        data: {
+          chunk: {
+            x: cx,
+            y: cy
+          },
+          element: {
+            x: xi,
+            y: yi,
+            value: value
+          }
+        }
+      });
+      jqXHR.done((function(_this) {
+        return function(data, status, jqXHR) {
+          return _this.sendMessage('elements', cx, cy, xi, yi, value);
+        };
+      })(this)).fail((function(_this) {
+        return function(jqXHR, status, error) {
+          return console.error(status);
+        };
+      })(this));
+      return this;
+    };
+
+    Game.removeElement = function(cx, cy, xi, yi) {
+      var jqXHR;
+      jqXHR = $.ajax({
+        url: "/api/" + cx + "_" + cy + "/elements.json",
+        method: 'delete',
+        data: {
+          chunk: {
+            x: cx,
+            y: cy
+          },
+          element: {
+            x: xi,
+            y: yi
+          }
+        }
+      });
+      jqXHR.done((function(_this) {
+        return function(data, status, jqXHR) {
+          return _this.sendMessage('elements', cx, cy, xi, yi, null);
+        };
+      })(this)).fail((function(_this) {
+        return function(jqXHR, status, error) {
+          return console.error(status);
+        };
+      })(this));
+      return this;
+    };
+
+    Game.sendMessage = function(type, cx, cy, xi, yi, value) {
+      var data;
+      data = {};
+      data.room = 'c_' + cx + '_' + cy;
+      switch (type) {
+        case 'elements':
+          data.element = {
+            x: xi,
+            y: yi,
+            value: value
+          };
+          this.socket.emit('elements', data);
+          break;
+        case 'tiles':
+          data.tile = {
+            x: xi,
+            y: yi,
+            value: value
+          };
+          this.socket.emit('tiles', data);
       }
       return this;
     };
@@ -1284,11 +1661,11 @@
         case NUM_6:
           return this.player.tool = TOOL.PATH;
         case NUM_7:
-          return false;
+          return this.player.tool = TOOL.TREE;
         case NUM_8:
-          return false;
+          return this.player.tool = TOOL.PLANT;
         case NUM_9:
-          return false;
+          return this.player.tool = TOOL.STONE;
         case NUM_0:
           return this.player.tool = TOOL.NONE;
       }
@@ -1307,12 +1684,18 @@
         case 'wateredSoil':
           return false;
         case 'weed':
+        case 'grass':
+        case 'stick':
           return this.clear_ground(x, y, cx, cy);
         case 'stump':
-          return this.clear_ground(x, y, cx, cy);
+        case 'tree':
+          this.clear_ground(x, y, cx, cy);
+          return this.set_tile(x, y, cx, cy, 'hole');
         case 'bush':
           return this.cut_down_bushes(x, y, cx, cy);
         case 'branch':
+        case 'roots':
+        case 'ticket':
           return this.clear_ground(x, y, cx, cy);
         case 'rock':
           return this.clear_ground(x, y, cx, cy);
@@ -1342,6 +1725,7 @@
                 return this.set_tile(x, y, cx, cy, 'hole');
               case 'grass':
               case 'sand':
+              case 'dirt_cliff':
                 return this.set_tile(x, y, cx, cy, 'dirt');
             }
           } else {
@@ -1350,6 +1734,9 @@
                 return this.set_tile(x, y, cx, cy, 'mud');
               case 'dirt':
                 return this.set_tile(x, y, cx, cy, 'dirt_cliff');
+              case 'mud':
+              case 'hole':
+                return this.set_tile(x, y, cx, cy, 'dirt');
             }
           }
           break;
@@ -1411,6 +1798,30 @@
             return this.set_tile(x, y, cx, cy, 'dirt');
           } else {
             return this.set_tile(x, y, cx, cy, 'worn_path');
+          }
+          break;
+        case TOOL.TREE:
+          switch (TILE_TYPES[tile_type]) {
+            case 'grass':
+            case 'dirt':
+              return this.add_tree(x, y, cx, cy);
+          }
+          break;
+        case TOOL.PLANT:
+          switch (TILE_TYPES[tile_type]) {
+            case 'grass':
+            case 'dirt':
+            case 'mud':
+              return this.add_plant(x, y, cx, cy);
+          }
+          break;
+        case TOOL.STONE:
+          switch (TILE_TYPES[tile_type]) {
+            case 'grass':
+            case 'dirt':
+            case 'sand':
+            case 'mud':
+              return this.add_stone(x, y, cx, cy);
           }
           break;
         case TOOL.NONE:
@@ -1479,6 +1890,44 @@
       return Game.setTile_at(x, y, cx, cy, _.indexOf(TILE_TYPES, 'dirt'));
     };
 
+    PlayerActions.prototype.add_tree = function(x, y, cx, cy) {
+      var r;
+      r = Math.random();
+      if (r >= 0 && r < 0.4) {
+        return Game.addTree(cx, cy, x, y, 'large');
+      } else if (r >= 0.4 && r < 0.9) {
+        return Game.addTree(cx, cy, x, y, 'small');
+      } else if (r >= 0.9 && r <= 1) {
+        return Game.addTree(cx, cy, x, y, 'bare');
+      }
+    };
+
+    PlayerActions.prototype.add_plant = function(x, y, cx, cy) {
+      var r;
+      r = Math.random();
+      if (r >= 0 && r < 0.3) {
+        return Game.setElement_at(x, y, cx, cy, _.indexOf(ELM_TYPES, 'grass'));
+      } else if (r >= 0.3 && r < 0.6) {
+        return Game.setElement_at(x, y, cx, cy, _.indexOf(ELM_TYPES, 'roots'));
+      } else if (r >= 0.6 && r < 0.9) {
+        return Game.setElement_at(x, y, cx, cy, _.indexOf(ELM_TYPES, 'branch'));
+      } else if (r >= 0.9 && r <= 1) {
+        return Game.setElement_at(x, y, cx, cy, _.indexOf(ELM_TYPES, 'bush'));
+      }
+    };
+
+    PlayerActions.prototype.add_stone = function(x, y, cx, cy) {
+      var r;
+      r = Math.random();
+      if (r >= 0 && r < 0.4) {
+        return Game.setElement_at(x, y, cx, cy, _.indexOf(ELM_TYPES, 'stones'));
+      } else if (r >= 0.4 && r < 0.9) {
+        return Game.setElement_at(x, y, cx, cy, _.indexOf(ELM_TYPES, 'rock'));
+      } else if (r >= 0.9 && r <= 1) {
+        return Game.setElement_at(x, y, cx, cy, _.indexOf(ELM_TYPES, 'ore'));
+      }
+    };
+
     PlayerActions.prototype.set_tile = function(x, y, cx, cy, tile_type) {
       return Game.setTile_at(x, y, cx, cy, _.indexOf(TILE_TYPES, tile_type));
     };
@@ -1507,8 +1956,6 @@
       this.addSelf = __bind(this.addSelf, this);
       this.name = name || ("player" + PlayerEntity.count);
       PlayerEntity.count++;
-      x = x || Game._gridWidth / 2;
-      y = y || Game._gridHeight / 2;
       PlayerEntity.__super__.constructor.call(this, "player", this.name, x, y);
       this.cx = 0;
       this.cy = 0;
@@ -1516,7 +1963,6 @@
       this.facing = SOUTH;
       this.inventory = new PlayerInventory(this);
       this.actions = new PlayerActions(this);
-      this.setPosition();
       this.bindEvents();
       this;
     }
@@ -1580,65 +2026,107 @@
 
     PlayerEntity.prototype.move = function(dir) {
       if (__indexOf.call(DIR_LEFT, dir) >= 0) {
-        this.face(WEST);
-        if (this.check(this.x - 1, this.y)) {
-          this.x--;
+        if (this.facing === WEST) {
+          this.check(this.x - 1, this.y);
+        } else {
+          this.face(WEST);
         }
       }
       if (__indexOf.call(DIR_UP, dir) >= 0) {
-        this.face(NORTH);
-        if (this.check(this.x, this.y - 1)) {
-          this.y--;
+        if (this.facing === NORTH) {
+          this.check(this.x, this.y - 1);
+        } else {
+          this.face(NORTH);
         }
       }
       if (__indexOf.call(DIR_RIGHT, dir) >= 0) {
-        this.face(EAST);
-        if (this.check(this.x + 1, this.y)) {
-          this.x++;
+        if (this.facing === EAST) {
+          this.check(this.x + 1, this.y);
+        } else {
+          this.face(EAST);
         }
       }
       if (__indexOf.call(DIR_DOWN, dir) >= 0) {
-        this.face(SOUTH);
-        if (this.check(this.x, this.y + 1)) {
-          this.y++;
+        if (this.facing === SOUTH) {
+          this.check(this.x, this.y + 1);
+        } else {
+          this.face(SOUTH);
         }
       }
       this.collectItems(this.x, this.y);
-      Game.setCenter(this.x, this.y);
+      Game.setCenter(this.x, this.y, this.cx, this.cy);
       return this;
     };
 
     PlayerEntity.prototype["do"] = function(x, y, alt) {
-      var e, t;
+      var cx, cy, e, t;
       if (alt == null) {
         alt = false;
       }
-      if (x < 0 || y < 0 || x >= CHUNK_WIDTH || y >= CHUNK_HEIGHT) {
-        return false;
+      cx = this.cx;
+      cy = this.cy;
+      if (x < 0) {
+        cx -= 1;
+        x = x + CHUNK_WIDTH;
+      } else if (x >= CHUNK_WIDTH) {
+        cx += 1;
+        x = x - CHUNK_WIDTH;
       }
-      e = Game.getElement_at(x, y, this.cx, this.cy);
+      if (y < 0) {
+        cy -= 1;
+        y = y + CHUNK_HEIGHT;
+      } else if (y >= CHUNK_HEIGHT) {
+        cy += 1;
+        y = y - CHUNK_HEIGHT;
+      }
+      e = Game.getElement_at(x, y, cx, cy);
       if (e !== void 0 && e !== null) {
-        return this.actions.actOnElement(e, x, y, this.cx, this.cy, alt);
+        return this.actions.actOnElement(e, x, y, cx, cy, alt);
       } else {
-        t = Game.getTile_at(x, y, this.cx, this.cy);
-        return this.actions.actOnTile(t, x, y, this.cx, this.cy, alt);
+        t = Game.getTile_at(x, y, cx, cy);
+        return this.actions.actOnTile(t, x, y, cx, cy, alt);
       }
     };
 
     PlayerEntity.prototype.check = function(x, y) {
-      var e, t;
-      if (x < 0 || y < 0 || x >= CHUNK_WIDTH || y >= CHUNK_HEIGHT) {
-        return false;
+      var cx, cy, elm, tle;
+      cx = this.cx;
+      cy = this.cy;
+      if (x < 0) {
+        cx -= 1;
+        x = x + CHUNK_WIDTH;
+      } else if (x >= CHUNK_WIDTH) {
+        cx += 1;
+        x = x - CHUNK_WIDTH;
       }
-      e = Game.getElement_at(x, y, this.cx, this.cy);
-      if (e !== void 0 && e !== null) {
-        return !COLLIDER_ELMS[e];
-      } else {
-        t = Game.getTile_at(x, y, this.cx, this.cy);
-        if (t === null || t === void 0) {
-          return true;
+      if (y < 0) {
+        cy -= 1;
+        y = y + CHUNK_HEIGHT;
+      } else if (y >= CHUNK_HEIGHT) {
+        cy += 1;
+        y = y - CHUNK_HEIGHT;
+      }
+      elm = Game.getElement_at(x, y, cx, cy);
+      if (elm !== void 0 && elm !== null) {
+        if (!COLLIDER_ELMS[elm]) {
+          return this.updatePos(x, y, cx, cy);
         }
-        return !COLLIDER_TILES[t];
+      } else {
+        tle = Game.getTile_at(x, y, cx, cy);
+        if (tle === null || tle === void 0 || !COLLIDER_TILES[tle]) {
+          return this.updatePos(x, y, cx, cy);
+        }
+      }
+    };
+
+    PlayerEntity.prototype.updatePos = function(x, y, cx, cy) {
+      this.x = x;
+      this.y = y;
+      this.cx = cx;
+      this.cy = cy;
+      if (!Game.hasChunk(cx, cy)) {
+        console.log("making new chunk at x: " + cx + " y: " + cy);
+        return Game.loadChunks(cx, cy);
       }
     };
 
@@ -1671,7 +2159,6 @@
       this.items = {};
       this.$items = {};
       this.$elms = document.createElement('div');
-      Game.$inventory.appendChild(this.$elms);
       this;
     }
 
@@ -1769,5 +2256,43 @@
     return PlayerStats;
 
   })();
+
+  this.Tree = (function(_super) {
+    __extends(Tree, _super);
+
+    Tree.prototype.treeType = 'small';
+
+    Tree.prototype._$elm = void 0;
+
+    function Tree(treeType, x, y, cx, cy) {
+      this.removeSelf = __bind(this.removeSelf, this);
+      this.addSelf = __bind(this.addSelf, this);
+      this.name = "tree_" + x + "_" + y;
+      this.treeType = treeType || 'small';
+      this.type = 'tree ' + this.treeType;
+      Tree.__super__.constructor.call(this, this.type, this.name, x, y);
+      this.cx = cx || 0;
+      this.cy = cy || 0;
+      this.facing = SOUTH;
+      this.setPosition();
+      this;
+    }
+
+    Tree.prototype.addSelf = function(game) {
+      Tree.__super__.addSelf.call(this, game);
+      game.setElement_at(this.x, this.y, this.cx, this.cy, _.indexOf(ELM_TYPES, 'tree'));
+      return this._$elm = game.getElementElm(this.x, this.y, this.cx, this.cy);
+    };
+
+    Tree.prototype.removeSelf = function(game) {
+      Tree.__super__.removeSelf.call(this, game);
+      if (this._$elm.parentNode) {
+        return this._$elm.parentNode.removeChild(this.$_elm);
+      }
+    };
+
+    return Tree;
+
+  })(Entity);
 
 }).call(this);

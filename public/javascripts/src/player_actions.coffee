@@ -22,11 +22,11 @@ class @PlayerActions
       when NUM_6
         @player.tool = TOOL.PATH
       when NUM_7
-        false
+        @player.tool = TOOL.TREE
       when NUM_8
-        false
+        @player.tool = TOOL.PLANT
       when NUM_9
-        false
+        @player.tool = TOOL.STONE
       when NUM_0
         @player.tool = TOOL.NONE
 
@@ -42,13 +42,14 @@ class @PlayerActions
       when 'wateredSoil'
         false
 
-      when 'weed'
+      when 'weed', 'grass', 'stick'
         @clear_ground(x, y, cx, cy)
-      when 'stump'
+      when 'stump', 'tree'
         @clear_ground(x, y, cx, cy)
+        @set_tile(x, y, cx, cy, 'hole')
       when 'bush'
         @cut_down_bushes(x, y, cx, cy)
-      when 'branch'
+      when 'branch', 'roots', 'ticket'
         @clear_ground(x, y, cx, cy)
       when 'rock'
         @clear_ground(x, y, cx, cy)
@@ -78,15 +79,17 @@ class @PlayerActions
           switch TILE_TYPES[tile_type]
             when 'dirt'
               @set_tile(x, y, cx, cy, 'hole')
-            when 'grass', 'sand'
+            when 'grass', 'sand', 'dirt_cliff'
               @set_tile(x, y, cx, cy, 'dirt')
 
         else
           switch TILE_TYPES[tile_type]
             when 'water'
               @set_tile(x, y, cx, cy, 'mud')
-            when  'dirt'
+            when 'dirt'
               @set_tile(x, y, cx, cy, 'dirt_cliff')
+            when 'mud', 'hole'
+              @set_tile(x, y, cx, cy, 'dirt')
 
       # GRASS
       when TOOL.GRASS
@@ -141,6 +144,22 @@ class @PlayerActions
           @set_tile(x, y, cx, cy, 'dirt')
         else
           @set_tile(x, y, cx, cy, 'worn_path')
+
+
+      when TOOL.TREE
+        switch TILE_TYPES[tile_type]
+          when 'grass', 'dirt'
+            @add_tree(x, y, cx, cy)
+
+      when TOOL.PLANT
+        switch TILE_TYPES[tile_type]
+          when 'grass', 'dirt', 'mud'
+            @add_plant(x, y, cx, cy)
+
+      when TOOL.STONE
+        switch TILE_TYPES[tile_type]
+          when 'grass', 'dirt', 'sand', 'mud'
+            @add_stone(x, y, cx, cy)
 
       # NONE
       when TOOL.NONE
@@ -197,6 +216,35 @@ class @PlayerActions
 
   fill_water_hole: (x, y, cx, cy) ->
     Game.setTile_at x, y, cx, cy, _.indexOf TILE_TYPES, 'dirt'
+
+  add_tree: (x, y, cx, cy) ->
+    r = Math.random()
+    if r >= 0 and r < 0.4
+      Game.addTree cx, cy, x, y, 'large'
+    else if r >= 0.4 and r < 0.9
+      Game.addTree cx, cy, x, y, 'small'
+    else if r >= 0.9 and r <= 1
+      Game.addTree cx, cy, x, y, 'bare'
+
+  add_plant: (x, y, cx, cy) ->
+    r = Math.random()
+    if r >= 0 and r < 0.3
+      Game.setElement_at x, y, cx, cy, _.indexOf ELM_TYPES, 'grass'
+    else if r >= 0.3 and r < 0.6
+      Game.setElement_at x, y, cx, cy, _.indexOf ELM_TYPES, 'roots'
+    else if r >= 0.6 and r < 0.9
+      Game.setElement_at x, y, cx, cy, _.indexOf ELM_TYPES, 'branch'
+    else if r >= 0.9 and r <= 1
+      Game.setElement_at x, y, cx, cy, _.indexOf ELM_TYPES, 'bush'
+
+  add_stone: (x, y, cx, cy) ->
+    r = Math.random()
+    if r >= 0 and r < 0.4
+      Game.setElement_at x, y, cx, cy, _.indexOf ELM_TYPES, 'stones'
+    else if r >= 0.4 and r < 0.9
+      Game.setElement_at x, y, cx, cy, _.indexOf ELM_TYPES, 'rock'
+    else if r >= 0.9 and r <= 1
+      Game.setElement_at x, y, cx, cy, _.indexOf ELM_TYPES, 'ore'
 
 
   set_tile: (x, y, cx, cy, tile_type) ->

@@ -28,12 +28,14 @@
       float: left;
     }
     &.wood .icon {
-      background-position-x:-(@TILESIZE)*6;
-      background-position-y:-(@TILESIZE)*4;
+      // background-position-x:-(@TILESIZE)*6;
+      // background-position-y:-(@TILESIZE)*4;
+      .background-pos(6, 4);
     }
     &.stone .icon {
-      background-position-x:-(@TILESIZE)*7;
-      background-position-y:-(@TILESIZE)*4;
+      // background-position-x:-(@TILESIZE)*7;
+      // background-position-y:-(@TILESIZE)*4;
+      .background-pos(7, 4);
     }
 
     .count {
@@ -70,12 +72,14 @@
     .count { text-align: right; }
 
     &.wood .icon {
-      background-position-x:-(@TILESIZE/2)*6;
-      background-position-y:-(@TILESIZE/2)*4;
+      // background-position-x:-(@TILESIZE/2)*6;
+      // background-position-y:-(@TILESIZE/2)*4;
+      .background-pos(3, 2);
     }
     &.stone .icon {
-      background-position-x:-(@TILESIZE/2)*7;
-      background-position-y:-(@TILESIZE/2)*4;
+      // background-position-x:-(@TILESIZE/2)*7;
+      // background-position-y:-(@TILESIZE/2)*4;
+      .background-pos(3, 2, @HALFTILE);
     }
   }
 }

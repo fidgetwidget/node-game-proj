@@ -11,17 +11,15 @@ class @Game
   @entities:    undefined
   @players:     undefined
   @chunks:      undefined
-  @$container:  undefined
+  @chunksElm:   undefined
+
+  @$viewport:  undefined
   @$tiles:      undefined
   @$elements:   undefined
   @$entities:   undefined
   @$playerLayer:undefined
 
   @listeners:   undefined
-
-  @$inventory:  undefined
-  @$stats:      undefined
-  @$combat:     undefined
 
   @centerX:     0
   @centerY:     0
@@ -30,6 +28,8 @@ class @Game
   @_width:      0
   @_gridHeight: 0  # number of tiles height
   @_gridWidth:  0  # number of tiles wide
+
+  @socket:      undefined
   
 
   # Initialize the Game
@@ -38,55 +38,60 @@ class @Game
       
     Game.entities = []
     Game.players = []
-    Game.$container = document.getElementById 'main'
-    Game.$inventory = document.getElementById 'inventory'
-    Game.$stats = document.getElementById 'stast'
-    Game.$combat = document.getElementById 'combat'
 
-    $wrapper = document.createElement('div')
-    $wrapper.className = 'wrapper'
+    @listeners = {}
+    @chunksElm = {}
 
-    @$tiles = document.createElement('div')
-    @$tiles.className = 'tiles'
-
-    @$elements = document.createElement('div')
-    @$elements.className = 'elements'
+    Game.$viewport = document.getElementById 'main'
 
     @$playerLayer = document.createElement('div')
     @$playerLayer.className = 'players'
-    
-    @$entities = document.createElement('div')
-    @$entities.className = 'entities'
 
-    @listeners = {}
+    Game.$viewport.appendChild @$playerLayer
 
-    # Optimization, use a document fragment
-    _fragment = document.createDocumentFragment()
-    _fragment.appendChild @$tiles
-    _fragment.appendChild @$elements
-    _fragment.appendChild @$playerLayer
-    _fragment.appendChild @$entities
-    $wrapper.appendChild _fragment
+    # TODO: create the chunkElms
 
-    Game.$container.appendChild $wrapper
-
-    Game._width = Game.$container.offsetWidth
+    Game._width = Game.$viewport.offsetWidth
     Game._gridWidth = Game._width / TILE_SIZE
-    Game._height = Game.$container.offsetHeight
+    Game._height = Game.$viewport.offsetHeight
     Game._gridHeight = Game._height / TILE_SIZE
 
     @chunks = {}
+    @connect()
 
     console.log "Game.init() complete." if Game._debug
     return Game  
 
 
+  @connect: () ->
+    @socket = io.connect('/')
+
+    @socket.on('tiles', (data) ->
+        if data.tile?
+          tle = data.tile
+          Game.setTile_at tle.x, tle.y, 0, 0, tle.value, true
+          console.log data
+        else
+          console.error 'tiles changed error'
+      )
+    @socket.on('elements', (data) ->
+        if data.element?
+          elm = data.element
+          Game.setElement_at elm.x, elm.y, 0, 0, elm.value, true
+          console.log data
+        else
+          console.error 'elements changed error'
+      )
+
   # Create a random World
-  @randomWorld: () ->
+  @randomWorld: (cx, cy) ->
     
-    @chunks[0] = {}
-    chunk = new Chunk(0, 0)
-    @chunks[0][0] = chunk
+    @chunks[cx] = {} unless @chunks[cx]
+    chunk = new Chunk(cx, cy)
+
+    @addChunkElm(cx, cy)
+
+    @chunks[cx][cy] = chunk
 
     @setTilesBaseClass chunk
       
@@ -112,74 +117,53 @@ class @Game
           elm_type = 6
 
       unless elm_type is null
-        Game.setElement_at(rx, ry, 0, 0, elm_type)
+        Game.setElement_at(rx, ry, cx, cy, elm_type)
     
     for i in [0...128]
       rx = _.random( 0, CHUNK_WIDTH-1 )
       ry = _.random( 0, CHUNK_HEIGHT-1 )
       
-      Game.setTile_at(rx, ry, 0, 0, 1)
+      Game.setTile_at(rx, ry, cx, cy, 1, true)
 
     return this
 
+  @addChunkElm: (cx, cy) ->
+    $chnkElm = new ChunkElm(@$viewport, cx, cy)
+    @chunksElm[cx] = {} unless @chunksElm[cx]
+    @chunksElm[cx][cy] = $chnkElm
+    return $chnkElm;
+
+  @hasChunk: (cx, cy) ->
+    return @chunks[cx] isnt undefined and @chunks[cx][cy] isnt undefined
 
   # Create Player
   @createPlayer: () ->
-    p1 = new PlayerEntity()
+    x = 0 #|| Game._gridWidth/2
+    y = 0 #|| Game._gridHeight/2
+    p1 = new PlayerEntity(null, x, y)
     @addPlayer p1
-    @setCenter p1.x, p1.y
-
+    @setCenter p1.x, p1.y, p1.cx, p1.cy
 
   # Set Center
-  @setCenter: (x, y) ->
-    classie.remove @$container, "x#{@centerX}"
-    classie.remove @$container, "y#{@centerY}"
+  @setCenter: (x, y, cx, cy) ->
+    classie.remove @$viewport, "x#{@centerX}"
+    classie.remove @$viewport, "y#{@centerY}"
     @centerX = x - HALF_WIDTH
     @centerY = y - HALF_HEIGHT
-    classie.add @$container, "x#{@centerX}"
-    classie.add @$container, "y#{@centerY}"
+    classie.add @$viewport, "x#{@centerX}"
+    classie.add @$viewport, "y#{@centerY}"
 
-
-  @loadChunks: (cx, cy) ->
-    cx = cx || 0
-    cy = cy || 0
-    unless @chunks[cx]
-      @chunks[cx] = {}
+    $(@$viewport).find('.chunk').css({
+      marginTop:  "#{GRID_HEIGHT*-cy}px"
+      marginLeft: "#{GRID_HEIGHT*-cx}px"
+      })
     
-    jqXHR = $.getJSON "/api/#{cx}_#{cy}.json"
-    jqXHR
-      .done (data, status, jqXHR) =>
-        if data and data.chunk
-          @_loadChunk(cx, cy, Chunk.fromJSON(data.chunk))
-        else
-          console.log "status: #{status} "
-          console.log data
-
-      .fail (jqXHR, status, error) =>
-        console.error "#{status}"
-
-  # attempt to save the chunk to the server
-  @saveChunk: (cx, cy) ->
-    unless @chunks[cx] and @chunks[cx][cy]
-      console.warn "no clunk @ #{cx}_#{cy}"
-      return  
-
-    jqXHR = $.ajax {
-        url: "/api"
-        method: 'post'
-        data: @chunks[cx][cy].toJSON()
-      }
-
-    jqXHR
-      .done (data, status, jqXHR) =>
-        console.log data
-        console.log status
-      .fail (jqXHR, status, error) =>
-        console.error status
-
 
   # Unload a chunk
-  @_unloadChunk: (cx, cy) ->
+  @_unloadChunk: (cx, cy, unsub=true) ->
+
+    @socket.emit('unsubscribe', { room: 'c_'+cx+'_'+cy }) if unsub
+
     if @chunks[cx]
       if @chunks[cx][cy]
 
@@ -189,13 +173,13 @@ class @Game
       @chunks[cx][cy] = null
 
   @_removeAllTiles: (cx, cy) ->
-    $tiles = @$tiles.querySelectorAll ".tile.cx#{cx}.cy#{cy}"
+    $tiles = @chunksElm[cx][cy].$tiles.querySelectorAll ".tile.cx#{cx}.cy#{cy}"
     if $tiles
       for $tile in $tiles
         $tile.parentNode.removeChild $tile
 
   @_removeAllElements: (cx, cy) ->
-    $elms = @$elements.querySelectorAll ".elm.cx#{cx}.cy#{cy}"
+    $elms = @chunksElm[cx][cy].$elements.querySelectorAll ".elm.cx#{cx}.cy#{cy}"
     if $elms
       for $elm in $elms
         $elm.parentNode.removeChild $elm
@@ -212,8 +196,8 @@ class @Game
 
   @setTilesBaseClass: (chunk) ->
     for typ in TILE_TYPES
-        classie.remove @$tiles, typ
-      classie.add @$tiles, TILE_TYPES[chunk.base]
+        classie.remove @chunksElm[chunk.x][chunk.y].$tiles, typ
+      classie.add @chunksElm[chunk.x][chunk.y].$tiles, TILE_TYPES[chunk.base]
 
   # Insert an entity to the game
   @addEntity: (entity) ->
@@ -226,9 +210,13 @@ class @Game
 
     return entity
 
+  @addTree: (cx, cy, x, y, treeType) ->
+    entity = new Tree(treeType, x, y, cx, cy)
+    Game.addEntity(entity)
+
+
   @addPlayer: (player) ->
     @players[player.name] = player
-
     player.addSelf this
 
     return player
@@ -256,6 +244,7 @@ class @Game
   
   # Add an Item @ world location
   @addItem: (type, x, y, cx, cy, count=1) ->
+    return null if @chunks[cx] is undefined or @chunks[cx][cy] is undefined
     item = new Item(type, x, y, count)
     @addEntity(item)
     @chunks[cx][cy].setItem(x, y, item)
@@ -263,6 +252,7 @@ class @Game
 
   # Add an Item @ grid location
   @addItem_at: (xi, yi, cx, cy, item) ->
+    return null if @chunks[cx] is undefined or @chunks[cx][cy] is undefined
     _item = new Item(item.type, xi, yi, item.count)
     @addEntity(_item)
     @chunks[cx][cy].setItem(xi, yi, _item)
@@ -270,11 +260,13 @@ class @Game
 
   # Get an Item
   @getItem: (x, y, cx, cy) ->
+    return null if @chunks[cx] is undefined or @chunks[cx][cy] is undefined
     return @chunks[cx][cy].getItem(x, y)
 
 
   # Remove an Item
   @removeItem: (x, y, cx, cy) ->
+    return null if @chunks[cx] is undefined or @chunks[cx][cy] is undefined
     item = @chunks[cx][cy].getItem(x, y)
     return false unless item
     @removeEntity item
@@ -302,21 +294,24 @@ class @Game
 
 
   @getElement_at: (xi, yi, cx, cy) ->
-    return null if @chunks.length < cx or @chunks[cx]?.length < cy
+    return null if @chunks[cx] is undefined or @chunks[cx][cy] is undefined
     return @chunks[cx][cy].getElement(xi, yi)
 
 
-  @setElement_at: (xi, yi, cx, cy, element) ->
-    return null if @chunks.length < cx or @chunks[cx]?.length < cy
+  @setElement_at: (xi, yi, cx, cy, element, dontSave=false) ->
+    return null if @chunks[cx] is undefined or @chunks[cx][cy] is undefined
     $element = @getElementElm xi, yi, cx, cy
-    if !(element is undefined)
+    if !(element is undefined or element is null)
       if $element
+        return if classie.has $element, ELM_TYPES[element]
         # CHANGE TILE AT
         @removeListener $element
         @changeElementElm($element, xi, yi, cx, cy, element)
       else
         # INSERT TILE AT
         $element = @addElementElm(xi, yi, cx, cy, element)
+
+      @saveElement(cx, cy, xi, yi, element) unless dontSave
 
       # Init on non remove
       @initElement($element, xi, yi, cx, cy, element)
@@ -326,6 +321,8 @@ class @Game
       if $element
         @removeListener $element
         $element.remove()
+
+        @removeElement(cx, cy, xi, yi)
           
     return @chunks[cx][cy].setElement(xi, yi, element)
 
@@ -333,7 +330,7 @@ class @Game
   # add the tile elm to the dom
   @addElementElm: (xi, yi, cx, cy, element) ->
     $element = @makeElement(cx, cy, xi, yi, ELM_TYPES[element])
-    @$elements.appendChild $element
+    @chunksElm[cx][cy].$elements.appendChild $element
     return $element
 
   # alter the tile elm to match the new value
@@ -347,7 +344,7 @@ class @Game
 
 
   @getElementElm: (xi, yi, cx, cy) ->
-    return @$elements.querySelector ".elm.x#{xi}.y#{yi}.cx#{cx}.cy#{cy}"
+    return @chunksElm[cx][cy].$elements.querySelector ".elm.x#{xi}.y#{yi}.cx#{cx}.cy#{cy}"
 
 
   @makeElement: (cx, cy, xi, yi, element_type) ->
@@ -391,16 +388,18 @@ class @Game
 
   # get the tile from the given coords
   @getTile_at: (xi, yi, cx, cy) ->
-    return null if @chunks.length < cx or @chunks[cx]?.length < cy
+    return null if @chunks[cx] is undefined or @chunks[cx][cy] is undefined
     return @chunks[cx][cy].getTile(xi, yi)
 
 
   # set the value of a tile at the given coords
-  @setTile_at: (xi, yi, cx, cy, value) ->
+  @setTile_at: (xi, yi, cx, cy, value, dontSave=false) ->
     return null if @chunks.length < cx or @chunks[cx]?.length < cy
+
     $tile = @getTileElm xi, yi, cx, cy
-    if !(value is undefined)
+    if !(value is undefined or value is null)
       if $tile
+        return if classie.has $tile, TILE_TYPES[value]
         # CHANGE TILE AT
         @removeListener $tile
         @changeTileElm($tile, xi, yi, cx, cy, value)
@@ -408,11 +407,15 @@ class @Game
         # INSERT TILE AT
         $tile = @addTileElm(xi, yi, cx, cy, value)
 
+      @saveTile(cx, cy, xi, yi, value) unless dontSave
+
     else
       #REMOVE TILE AT
       if $tile
         @removeListener $tile
         $tile.remove()
+
+        @removeTile(cx, cy, xi, yi)
 
     # Init on non remove
     @initTile($tile, xi, yi, cx, cy, value)
@@ -424,12 +427,10 @@ class @Game
     return -1 if @chunks.length < cx or @chunks[cx]?.length < cy
     return @chunks[cx][cy].base
 
-
-
   # add the tile elm to the dom
   @addTileElm: (xi, yi, cx, cy, value) ->
     $tile = @makeTile(cx, cy, xi, yi, TILE_TYPES[value])
-    @$tiles.appendChild $tile
+    @chunksElm[cx][cy].$tiles.appendChild $tile
     return $tile
 
   # alter the tile elm to match the new value
@@ -442,7 +443,8 @@ class @Game
 
 
   @getTileElm: (xi, yi, cx, cy) ->
-    return @$tiles.querySelector ".tile.x#{xi}.y#{yi}.cx#{cx}.cy#{cy}"
+    return null if @chunksElm[cx] is undefined or @chunksElm[cx][cy] is undefined
+    return @chunksElm[cx][cy].$tiles.querySelector ".tile.x#{xi}.y#{yi}.cx#{cx}.cy#{cy}"
 
 
   @makeTile: (cx, cy, xi, yi, tile_type) ->
@@ -484,9 +486,21 @@ class @Game
 
   @getNeightbor: (tile_type, dir, xi, yi, cx, cy) ->
     switch dir
+
       when 'nw' 
-        tile  = @getTile_at( xi-1, yi-1, cx, cy)
-        elm   = @getTileElm( xi-1, yi-1, cx, cy)
+        if xi is 0 and yi is 0
+          tile  = @getTile_at( CHUNK_WIDTH-1, CHUNK_HEIGHT-1, cx-1, cy-1 )
+          elm   = @getTileElm( CHUNK_WIDTH-1, CHUNK_HEIGHT-1, cx-1, cy-1 )
+        else if xi is 0
+          tile  = @getTile_at( CHUNK_WIDTH-1, yi, cx-1, cy )
+          elm   = @getTileElm( CHUNK_WIDTH-1, yi, cx-1, cy )
+        else if yi is 0
+          tile  = @getTile_at( xi, CHUNK_HEIGHT-1, cx, cy-1 )
+          elm   = @getTileElm( xi, CHUNK_HEIGHT-1, cx, cy-1 )
+        else
+          tile  = @getTile_at( xi-1, yi-1, cx, cy)
+          elm   = @getTileElm( xi-1, yi-1, cx, cy)
+
         if @isNeightbor(tile, tile_type)
           classie.add elm, 'se' if elm?
           return true
@@ -495,8 +509,13 @@ class @Game
         return false
 
       when 'n'  
-        tile  = @getTile_at( xi,   yi-1, cx, cy)
-        elm   = @getTileElm( xi,   yi-1, cx, cy)
+        if yi is 0
+          tile  = @getTile_at( xi, CHUNK_HEIGHT-1, cx, cy-1 )
+          elm   = @getTileElm( xi, CHUNK_HEIGHT-1, cx, cy-1 )
+        else
+          tile  = @getTile_at( xi,   yi-1, cx, cy)
+          elm   = @getTileElm( xi,   yi-1, cx, cy)
+
         if @isNeightbor(tile, tile_type)
           classie.add elm, 's' if elm?
           return true
@@ -505,8 +524,19 @@ class @Game
         return false
 
       when 'ne' 
-        tile  = @getTile_at( xi+1, yi-1, cx, cy)
-        elm   = @getTileElm( xi+1, yi-1, cx, cy)
+        if xi is CHUNK_WIDTH and yi is 0
+          tile  = @getTile_at( 0, CHUNK_HEIGHT-1, cx+1, cy-1)
+          elm   = @getTileElm( 0, CHUNK_HEIGHT-1, cx+1, cy-1)
+        else if xi is CHUNK_WIDTH
+          tile  = @getTile_at( 0, yi-1, cx+1, cy)
+          elm   = @getTileElm( 0, yi-1, cx+1, cy)
+        else if yi is 0
+          tile  = @getTile_at( xi+1, CHUNK_HEIGHT-1, cx, cy-1)
+          elm   = @getTileElm( xi+1, CHUNK_HEIGHT-1, cx, cy-1)
+        else
+          tile  = @getTile_at( xi+1, yi-1, cx, cy)
+          elm   = @getTileElm( xi+1, yi-1, cx, cy)
+
         if @isNeightbor(tile, tile_type)
           classie.add elm, 'sw' if elm?
           return true
@@ -515,8 +545,13 @@ class @Game
         return false
         
       when 'e'  
-        tile  = @getTile_at( xi+1, yi,   cx, cy)
-        elm   = @getTileElm( xi+1, yi,   cx, cy)
+        if xi is CHUNK_WIDTH
+          tile  = @getTile_at( 0, yi,   cx+1, cy)
+          elm   = @getTileElm( 0, yi,   cx+1, cy)
+        else
+          tile  = @getTile_at( xi+1, yi,   cx, cy)
+          elm   = @getTileElm( xi+1, yi,   cx, cy)
+
         if @isNeightbor(tile, tile_type)
           classie.add elm, 'w' if elm?
           return true
@@ -525,8 +560,19 @@ class @Game
         return false
         
       when 'se' 
-        tile  = @getTile_at( xi+1, yi+1, cx, cy)
-        elm   = @getTileElm( xi+1, yi+1, cx, cy)
+        if xi is CHUNK_WIDTH and yi is CHUNK_HEIGHT
+          tile  = @getTile_at( 0, 0, cx+1, cy+1)
+          elm   = @getTileElm( 0, 0, cx+1, cy+1)
+        else if xi is CHUNK_WIDTH
+          tile  = @getTile_at( 0, yi+1, cx+1, cy)
+          elm   = @getTileElm( 0, yi+1, cx+1, cy)
+        else if yi is CHUNK_HEIGHT
+          tile  = @getTile_at( xi+1, 0, cx, cy+1)
+          elm   = @getTileElm( xi+1, 0, cx, cy+1)
+        else
+          tile  = @getTile_at( xi+1, yi+1, cx, cy)
+          elm   = @getTileElm( xi+1, yi+1, cx, cy)
+
         if @isNeightbor(tile, tile_type)
           classie.add elm, 'nw' if elm?
           return true
@@ -535,8 +581,13 @@ class @Game
         return false
 
       when 's'
-        tile  = @getTile_at( xi,   yi+1, cx, cy)
-        elm   = @getTileElm( xi,   yi+1, cx, cy)
+        if yi is CHUNK_HEIGHT
+          tile  = @getTile_at( xi,   0, cx, cy+1)
+          elm   = @getTileElm( xi,   0, cx, cy+1)
+        else
+          tile  = @getTile_at( xi,   yi+1, cx, cy)
+          elm   = @getTileElm( xi,   yi+1, cx, cy)
+
         if @isNeightbor(tile, tile_type)
           classie.add elm, 'n' if elm?
           return true
@@ -545,8 +596,19 @@ class @Game
         return false
 
       when 'sw' 
-        tile  = @getTile_at( xi-1, yi+1, cx, cy)
-        elm   = @getTileElm( xi-1, yi+1, cx, cy)
+        if xi is 0 and yi is CHUNK_HEIGHT
+          tile  = @getTile_at( CHUNK_WIDTH-1, 0, cx-1, cy+1)
+          elm   = @getTileElm( CHUNK_WIDTH-1, 0, cx-1, cy+1)
+        else if xi is 0
+          tile  = @getTile_at( CHUNK_WIDTH-1, yi+1, cx-1, cy)
+          elm   = @getTileElm( CHUNK_WIDTH-1, yi+1, cx-1, cy)
+        else if yi is CHUNK_WIDTH
+          tile  = @getTile_at( xi-1, 0, cx, cy+1)
+          elm   = @getTileElm( xi-1, 0, cx, cy+1)
+        else
+          tile  = @getTile_at( xi-1, yi+1, cx, cy)
+          elm   = @getTileElm( xi-1, yi+1, cx, cy)
+
         if @isNeightbor(tile, tile_type)
           classie.add elm, 'ne' if elm?
           return true
@@ -555,8 +617,13 @@ class @Game
         return false
 
       when 'w'
-        tile  = @getTile_at( xi-1, yi,   cx, cy)
-        elm   = @getTileElm( xi-1, yi,   cx, cy)
+        if xi is 0
+          tile  = @getTile_at( CHUNK_WIDTH-1, yi,   cx-1, cy)
+          elm   = @getTileElm( CHUNK_WIDTH-1, yi,   cx-1, cy)
+        else
+          tile  = @getTile_at( xi-1, yi,   cx, cy)
+          elm   = @getTileElm( xi-1, yi,   cx, cy)
+
         if @isNeightbor(tile, tile_type)
           classie.add elm, 'e' if elm?
           return true
@@ -566,6 +633,8 @@ class @Game
 
       else 
         return false
+
+
 
   @isNeightbor: (tile, tile_type) ->
     return tile is tile_type
@@ -606,3 +675,196 @@ class @Game
     return @
 
 
+  #
+  # SAVING AND LOADING
+  #
+
+  ## CHUNK
+
+  @loadChunks: (cx, cy) ->
+    cx = cx || 0
+    cy = cy || 0
+    
+    @addChunkElm(cx, cy)
+    @socket.emit('subscribe', { room: 'c_'+cx+'_'+cy} )
+
+    unless @chunks[cx]
+      @chunks[cx] = {}
+    
+    jqXHR = $.getJSON "/api/#{cx}_#{cy}.json"
+    jqXHR
+      .done (data, status, jqXHR) =>
+        if data and data.chunk
+          @_loadChunk(cx, cy, Chunk.fromJSON(data.chunk))
+        else
+          console.log "status: #{status} "
+          console.log data
+
+      .fail (jqXHR, status, error) =>
+        console.error "#{status}"
+    return @
+
+  # attempt to save the chunk to the server
+  @saveChunk: (cx, cy) ->
+    unless @chunks[cx] and @chunks[cx][cy]
+      console.warn "no chunk @ #{cx}_#{cy}"
+      return  
+
+    jqXHR = $.ajax {
+        url: "/api"
+        method: 'post'
+        data: @chunks[cx][cy].toJSON()
+      }
+
+    jqXHR
+      .done (data, status, jqXHR) =>
+        console.log data
+        console.log status
+      .fail (jqXHR, status, error) =>
+        console.error status
+    return @
+  
+  ## TILES
+  
+  @loadTile: (cx, cy, xi, yi) ->
+    jqXHR = $.getJSON "/api/#{cx}_#{cy}/tiles/#{xi}_#{yi}.json"
+
+    jqXHR
+      .done (data, status, jqXHR) =>
+        if data and data.tiles
+          unless data.tiles instanceof Array
+            @setTile_at(xi, yi, cx, cy, data.tiles.value, true)
+        else
+          console.log "status: #{status} "
+          console.log data
+
+      .fail (jqXHR, status, error) =>
+        console.error "#{status}"
+    return @
+
+
+  @saveTile: (cx, cy, xi, yi, value) ->
+    jqXHR = $.ajax {
+        url: "/api/#{cx}_#{cy}/tiles.json"
+        method: 'post'
+        data: 
+          chunk:
+            x: cx
+            y: cy
+          tile: 
+            x: xi
+            y: yi
+            value: value
+      }
+
+    jqXHR
+      .done (data, status, jqXHR) =>
+        @sendMessage('tiles', cx, cy, xi, yi, value)
+      .fail (jqXHR, status, error) =>
+        console.error status
+    return @
+
+
+  @removeTile: (cx, cy, xi, yi) ->
+    jqXHR = $.ajax {
+        url: "/api/#{cx}_#{cy}/tiles.json"
+        method: 'delete'
+        data: 
+          chunk:
+            x: cx
+            y: cy
+          tile: 
+            x: xi
+            y: yi
+      }
+
+    jqXHR
+      .done (data, status, jqXHR) =>
+        @sendMessage('tiles', cx, cy, xi, yi, null)
+      .fail (jqXHR, status, error) =>
+        console.error status
+    return @
+
+
+  ## ELEMENTS
+  @loadElement: (cx, cy, xi, yi) ->
+    jqXHR = $.getJSON "/api/#{cx}_#{cy}/elements/#{xi}_#{yi}.json"
+
+    jqXHR
+      .done (data, status, jqXHR) =>
+        if data and data.elements
+          unless data.elements instanceof Array
+            @setElement_at(xi, yi, cx, cy, data.elements.value, true)
+        else
+          console.log "status: #{status} "
+          console.log data
+
+      .fail (jqXHR, status, error) =>
+        console.error "#{status}"
+    return @
+
+
+  @saveElement: (cx, cy, xi, yi, value) ->
+    jqXHR = $.ajax {
+        url: "/api/#{cx}_#{cy}/elements.json"
+        method: 'post'
+        data: 
+          chunk:
+            x: cx
+            y: cy
+          element: 
+            x: xi
+            y: yi
+            value: value
+      }
+
+    jqXHR
+      .done (data, status, jqXHR) =>
+        @sendMessage('elements', cx, cy, xi, yi, value)
+
+      .fail (jqXHR, status, error) =>
+        console.error status
+    return @
+
+
+  @removeElement: (cx, cy, xi, yi) ->
+    jqXHR = $.ajax {
+        url: "/api/#{cx}_#{cy}/elements.json"
+        method: 'delete'
+        data: 
+          chunk:
+            x: cx
+            y: cy
+          element: 
+            x: xi
+            y: yi
+      }
+
+    jqXHR
+      .done (data, status, jqXHR) =>
+        @sendMessage('elements', cx, cy, xi, yi, null)
+      .fail (jqXHR, status, error) =>
+        console.error status
+    return @
+
+
+  @sendMessage: (type, cx, cy, xi, yi, value) ->
+    data = {}
+    data.room = 'c_'+cx+'_'+cy
+    switch type
+      when 'elements'
+        data.element = {
+            x: xi
+            y: yi
+            value: value
+          }
+        @socket.emit( 'elements', data )
+
+      when 'tiles'
+        data.tile = {
+            x: xi
+            y: yi
+            value: value
+          }
+        @socket.emit( 'tiles', data )
+    return @

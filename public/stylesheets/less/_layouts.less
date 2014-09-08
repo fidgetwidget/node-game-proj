@@ -9,22 +9,23 @@ body * {
 }
 
 .content-center {
-  width: 1024px;
+  // width: 1024px;
+  width: @DISPLAY_SIZE;
   .center;
 }
 
 body {
-  background-color: #babab8;
+  // background-color: #babab8;
   // background-image: url('../images/background.png');
-  background-position: top center;
-  background-repeat: no-repeat;
+  // background-position: top center;
+  // background-repeat: no-repeat;
 }
 
 body > #content {
   .content-center;
   position: relative;
-  height: 768px;
-  background-color: #0f1f05;
+  // height: 768px;
+  height: @DISPLAY_SIZE;
 }
 
 .clearfix {

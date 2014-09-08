@@ -3,7 +3,11 @@
   content: "";
   display: block;
   background-image: url('../images/tiles.png');
-  background-size: 512px 512px;
+  background-size: @TILESHEET_SIZE @TILESHEET_SIZE;
+}
+
+.background-pos(@x_tiles, @y_tiles, @x_offset:0, @y_offset:0) {
+  background-position: -(@x_tiles*@TILESIZE)-@x_offset -(@y_tiles*@TILESIZE)-@y_offset;
 }
 
 .tile-neighbors(@offsetX:0, @offsetY:0) {
@@ -11,308 +15,379 @@
   background-position-x:-(@TILESIZE)*@offsetX; 
   background-position-y:-(@TILESIZE)*@offsetY;
 
-  &.none    { background-position-x:-(@TILESIZE)*@offsetX; 
-              background-position-y:-(@TILESIZE)*@offsetY; }
+  &.none    { 
+              // background-position-x:-(@TILESIZE)*@offsetX; 
+              // background-position-y:-(@TILESIZE)*@offsetY;
+              .background-pos(0+@offsetX, 0+@offsetY);
+               }
 
-  &.n       { background-position-x:-(@TILESIZE)*(1 + @offsetX); 
-              background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+  &.n       { 
+              // background-position-x:-(@TILESIZE)*(1 + @offsetX); 
+              // background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+              .background-pos(1+@offsetX, 1+@offsetY);
               &:after {
                 ._psudo;
                 top: 0;
                 left: @HALFTILE;
                 width: @HALFTILE;
                 height: @TILESIZE;
-                background-position-x:-(@TILESIZE)*(2 + @offsetX)-@HALFTILE; 
-                background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                // background-position-x:-(@TILESIZE)*(2 + @offsetX)-@HALFTILE; 
+                // background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                .background-pos(2+@offsetX, 1+@offsetY, @HALFTILE);
               }
             }
-  &.s       { background-position-x:-(@TILESIZE)*(1 + @offsetX); 
-              background-position-y:-(@TILESIZE)*(0 + @offsetY); 
+  &.s       { 
+              // background-position-x:-(@TILESIZE)*(1 + @offsetX); 
+              // background-position-y:-(@TILESIZE)*(0 + @offsetY); 
+              .background-pos(1+@offsetX, 0+@offsetY);
+
               &:after {
                 ._psudo;
                 top: 0;
                 left: @HALFTILE;
                 width: @HALFTILE;
                 height: @TILESIZE;
-                background-position-x:-(@TILESIZE)*(2 + @offsetX)-@HALFTILE; 
-                background-position-y:-(@TILESIZE)*(0 + @offsetY); 
+                // background-position-x:-(@TILESIZE)*(2 + @offsetX)-@HALFTILE; 
+                // background-position-y:-(@TILESIZE)*(0 + @offsetY); 
+                .background-pos(2+@offsetX, 0+@offsetY, @HALFTILE);
               }
             }
-  &.e       { background-position-x:-(@TILESIZE)*(1 + @offsetX); 
-              background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+  &.e       { 
+              // background-position-x:-(@TILESIZE)*(1 + @offsetX); 
+              // background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+              .background-pos(1+@offsetX, 1+@offsetY);
               &:after {
                 ._psudo;
                 top: 0;
                 left: 0;
                 width: @TILESIZE;
                 height: @HALFTILE;
-                background-position-x:-(@TILESIZE)*(1 + @offsetX); 
-                background-position-y:-(@TILESIZE)*(0 + @offsetY); 
+                // background-position-x:-(@TILESIZE)*(1 + @offsetX); 
+                // background-position-y:-(@TILESIZE)*(0 + @offsetY); 
+                .background-pos(1+@offsetX, 0+@offsetY);
               }
             }
-  &.w       { background-position-x:-(@TILESIZE)*(2 + @offsetX); 
-              background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+  &.w       { 
+              // background-position-x:-(@TILESIZE)*(2 + @offsetX); 
+              // background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+              .background-pos(2+@offsetX, 1+@offsetY);
               &:after {
                 ._psudo;
                 top: 0;
                 left: 0;
                 width: @TILESIZE;
                 height: @HALFTILE;
-                background-position-x:-(@TILESIZE)*(2 + @offsetX); 
-                background-position-y:-(@TILESIZE)*(0 + @offsetY); 
+                // background-position-x:-(@TILESIZE)*(2 + @offsetX); 
+                // background-position-y:-(@TILESIZE)*(0 + @offsetY); 
+                .background-pos(2+@offsetX, 0+@offsetY);
               }
             }
-  &.n.s     { background-position-x:-(@TILESIZE)*(1 + @offsetX); 
-              background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+  &.n.s     { 
+              // background-position-x:-(@TILESIZE)*(1 + @offsetX); 
+              // background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+              .background-pos(1+@offsetX, 0+@offsetY, 0, @HALFTILE);
               &:after {
                 ._psudo;
                 top: 0;
                 left: @HALFTILE;
                 width: @HALFTILE;
                 height: @TILESIZE;
-                background-position-x:-(@TILESIZE)*(2 + @offsetX)-@HALFTILE; 
-                background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+                // background-position-x:-(@TILESIZE)*(2 + @offsetX)-@HALFTILE; 
+                // background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+                .background-pos(2+@offsetX, 0+@offsetY, @HALFTILE, @HALFTILE);
               }
             }
 
-  &.e.w     { background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
-              background-position-y:-(@TILESIZE)*(0 + @offsetY); 
+  &.e.w     { 
+              // background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
+              // background-position-y:-(@TILESIZE)*(0 + @offsetY); 
+              .background-pos(1+@offsetX, 0+@offsetY, @HALFTILE);
               &:after {
                 ._psudo;
                 top: @HALFTILE;
                 left: 0;
                 width: @TILESIZE;
                 height: @HALFTILE;
-                background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
-                background-position-y:-(@TILESIZE)*(1 + @offsetY)-@HALFTILE; 
+                // background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
+                // background-position-y:-(@TILESIZE)*(1 + @offsetY)-@HALFTILE; 
+                .background-pos(1+@offsetX, 1+@offsetY, @HALFTILE, @HALFTILE);
               }
             }
 
-  &.s.e     { background-position-x:-(@TILESIZE)*(1 + @offsetX); 
-              background-position-y:-(@TILESIZE)*(0 + @offsetY); 
+  &.s.e     { 
+              // background-position-x:-(@TILESIZE)*(1 + @offsetX); 
+              // background-position-y:-(@TILESIZE)*(0 + @offsetY); 
+              .background-pos(1+@offsetX, 0+@offsetY);
               &:after {
                 ._psudo;
                 top: @HALFTILE;
                 left: @HALFTILE;
                 width: @HALFTILE;
                 height: @HALFTILE;
-                background-position-x:-(@TILESIZE)*(0 + @offsetX)-@HALFTILE; 
-                background-position-y:-(@TILESIZE)*(1 + @offsetY)-@HALFTILE; 
+                // background-position-x:-(@TILESIZE)*(0 + @offsetX)-@HALFTILE; 
+                // background-position-y:-(@TILESIZE)*(1 + @offsetY)-@HALFTILE; 
+                .background-pos(0+@offsetX, 1+@offsetY, @HALFTILE, @HALFTILE);
               }
             }
-  &.s.w     { background-position-x:-(@TILESIZE)*(2 + @offsetX); 
-              background-position-y:-(@TILESIZE)*(0 + @offsetY); 
+  &.s.w     { 
+              // background-position-x:-(@TILESIZE)*(2 + @offsetX); 
+              // background-position-y:-(@TILESIZE)*(0 + @offsetY); 
+              .background-pos(2+@offsetX, 0+@offsetY);
               &:after {
                 ._psudo;
                 top: @HALFTILE;
                 left: 0;
                 width: @HALFTILE;
                 height: @HALFTILE;
-                background-position-x:-(@TILESIZE)*(0 + @offsetX); 
-                background-position-y:-(@TILESIZE)*(1 + @offsetY)-@HALFTILE; 
+                // background-position-x:-(@TILESIZE)*(0 + @offsetX); 
+                // background-position-y:-(@TILESIZE)*(1 + @offsetY)-@HALFTILE; 
+                .background-pos(0+@offsetX, 1+@offsetY, 0, @HALFTILE);
               }
             }
-  &.n.e     { background-position-x:-(@TILESIZE)*(1 + @offsetX); 
-              background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+  &.n.e     { 
+              // background-position-x:-(@TILESIZE)*(1 + @offsetX); 
+              // background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+              .background-pos(1+@offsetX, 1+@offsetY);
               &:after {
                 ._psudo;
                 top: 0;
                 left: @HALFTILE;
                 width: @HALFTILE;
                 height: @HALFTILE;
-                background-position-x:-(@TILESIZE)*(0 + @offsetX)-@HALFTILE; 
-                background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                // background-position-x:-(@TILESIZE)*(0 + @offsetX)-@HALFTILE; 
+                // background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                .background-pos(0+@offsetX, 1+@offsetY, @HALFTILE);
               }
             }
-  &.n.w     { background-position-x:-(@TILESIZE)*(2 + @offsetX); 
-              background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+  &.n.w     { 
+              // background-position-x:-(@TILESIZE)*(2 + @offsetX); 
+              // background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+              .background-pos(2+@offsetX, 1+@offsetY);
               &:after {
                 ._psudo;
                 top: 0;
                 left: 0;
                 width: @HALFTILE;
                 height: @HALFTILE;
-                background-position-x:-(@TILESIZE)*(0 + @offsetX); 
-                background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                // background-position-x:-(@TILESIZE)*(0 + @offsetX); 
+                // background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                .background-pos(0+@offsetX, 1+@offsetY);
               }
             }
 
-  &.w.s.e   { background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
-              background-position-y:-(@TILESIZE)*(0 + @offsetY); 
+  &.w.s.e   { 
+              // background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
+              // background-position-y:-(@TILESIZE)*(0 + @offsetY); 
+              .background-pos(1+@offsetX, 0+@offsetY, @HALFTILE);
               &:after {
                 ._psudo;
                 top: @HALFTILE;
                 left: 0;
                 width: @TILESIZE;
                 height: @HALFTILE;
-                background-position-x:-(@TILESIZE)*(0 + @offsetX); 
-                background-position-y:-(@TILESIZE)*(1 + @offsetY)-@HALFTILE; 
+                // background-position-x:-(@TILESIZE)*(0 + @offsetX); 
+                // background-position-y:-(@TILESIZE)*(1 + @offsetY)-@HALFTILE; 
+                .background-pos(0+@offsetX, 1+@offsetY, 0, @HALFTILE);
               }
             }
-  &.s.e.n   { background-position-x:-(@TILESIZE)*(1 + @offsetX); 
-              background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+  &.s.e.n   { 
+              // background-position-x:-(@TILESIZE)*(1 + @offsetX); 
+              // background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+              .background-pos(1+@offsetX, 0+@offsetY, 0, @HALFTILE);
               &:after {
                 ._psudo;
                 top: 0;
                 left: @HALFTILE;
                 width: @HALFTILE;
                 height: @TILESIZE;
-                background-position-x:-(@TILESIZE)*(0 + @offsetX)-@HALFTILE; 
-                background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                // background-position-x:-(@TILESIZE)*(0 + @offsetX)-@HALFTILE; 
+                // background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                .background-pos(0+@offsetX, 1+@offsetY, @HALFTILE);
               }
             }
-  &.e.n.w   { background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
-              background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+  &.e.n.w   { 
+              // background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
+              // background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+              .background-pos(1+@offsetX, 1+@offsetY, @HALFTILE);
               &:after {
                 ._psudo;
                 top: 0;
                 left: 0;
                 width: @TILESIZE;
                 height: @HALFTILE;
-                background-position-x:-(@TILESIZE)*(0 + @offsetX); 
-                background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                // background-position-x:-(@TILESIZE)*(0 + @offsetX); 
+                // background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                .background-pos(0+@offsetX, 1+@offsetY);
               }
             }
-  &.n.w.s   { background-position-x:-(@TILESIZE)*(2 + @offsetX); 
-              background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+  &.n.w.s   { 
+              // background-position-x:-(@TILESIZE)*(2 + @offsetX); 
+              // background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+              .background-pos(2+@offsetX, 0+@offsetY, 0, @HALFTILE);
               &:after {
                 ._psudo;
                 top: 0;
                 left: 0;
                 width: @HALFTILE;
                 height: @TILESIZE;
-                background-position-x:-(@TILESIZE)*(0 + @offsetX); 
-                background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                // background-position-x:-(@TILESIZE)*(0 + @offsetX); 
+                // background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                .background-pos(0+@offsetX, 1+@offsetY);
               }
             }
-  &.w.s.sw  { background-position-x:-(@TILESIZE)*(2 + @offsetX); 
-              background-position-y:-(@TILESIZE)*(0 + @offsetY); 
+  &.w.s.sw  { 
+              // background-position-x:-(@TILESIZE)*(2 + @offsetX); 
+              // background-position-y:-(@TILESIZE)*(0 + @offsetY); 
+              .background-pos(2+@offsetX, 0+@offsetY);
               &:after   { display: none; background-image: none; }
             }
 
-  &.s.e.se  { background-position-x:-(@TILESIZE)*(1 + @offsetX); 
-              background-position-y:-(@TILESIZE)*(0 + @offsetY); 
+  &.s.e.se  { 
+              // background-position-x:-(@TILESIZE)*(1 + @offsetX); 
+              // background-position-y:-(@TILESIZE)*(0 + @offsetY); 
+              .background-pos(1+@offsetX, 0+@offsetY);
               &:after   { display: none; background-image: none; }
             }
 
-  &.e.n.ne  { background-position-x:-(@TILESIZE)*(1 + @offsetX); 
-              background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+  &.e.n.ne  {
+              // background-position-x:-(@TILESIZE)*(1 + @offsetX); 
+              // background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+              .background-pos(1+@offsetX, 1+@offsetY);
               &:after   { display: none; background-image: none; }
             }
 
-  &.n.w.nw  { background-position-x:-(@TILESIZE)*(2 + @offsetX); 
-              background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+  &.n.w.nw  { 
+              // background-position-x:-(@TILESIZE)*(2 + @offsetX); 
+              // background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+              .background-pos(2+@offsetX, 1+@offsetY);
               &:after   { display: none; background-image: none; }
             }
 
   &.w.s.e.se { 
-              background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
-              background-position-y:-(@TILESIZE)*(0 + @offsetY); 
+              // background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
+              // background-position-y:-(@TILESIZE)*(0 + @offsetY); 
+              .background-pos(1+@offsetX, 0+@offsetY, @HALFTILE);
               &:after {
                 ._psudo;
                 top: @HALFTILE;
                 left: 0;
                 width: @HALFTILE;
                 height: @HALFTILE;
-                background-position-x:-(@TILESIZE)*(0 + @offsetX); 
-                background-position-y:-(@TILESIZE)*(1 + @offsetY)-@HALFTILE; 
+                // background-position-x:-(@TILESIZE)*(0 + @offsetX); 
+                // background-position-y:-(@TILESIZE)*(1 + @offsetY)-@HALFTILE; 
+                .background-pos(0+@offsetX, 1+@offsetY, 0, @HALFTILE);
               }
             }
   &.w.sw.s.e { 
-              background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
-              background-position-y:-(@TILESIZE)*(0 + @offsetY); 
+              // background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
+              // background-position-y:-(@TILESIZE)*(0 + @offsetY); 
+              .background-pos(1+@offsetX, 0+@offsetY, @HALFTILE);
               &:after {
                 ._psudo;
                 top: @HALFTILE;
                 left: @HALFTILE;
                 width: @HALFTILE;
                 height: @HALFTILE;
-                background-position-x:-(@TILESIZE)*(0 + @offsetX)-@HALFTILE; 
-                background-position-y:-(@TILESIZE)*(1 + @offsetY)-@HALFTILE; 
+                // background-position-x:-(@TILESIZE)*(0 + @offsetX)-@HALFTILE; 
+                // background-position-y:-(@TILESIZE)*(1 + @offsetY)-@HALFTILE; 
+                .background-pos(0+@offsetX, 1+@offsetY, @HALFTILE, @HALFTILE);
               }
             }
   &.s.se.e.n  { 
-              background-position-x:-(@TILESIZE)*(1 + @offsetX); 
-              background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+              // background-position-x:-(@TILESIZE)*(1 + @offsetX); 
+              // background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+              .background-pos(1+@offsetX, 0+@offsetY, 0, @HALFTILE);
               &:after {
                 ._psudo;
                 top: 0;
                 left: @HALFTILE;
                 width: @HALFTILE;
                 height: @HALFTILE;
-                background-position-x:-(@TILESIZE)*(0 + @offsetX)-@HALFTILE; 
-                background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                // background-position-x:-(@TILESIZE)*(0 + @offsetX)-@HALFTILE; 
+                // background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                .background-pos(0+@offsetX, 1+@offsetY, @HALFTILE);
               }
             }
   &.s.e.ne.n  { 
-              background-position-x:-(@TILESIZE)*(1 + @offsetX); 
-              background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+              // background-position-x:-(@TILESIZE)*(1 + @offsetX); 
+              // background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+              .background-pos(1+@offsetX, 0+@offsetY, 0, @HALFTILE);
               &:after {
                 ._psudo;
                 top: @HALFTILE;
                 left: @HALFTILE;
                 width: @HALFTILE;
                 height: @HALFTILE;
-                background-position-x:-(@TILESIZE)*(0 + @offsetX)-@HALFTILE; 
-                background-position-y:-(@TILESIZE)*(1 + @offsetY)-@HALFTILE; 
+                // background-position-x:-(@TILESIZE)*(0 + @offsetX)-@HALFTILE; 
+                // background-position-y:-(@TILESIZE)*(1 + @offsetY)-@HALFTILE; 
+                .background-pos(0+@offsetX, 1+@offsetY, @HALFTILE, @HALFTILE);
               }
             }
   &.e.ne.n.w { 
-              background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
-              background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+              // background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
+              // background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+              .background-pos(1+@offsetX, 1+@offsetY, @HALFTILE);
               &:after {
                 ._psudo;
                 top: 0;
                 left: 0;
                 width: @HALFTILE;
                 height: @HALFTILE;
-                background-position-x:-(@TILESIZE)*(0 + @offsetX); 
-                background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                // background-position-x:-(@TILESIZE)*(0 + @offsetX); 
+                // background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                .background-pos(0+@offsetX, 1+@offsetY);
               }
             }
   &.e.n.nw.w { 
-              background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
-              background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+              // background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
+              // background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+              .background-pos(1+@offsetX, 1+@offsetY, @HALFTILE);
               &:after {
                 ._psudo;
                 top: 0;
                 left: @HALFTILE;
                 width: @HALFTILE;
                 height: @HALFTILE;
-                background-position-x:-(@TILESIZE)*(0 + @offsetX)-@HALFTILE; 
-                background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                // background-position-x:-(@TILESIZE)*(0 + @offsetX)-@HALFTILE; 
+                // background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                .background-pos(0+@offsetX, 1+@offsetY, @HALFTILE);
               }
             }
   &.n.nw.w.s { 
-              background-position-x:-(@TILESIZE)*(2 + @offsetX); 
-              background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+              // background-position-x:-(@TILESIZE)*(2 + @offsetX); 
+              // background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+              .background-pos(2+@offsetX, 0+@offsetY, 0, @HALFTILE);
               &:after {
                 ._psudo;
                 top: @HALFTILE;
                 left: 0;
                 width: @HALFTILE;
                 height: @HALFTILE;
-                background-position-x:-(@TILESIZE)*(0 + @offsetX); 
-                background-position-y:-(@TILESIZE)*(1 + @offsetY)-@HALFTILE; 
+                // background-position-x:-(@TILESIZE)*(0 + @offsetX); 
+                // background-position-y:-(@TILESIZE)*(1 + @offsetY)-@HALFTILE; 
+                .background-pos(0+@offsetX, 1+@offsetY, 0, @HALFTILE);
               }
             }
   &.n.w.sw.s { 
-              background-position-x:-(@TILESIZE)*(2 + @offsetX); 
-              background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+              // background-position-x:-(@TILESIZE)*(2 + @offsetX); 
+              // background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+              .background-pos(2+@offsetX, 0+@offsetY, 0, @HALFTILE);
               &:after {
                 ._psudo;
                 top: 0;
                 left: 0;
                 width: @HALFTILE;
                 height: @HALFTILE;
-                background-position-x:-(@TILESIZE)*(0 + @offsetX); 
-                background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                // background-position-x:-(@TILESIZE)*(0 + @offsetX); 
+                // background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                .background-pos(0+@offsetX, 1+@offsetY);
               }
             }
 
   &.n.w.s.e  { 
-              background-position-x:-(@TILESIZE)*(0 + @offsetX); 
-              background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+              // background-position-x:-(@TILESIZE)*(0 + @offsetX); 
+              // background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+              .background-pos(0+@offsetX, 1+@offsetY);
               &:after   { display: none; background-image: none; }
             }
 
@@ -330,122 +405,140 @@
             }
 
   &.n.w.s.e.se { 
-              background-position-x:-(@TILESIZE)*(0 + @offsetX); 
-              background-position-y:-(@TILESIZE)*(1 + @offsetY);
+              // background-position-x:-(@TILESIZE)*(0 + @offsetX); 
+              // background-position-y:-(@TILESIZE)*(1 + @offsetY);
+              .background-pos(0+@offsetX, 1+@offsetY);
               &:after {
                 ._psudo;
                 top: @HALFTILE;
                 left: @HALFTILE;
                 width: @HALFTILE;
                 height: @HALFTILE;
-                background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
-                background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+                // background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
+                // background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+                .background-pos(1+@offsetX, 0+@offsetY, @HALFTILE, @HALFTILE);
               }
             }
   &.n.w.s.e.sw { 
-              background-position-x:-(@TILESIZE)*(0 + @offsetX); 
-              background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+              // background-position-x:-(@TILESIZE)*(0 + @offsetX); 
+              // background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+              .background-pos(0+@offsetX, 1+@offsetY);
               &:after {
                 ._psudo;
                 top: @HALFTILE;
                 left: 0;
                 width: @HALFTILE;
                 height: @HALFTILE;
-                background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
-                background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+                // background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
+                // background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+                .background-pos(1+@offsetX, 0+@offsetY, @HALFTILE, @HALFTILE);
               }
             }
   &.n.w.s.e.nw { 
-              background-position-x:-(@TILESIZE)*(0 + @offsetX); 
-              background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+              // background-position-x:-(@TILESIZE)*(0 + @offsetX); 
+              // background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+              .background-pos(0+@offsetX, 1+@offsetY);
               &:after {
                 ._psudo;
                 top: 0;
                 left: 0;
                 width: @HALFTILE;
                 height: @HALFTILE;
-                background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
-                background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+                // background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
+                // background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+                .background-pos(1+@offsetX, 0+@offsetY, @HALFTILE, @HALFTILE);
               }
             }
   &.n.w.s.e.ne { 
-              background-position-x:-(@TILESIZE)*(0 + @offsetX); 
-              background-position-y:-(@TILESIZE)*(1 + @offsetY);
+              // background-position-x:-(@TILESIZE)*(0 + @offsetX); 
+              // background-position-y:-(@TILESIZE)*(1 + @offsetY);
+              .background-pos(0+@offsetX, 1+@offsetY);
               &:after {
                 ._psudo;
                 top: 0;
                 left: @HALFTILE;
                 width: @HALFTILE;
                 height: @HALFTILE;
-                background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
-                background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+                // background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
+                // background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+                .background-pos(1+@offsetX, 0+@offsetY, @HALFTILE, @HALFTILE);
               }
             }
 
   &.n.w.s.e.se.sw { 
-              background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
-              background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+              // background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
+              // background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+              .background-pos(1+@offsetX, 0+@offsetY, @HALFTILE, @HALFTILE);
               &:after {
                 ._psudo;
                 top: 0;
                 left: 0;
                 width: @TILESIZE;
                 height: @HALFTILE;
-                background-position-x:-(@TILESIZE)*(0 + @offsetX); 
-                background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                // background-position-x:-(@TILESIZE)*(0 + @offsetX); 
+                // background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                .background-pos(0+@offsetX, 1+@offsetY);
               }
             }
   &.n.w.s.e.sw.nw { 
-              background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
-              background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+              // background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
+              // background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+              .background-pos(1+@offsetX, 0+@offsetY, @HALFTILE, @HALFTILE);
               &:after {
                 ._psudo;
                 top: 0;
                 left: @HALFTILE;
                 width: @HALFTILE;
                 height: @TILESIZE;
-                background-position-x:-(@TILESIZE)*(0 + @offsetX)-@HALFTILE; 
-                background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                // background-position-x:-(@TILESIZE)*(0 + @offsetX)-@HALFTILE; 
+                // background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                .background-pos(0+@offsetX, 1+@offsetY, @HALFTILE);
               }
             }
   &.n.w.s.e.nw.ne { 
-              background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
-              background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+              // background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
+              // background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+              .background-pos(1+@offsetX, 0+@offsetY, @HALFTILE, @HALFTILE);
               &:after {
                 ._psudo;
                 top: @HALFTILE;
                 left: 0;
                 width: @TILESIZE;
                 height: @HALFTILE;
-                background-position-x:-(@TILESIZE)*(0 + @offsetX); 
-                background-position-y:-(@TILESIZE)*(1 + @offsetY)-@HALFTILE; 
+                // background-position-x:-(@TILESIZE)*(0 + @offsetX); 
+                // background-position-y:-(@TILESIZE)*(1 + @offsetY)-@HALFTILE; 
+                .background-pos(0+@offsetX, 1+@offsetY, 0, @HALFTILE);
               }
             }
   &.n.w.s.e.ne.se { 
-              background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
-              background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+              // background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
+              // background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+              .background-pos(1+@offsetX, 0+@offsetY, @HALFTILE, @HALFTILE);
               &:after {
                 ._psudo;
                 top: 0;
                 left: 0;
                 width: @HALFTILE;
                 height: @TILESIZE;
-                background-position-x:-(@TILESIZE)*(0 + @offsetX); 
-                background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                // background-position-x:-(@TILESIZE)*(0 + @offsetX); 
+                // background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                .background-pos(0+@offsetX, 1+@offsetY);
               }
             }
 
   &.n.w.s.e.ne.sw { 
-              background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
-              background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+              // background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
+              // background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+              .background-pos(1+@offsetX, 0+@offsetY, @HALFTILE, @HALFTILE);
               &:before {
                 ._psudo;
                 top: 0;
                 left: 0;
                 width: @HALFTILE;
                 height: @HALFTILE;
-                background-position-x:-(@TILESIZE)*(0 + @offsetX); 
-                background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                // background-position-x:-(@TILESIZE)*(0 + @offsetX); 
+                // background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                .background-pos(0+@offsetX, 1+@offsetY);
               }
               &:after {
                 ._psudo;
@@ -453,21 +546,24 @@
                 left: @HALFTILE;
                 width: @HALFTILE;
                 height: @HALFTILE;
-                background-position-x:-(@TILESIZE)*(0 + @offsetX)-@HALFTILE; 
-                background-position-y:-(@TILESIZE)*(1 + @offsetY)-@HALFTILE; 
+                // background-position-x:-(@TILESIZE)*(0 + @offsetX)-@HALFTILE; 
+                // background-position-y:-(@TILESIZE)*(1 + @offsetY)-@HALFTILE; 
+                .background-pos(0+@offsetX, 1+@offsetY, @HALFTILE, @HALFTILE);
               }
             }
   &.n.w.s.e.nw.se { 
-              background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
-              background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+              // background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
+              // background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+              .background-pos(1+@offsetX, 0+@offsetY, @HALFTILE, @HALFTILE);
               &:before {
                 ._psudo;
                 top: 0;
                 left: @HALFTILE;
                 width: @HALFTILE;
                 height: @HALFTILE;
-                background-position-x:-(@TILESIZE)*(0 + @offsetX)-@HALFTILE; 
-                background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                // background-position-x:-(@TILESIZE)*(0 + @offsetX)-@HALFTILE; 
+                // background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                .background-pos(0+@offsetX, 1+@offsetY, @HALFTILE);
               }
               &:after {
                 ._psudo;
@@ -475,14 +571,16 @@
                 left: 0;
                 width: @HALFTILE;
                 height: @HALFTILE;
-                background-position-x:-(@TILESIZE)*(0 + @offsetX); 
-                background-position-y:-(@TILESIZE)*(1 + @offsetY)-@HALFTILE; 
+                // background-position-x:-(@TILESIZE)*(0 + @offsetX); 
+                // background-position-y:-(@TILESIZE)*(1 + @offsetY)-@HALFTILE; 
+                .background-pos(0+@offsetX, 1+@offsetY, 0, @HALFTILE);
               }
             }
 
   &.n.w.s.e.nw.sw.se { 
-              background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
-              background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE;
+              // background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
+              // background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE;
+              .background-pos(1+@offsetX, 0+@offsetY, @HALFTILE, @HALFTILE);
               &:before  { display: none; background-image: none; }
               &:after {
                 ._psudo;
@@ -490,13 +588,15 @@
                 left: @HALFTILE;
                 width: @HALFTILE;
                 height: @HALFTILE;
-                background-position-x:-(@TILESIZE)*(0 + @offsetX)-@HALFTILE; 
-                background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                // background-position-x:-(@TILESIZE)*(0 + @offsetX)-@HALFTILE; 
+                // background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                .background-pos(0+@offsetX, 1+@offsetY, @HALFTILE);
               }
             }
   &.n.w.s.e.nw.sw.ne { 
-              background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
-              background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE;
+              // background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
+              // background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE;
+              .background-pos(1+@offsetX, 0+@offsetY, @HALFTILE, @HALFTILE);
               &:before  { display: none; background-image: none; }
               &:after {
                 ._psudo;
@@ -504,13 +604,15 @@
                 left: @HALFTILE;
                 width: @HALFTILE;
                 height: @HALFTILE;
-                background-position-x:-(@TILESIZE)*(0 + @offsetX)-@HALFTILE; 
-                background-position-y:-(@TILESIZE)*(1 + @offsetY)-@HALFTILE; 
+                // background-position-x:-(@TILESIZE)*(0 + @offsetX)-@HALFTILE; 
+                // background-position-y:-(@TILESIZE)*(1 + @offsetY)-@HALFTILE; 
+                .background-pos(0+@offsetX, 1+@offsetY, @HALFTILE, @HALFTILE);
               }
             }
   &.n.w.s.e.nw.se.ne { 
-              background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
-              background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE;
+              // background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
+              // background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE;
+              .background-pos(1+@offsetX, 0+@offsetY, @HALFTILE, @HALFTILE);
               &:before  { display: none; background-image: none; }
               &:after {
                 ._psudo;
@@ -518,13 +620,15 @@
                 left: 0;
                 width: @HALFTILE;
                 height: @HALFTILE;
-                background-position-x:-(@TILESIZE)*(0 + @offsetX); 
-                background-position-y:-(@TILESIZE)*(1 + @offsetY)-@HALFTILE; 
+                // background-position-x:-(@TILESIZE)*(0 + @offsetX); 
+                // background-position-y:-(@TILESIZE)*(1 + @offsetY)-@HALFTILE; 
+                .background-pos(0+@offsetX, 1+@offsetY, 0, @HALFTILE);
               }
             }
   &.n.w.s.e.sw.se.ne { 
-              background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
-              background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE;
+              // background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
+              // background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE;
+              .background-pos(1+@offsetX, 0+@offsetY, @HALFTILE, @HALFTILE);
               &:before  { display: none; background-image: none; }
               &:after {
                 ._psudo;
@@ -532,14 +636,16 @@
                 left: 0;
                 width: @HALFTILE;
                 height: @HALFTILE;
-                background-position-x:-(@TILESIZE)*(0 + @offsetX); 
-                background-position-y:-(@TILESIZE)*(1 + @offsetY); 
+                // background-position-x:-(@TILESIZE)*(0 + @offsetX); 
+                // background-position-y:-(@TILESIZE)*(1 + @offsetY);
+                .background-pos(0+@offsetX, 1+@offsetY); 
               }
             }
 
   &.n.w.s.e.nw.sw.se.ne { 
-              background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
-              background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+              // background-position-x:-(@TILESIZE)*(1 + @offsetX)-@HALFTILE; 
+              // background-position-y:-(@TILESIZE)*(0 + @offsetY)-@HALFTILE; 
+              .background-pos(1+@offsetX, 0+@offsetY, @HALFTILE, @HALFTILE);
               &:before  { display: none; background-image: none; }
               &:after   { display: none; background-image: none; }
             }
@@ -551,11 +657,12 @@
   position: absolute;
   box-sizing: border-box;
   background-image: url('../images/tiles.png');
-  background-size: 512px 512px;
+  background-size: @TILESHEET_SIZE @TILESHEET_SIZE;
 
   &.soil {
-    background-position-x:0;
-    background-position-y:0;
+    // background-position-x:0;
+    // background-position-y:0;
+    .background-pos(0, 0);
   }
   &.grass {
     .tile-neighbors(1, 0);

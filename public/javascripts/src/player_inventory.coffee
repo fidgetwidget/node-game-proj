@@ -14,7 +14,7 @@ class @PlayerInventory
     @items = {}
     @$items = {}
     @$elms = document.createElement('div')
-    Game.$inventory.appendChild @$elms
+    # Game.$inventory.appendChild @$elms
     @
 
 

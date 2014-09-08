@@ -8,8 +8,6 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var db = mongoose.connection;
 
-
-
 var app = express();
 
 // view engine setup
@@ -64,9 +62,7 @@ app.use(function(err, req, res, next) {
 });
 
 db.on('error', console.error);
-db.once('open', function() {
-  // Create your schemas and models here.
-});
+db.once('open', function() {});
 
 mongoose.connect('mongodb://localhost/node-game-proj');
 

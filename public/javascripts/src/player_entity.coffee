@@ -21,9 +21,6 @@ class @PlayerEntity extends Entity
   constructor: (name, x, y) ->
     @name = name || "player#{PlayerEntity.count}"
     PlayerEntity.count++
-
-    x = x || Game._gridWidth/2
-    y = y || Game._gridHeight/2
     super( "player", @name, x, y )
     @cx = 0
     @cy = 0
@@ -33,7 +30,6 @@ class @PlayerEntity extends Entity
     @inventory = new PlayerInventory(this)
     @actions = new PlayerActions(this)
     
-    @setPosition()
     @bindEvents()
     @
 
@@ -86,54 +82,102 @@ class @PlayerEntity extends Entity
 
   # move the player in a given direction
   move: (dir) ->
+
     if dir in DIR_LEFT
-      @face WEST
-      if @check @x-1, @y
-        @x--
+      if @facing is WEST
+        @check @x-1, @y
+      else
+        @face WEST
+
     if dir in DIR_UP
-      @face NORTH
-      if @check @x, @y-1
-        @y--
+      if @facing is NORTH 
+        @check @x, @y-1
+      else
+        @face NORTH
+
     if dir in DIR_RIGHT
-      @face EAST
-      if @check @x+1, @y
-        @x++
+      if @facing is EAST
+        @check @x+1, @y
+      else
+        @face EAST
+
     if dir in DIR_DOWN
-      @face SOUTH
-      if @check @x, @y+1
-        @y++
+      if @facing is SOUTH
+        @check @x, @y+1
+          
+      else
+        @face SOUTH
     
     @collectItems @x, @y
-    Game.setCenter @x, @y
-    # @setPosition()
+    Game.setCenter @x, @y, @cx, @cy
     @
 
   do: (x, y, alt=false) ->
-    # test for edges of screen (TEMP: this will be how to move from chunk to chunk later...)
-    return false if x < 0 or y < 0 or x >= CHUNK_WIDTH or y >= CHUNK_HEIGHT
+    cx = @cx
+    cy = @cy
+    if x < 0 
+      cx -= 1
+      x = x + CHUNK_WIDTH
+    else if x >= CHUNK_WIDTH
+      cx += 1
+      x = x - CHUNK_WIDTH
+
+    if y < 0
+      cy -= 1
+      y = y + CHUNK_HEIGHT
+    else if y >= CHUNK_HEIGHT
+      cy += 1
+      y = y - CHUNK_HEIGHT
 
     # get the tile at the desired location
-    e = Game.getElement_at(x, y, @cx, @cy)
+    e = Game.getElement_at(x, y, cx, cy)
     if e != undefined and e != null
-      @actions.actOnElement(e, x, y, @cx, @cy, alt)
+      @actions.actOnElement(e, x, y, cx, cy, alt)
       
     else
-      t = Game.getTile_at(x, y, @cx, @cy)
+      t = Game.getTile_at(x, y, cx, cy)
       # act on the tile even if the there isn't one (act on the chunk default_tile)
-      @actions.actOnTile(t, x, y, @cx, @cy, alt)
+      @actions.actOnTile(t, x, y, cx, cy, alt)
 
   check: (x, y) ->
-    return false if x < 0 or y < 0 or x >= CHUNK_WIDTH or y >= CHUNK_HEIGHT
+    cx = @cx
+    cy = @cy
+    if x < 0 
+      cx -= 1
+      x = x + CHUNK_WIDTH
+    else if x >= CHUNK_WIDTH
+      cx += 1
+      x = x - CHUNK_WIDTH
 
-    e = Game.getElement_at(x, y, @cx, @cy)
+    if y < 0
+      cy -= 1
+      y = y + CHUNK_HEIGHT
+    else if y >= CHUNK_HEIGHT
+      cy += 1
+      y = y - CHUNK_HEIGHT
 
-    if e != undefined and e != null
-      return !COLLIDER_ELMS[e]
+    elm = Game.getElement_at(x, y, cx, cy)
+
+    if elm != undefined and elm != null
+      if !COLLIDER_ELMS[elm]
+        @updatePos(x, y, cx, cy)
 
     else 
-      t = Game.getTile_at(x, y, @cx, @cy)
-      return true if t is null or t is undefined
-      return !COLLIDER_TILES[t]
+      tle = Game.getTile_at(x, y, cx, cy)
+      if tle is null or tle is undefined or !COLLIDER_TILES[tle]
+        @updatePos(x, y, cx, cy)  
+
+  updatePos: (x, y, cx, cy) ->
+    @x = x
+    @y = y
+    @cx = cx
+    @cy = cy
+    unless Game.hasChunk(cx, cy)
+      console.log "making new chunk at x: #{cx} y: #{cy}"
+      Game.loadChunks(cx, cy)
+      # Game.randomWorld(cx, cy)
+      # Game.saveChunk(cx, cy)
+
 
 
   collectItems: (x, y) ->

@@ -15,6 +15,11 @@ this.ELM_TYPES = [
   'ore'
   'fence'
   '_1'
+  'stick'
+  'roots'
+  'thicket'
+  'grass'
+  'tree'
 ]
 
 this.COLLIDER_ELMS = [
@@ -29,5 +34,10 @@ this.COLLIDER_ELMS = [
   true  #'rock'
   true  #'ore'
   true  #'fence'
-  false #'_1'
+  true  #'_1'
+  false #'stick'
+  true  #'roots'
+  true  #'thicket'
+  false #'grass'
+  true  #'tree'
 ]

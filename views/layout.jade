@@ -7,6 +7,7 @@ html
     script(src='/javascripts/lib/classie.js')
     script(src='/javascripts/lib/jquery.min.js')
     script(src='/javascripts/app.js')
+    script(src='/socket.io/socket.io.js')
   body
 
     //- header#header
@@ -19,5 +20,9 @@ html
     //-   block footer
 
     script. 
-      Game.init().loadChunks(0,0)
+      Game.init()
+        .loadChunks(-1,-1)
+        .loadChunks(0,-1)
+        .loadChunks(-1,0)
+        .loadChunks(0,0)
       Game.createPlayer()

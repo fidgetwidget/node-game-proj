@@ -23,53 +23,47 @@
   .tile-offset(@target, @n, (@i + 1));
 }
 
-.chunk-offset(@target, @n, @i: -@n) when (@i =< @n) {
+.chunk-offset-x(@n, @i: -@n) when (@i =< @n) {
   &.cx@{i} {
-    .@{target} {
-      left: -(@i * @GRID_SIZE);
-    }
+    .chunk-offset-y(@n, @i);
   }
-  &.cy@{i} {
-    .@{target} {
-      top: -(@i * @GRID_SIZE);
-    }
-  }
-  .chunk-offset(@target, @n, (@i + 1)); 
+  .chunk-offset-x(@n, (@i + 1));
 }
-
-#main,
-#stats,
-#inventory,
-#combat {
-  position: absolute;
-  background-color: #0f1f05;
+.chunk-offset-y(@n, @xi, @yi: -@n) when (@yi =< @n) {
+  &.cy@{yi} {
+    transform: translateX((@xi*@GRID_SIZE)) translateY((@yi*@GRID_SIZE));
+  } 
+  .chunk-offset-y(@n, @xi, (@yi + 1));
 }
 
 #main {
+  position: absolute;
   width:  @DISPLAY_SIZE;
   height: @DISPLAY_SIZE;
   top: 0;
-  left: @HALF;
+  left: 0;
   overflow: hidden;
 
   &.edit {
     overflow: auto;
   }
 
-  .wrapper {
+  .chunk {
     .clearfix;
+    position: absolute;
     width: @GRID_SIZE;
     height: @GRID_SIZE;
+    .chunk-offset-x(32);
   }
 
   .tiles,
   .elements,
   .entities {
     position: absolute;
-    width: @GRID_SIZE;
-    height: @GRID_SIZE;
   }
   .tiles {
+    width: @GRID_SIZE;
+    height: @GRID_SIZE;
     background-color: white;
     &.grass {
       background-image: url('../images/grass.png');
@@ -80,35 +74,12 @@
     -webkit-transform: translate3D(0,0,0);
   }
 
-  .tile-offset(tiles,     @CHUNKSIZE);
-  .tile-offset(elements,  @CHUNKSIZE);
-  .tile-offset(entities,  @CHUNKSIZE);
+  .tile-offset(chunk,     @CHUNKSIZE);
+  .players {
+    position: absolute;
+    z-index: 999;
+  }
 
-  .chunk-offset(tiles,    2);
-  .chunk-offset(elements, 2);
-  .chunk-offset(entities, 2);
-
-}
-
-#stats {
-  top: 0;
-  left: 0;
-  height: @DISPLAY_SIZE;
-  width: @HALF;
-}
-
-#inventory {
-  top: 0;
-  left: @SCREEN_WIDTH - @HALF;
-  height: @DISPLAY_SIZE;
-  width: @HALF;
-}
-
-#combat {
-  top: @DISPLAY_SIZE;
-  left: 0;
-  height: @SCREEN_HEIGHT - @DISPLAY_SIZE;
-  width: @SCREEN_WIDTH;
 }
 
 .tile,
