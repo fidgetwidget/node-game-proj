@@ -64,7 +64,19 @@ app.use(function(err, req, res, next) {
 db.on('error', console.error);
 db.once('open', function() {});
 
-mongoose.connect('mongodb://127.0.0.1:27017/node-game-proj');
+
+var mongoUriString = 
+    process.env.MONGOLAB_URI ||
+    process.env.MONGOHQ_URI ||
+    'mongodb://127.0.0.1:27017/node-game-proj'
+
+mongoose.connect(mongoUriString, function(err, res) {
+  if (err) {
+    console.log('ERROR: connecting to: ' + mongoUriString + '. ' + err);
+  } else if (res) {
+    console.log ('Succeeded connected to: ' + mongoUriString);
+  }
+});
 
 
 module.exports = app;
