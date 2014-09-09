@@ -66,8 +66,7 @@ db.once('open', function() {});
 
 
 var mongoUriString = 
-    process.env.MONGOLAB_URI ||
-    process.env.MONGOHQ_URL ||
+    process.env.MONGOSOUP_URL ||
     'mongodb://127.0.0.1:27017/node-game-proj'
 
 mongoose.connect(mongoUriString, function(err, res) {
