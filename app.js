@@ -64,7 +64,7 @@ app.use(function(err, req, res, next) {
 db.on('error', console.error);
 db.once('open', function() {});
 
-mongoose.connect('mongodb://localhost/node-game-proj');
+mongoose.connect('mongodb://127.0.0.1:27017/node-game-proj');
 
 
 module.exports = app;
