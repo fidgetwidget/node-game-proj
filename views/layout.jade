@@ -6,7 +6,6 @@ html
     script(src='/javascripts/lib/underscore.min.js')
     script(src='/javascripts/lib/classie.js')
     script(src='/javascripts/lib/jquery.min.js')
-    script(src='/javascripts/app.js')
     script(src='/socket.io/socket.io.js')
   body
 
@@ -16,13 +15,32 @@ html
     #content
       block content
 
+
+    #loading
+      .text Loading...
+
     //- footer
     //-   block footer
 
     script. 
-      Game.init()
-        .loadChunks(-1,-1)
-        .loadChunks(0,-1)
-        .loadChunks(-1,0)
-        .loadChunks(0,0)
-      Game.createPlayer()
+      var $loading = $('#loading');
+      var $content = $('#content');
+      $content.hide()
+
+      $(window).load( function() {
+
+          Game.init()
+            .loadChunks(-1,-1)
+            .loadChunks(0,-1)
+            .loadChunks(-1,0)
+            .loadChunks(0,0)
+          Game.createPlayer()
+
+          $content.show()
+          $loading.find('.text').hide()
+          $loading.fadeOut(1400)
+
+        });
+
+    script(src='/javascripts/app.js' async)
+      

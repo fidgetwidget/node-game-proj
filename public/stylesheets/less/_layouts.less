@@ -21,6 +21,31 @@ body {
   // background-repeat: no-repeat;
 }
 
+body, 
+#loading {
+  background-color: #111108;
+}
+
+body > #loading {
+  position: fixed;
+  top:    0px;
+  left:   0px;
+  width:  100%;
+  height: 100%;
+
+  .text {
+    position: absolute;
+    width: 100%;
+    top: 50%;
+    left: 0;
+    margin-top: -36px;
+    line-height: 36px;
+    font-size: 28px;
+    color: white;
+    text-align: center;
+  }
+}
+
 body > #content {
   .content-center;
   position: relative;
@@ -39,3 +64,5 @@ body > #content {
     clear: both;
   }
 }
+
+
