@@ -24,10 +24,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 /// routes
 
-var routes = require('./routes/index');
-app.use('/', routes);
+var index = require('./routes/index');
+app.use('/', index);
 
-var api = require('./controllers/api');
+var api = require('./routes/api');
 app.use('/api', api)
 
 /// catch 404 and forward to error handler
