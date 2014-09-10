@@ -67,14 +67,12 @@ db.once('open', function() {});
 
 var mongoUriString = 
     process.env.MONGOHQ_URL ||
-    process.env.MONGOLAB_URI ||
-    process.env.MONGOSOUP_URL ||
     'mongodb://127.0.0.1:27017/node-game-proj'
 
 mongoose.connect(mongoUriString, function(err, res) {
   if (err) {
     console.log('ERROR: connecting to: ' + mongoUriString + '. ' + err);
-  } else if (res) {
+  } else {
     console.log ('Succeeded connected to: ' + mongoUriString);
   }
 });
