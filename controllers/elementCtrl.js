@@ -3,13 +3,13 @@ var models = require('../models/models.js');
 
 var Chunk = models.Chunk.Model;
 
-var element = {}
+var ElementCtrl = {}
 
 // 
 // POST ACTION
 // 
 
-element.post = (function(req, res) {
+ElementCtrl.post = (function(req, res) {
 
   var params    = req['body'];
   var chunk     = params['chunk'];
@@ -52,7 +52,7 @@ element.post = (function(req, res) {
 // DELETE ACTION
 // 
 
-element.del = (function(req, res) {
+ElementCtrl.del = (function(req, res) {
   var params    = req['body'];
   var chunk     = params['chunk'];
   var cx        = chunk['x'];
@@ -94,7 +94,7 @@ element.del = (function(req, res) {
 // GET ACTION
 // 
 
-element.get = (function(req, res) {
+ElementCtrl.get = (function(req, res) {
   var args, cx, cy, tx, ty;
 
   args  = req.params.chunk_x_y.split('_');
@@ -122,4 +122,4 @@ element.get = (function(req, res) {
   
 });
 
-module.exports = element
+module.exports = ElementCtrl

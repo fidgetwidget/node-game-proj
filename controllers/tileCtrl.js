@@ -3,13 +3,13 @@ var models = require('../models/models.js');
 
 var Chunk = models.Chunk.Model;
 
-var tile = {}
+var TileCtrl = {}
 
 // 
 // POST ACTION
 // 
 
-tile.post = (function(req, res) {
+TileCtrl.post = (function(req, res) {
 
   var params    = req['body'];
   var chunk     = params['chunk'];
@@ -54,7 +54,7 @@ tile.post = (function(req, res) {
 // DELETE ACTION
 // 
 
-tile.del = (function(req, res) {
+TileCtrl.del = (function(req, res) {
   var params    = req['body'];
   var chunk     = params['chunk'];
   var cx        = chunk['x'];
@@ -89,7 +89,7 @@ tile.del = (function(req, res) {
 // GET ACTION
 // 
 
-tile.get = (function(req, res) {
+TileCtrl.get = (function(req, res) {
   var args, cx, cy, tx, ty;
 
   args  = req.params.chunk_x_y.split('_');
@@ -117,4 +117,4 @@ tile.get = (function(req, res) {
   
 });
 
-module.exports = tile
+module.exports = TileCtrl

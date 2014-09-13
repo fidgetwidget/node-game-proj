@@ -3,13 +3,13 @@ var models = require('../models/models.js');
 
 var Chunk = models.Chunk.Model;
 
-var chunk = {}
+var ChunkCtrl = {}
 
 // 
 // POST ACTIONS
 // 
 
-chunk.post = (function(req, res) {
+ChunkCtrl.post = (function(req, res) {
   
   var params    = req['body'];
   // TODO: ensure the params are safe
@@ -44,7 +44,7 @@ chunk.post = (function(req, res) {
 // 
 
 // get the chunk
-chunk.get = (function(req, res) {
+ChunkCtrl.get = (function(req, res) {
   var args, cx, cy;
   // turn the params into useable x, y coords
   args    = req.params.chunk_x_y.split('_');
@@ -57,4 +57,4 @@ chunk.get = (function(req, res) {
     });
 });
 
-module.exports = chunk
+module.exports = ChunkCtrl
