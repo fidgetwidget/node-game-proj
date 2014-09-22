@@ -654,8 +654,11 @@
 
 
 .tile {
+  .tile-pos( @CHUNKSIZE );
   position: absolute;
   box-sizing: border-box;
+  width: @TILESIZE;
+  height: @TILESIZE;
   background-image: url('../images/tiles.png');
   background-size: @TILESHEET_SIZE @TILESHEET_SIZE;
 

@@ -27,15 +27,16 @@ class @Entity
   #
   constructor: (@type, @name, @x=0, @y=0) ->
     @$elm = document.createElement('div')
-    @$elm.className = "entity #{@type} w#{@width} h#{@height}"
+    @$elm.className = "entity #{@type} "
 
     ## DEBUG
     console.log "#{@type} #{@name} created." if Game._debug
 
 
   setPosition: () ->
+    @$elm.className   = "entity #{@type} cx#{@cx} cy#{@cy}"
     @$elm.style.top   = "#{(@y*TILE_SIZE) - @offsetY}px"
-    @$elm.style.left  = "#{(@x*TILE_SIZE) - @offsetX}px"
+    @$elm.style.left  = "#{(@y*TILE_SIZE) - @offsetY}px"
     @
 
 
@@ -48,7 +49,7 @@ class @Entity
       if Game.entities[@type]
         # do we have to move the entity?
         if Game.entities[@type][_oldName]
-          Game.addEntity this 
+          Game.addEntity this, @cx, @cy
           delete Game.entities[@type][_oldName]
 
      ## DEBUG
@@ -63,7 +64,7 @@ class @Entity
   # DEFAULT behaviour:
   # - add self to the games entities
   # - and selfs element to the entities container
-  addSelf: (game) =>
+  addSelf: (game, cx, cy) =>
     game.entities[@type][@name] = this
     game.$entities.appendChild @$elm
     

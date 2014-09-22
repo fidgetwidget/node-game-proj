@@ -14,10 +14,9 @@ class @Game
   @chunksElm:   undefined
 
   @$viewport:  undefined
-  @$tiles:      undefined
-  @$elements:   undefined
+  
   @$entities:   undefined
-  @$playerLayer:undefined
+  @$players:    undefined
 
   @listeners:   undefined
 
@@ -44,10 +43,13 @@ class @Game
 
     Game.$viewport = document.getElementById 'main'
 
-    @$playerLayer = document.createElement('div')
-    @$playerLayer.className = 'players'
+    @$players = document.createElement('div')
+    @$players.className = 'players'
+    @$entities = document.createElement('div')
+    @$entities.className = 'entities'    
 
-    Game.$viewport.appendChild @$playerLayer
+    Game.$viewport.appendChild @$players
+    Game.$viewport.appendChild @$entities
 
     # TODO: create the chunkElms
 
@@ -146,12 +148,12 @@ class @Game
 
   # Set Center
   @setCenter: (x, y, cx, cy) ->
-    classie.remove @$viewport, "x#{@centerX}"
-    classie.remove @$viewport, "y#{@centerY}"
+    @$viewport.classList.remove("x#{@centerX}")
+    @$viewport.classList.remove("y#{@centerY}")
     @centerX = x - HALF_WIDTH
     @centerY = y - HALF_HEIGHT
-    classie.add @$viewport, "x#{@centerX}"
-    classie.add @$viewport, "y#{@centerY}"
+    @$viewport.classList.add("x#{@centerX}")
+    @$viewport.classList.add("y#{@centerY}")
 
     $(@$viewport).find('.chunk').css({
       marginTop:  "#{GRID_HEIGHT*-cy}px"
@@ -195,24 +197,25 @@ class @Game
 
 
   @setTilesBaseClass: (chunk) ->
+    $tiles = @chunksElm[chunk.x][chunk.y].$tiles
     for typ in TILE_TYPES
-        classie.remove @chunksElm[chunk.x][chunk.y].$tiles, typ
-      classie.add @chunksElm[chunk.x][chunk.y].$tiles, TILE_TYPES[chunk.base]
+        $tiles.classList.remove(typ)
+      $tiles.classList.add(TILE_TYPES[chunk.base])
 
   # Insert an entity to the game
-  @addEntity: (entity) ->
+  @addEntity: (entity, cx, cy) ->
     type = entity.type
     unless @entities[type]
       @entities[type] = {}  
     return null if @entities[type][entity.name]
 
-    entity.addSelf this
+    entity.addSelf this, cx, cy
 
     return entity
 
   @addTree: (cx, cy, x, y, treeType) ->
     entity = new Tree(treeType, x, y, cx, cy)
-    Game.addEntity(entity)
+    Game.addEntity(entity, cx, cy)
 
 
   @addPlayer: (player) ->
@@ -246,7 +249,7 @@ class @Game
   @addItem: (type, x, y, cx, cy, count=1) ->
     return null if @chunks[cx] is undefined or @chunks[cx][cy] is undefined
     item = new Item(type, x, y, count)
-    @addEntity(item)
+    @addEntity(item, cx, cy)
     @chunks[cx][cy].setItem(x, y, item)
 
 
@@ -254,7 +257,7 @@ class @Game
   @addItem_at: (xi, yi, cx, cy, item) ->
     return null if @chunks[cx] is undefined or @chunks[cx][cy] is undefined
     _item = new Item(item.type, xi, yi, item.count)
-    @addEntity(_item)
+    @addEntity(_item, cx, cy)
     @chunks[cx][cy].setItem(xi, yi, _item)
 
 
@@ -303,7 +306,7 @@ class @Game
     $element = @getElementElm xi, yi, cx, cy
     if !(element is undefined or element is null)
       if $element
-        return if classie.has $element, ELM_TYPES[element]
+        return if $element.classList.contains(ELM_TYPES[element])
         # CHANGE TILE AT
         @removeListener $element
         @changeElementElm($element, xi, yi, cx, cy, element)
@@ -338,8 +341,8 @@ class @Game
     was = @chunks[cx][cy].getElement(xi, yi)
     console.log "changed element at x:#{xi} y:#{yi} from: #{ELM_TYPES[was]}  to: #{ELM_TYPES[element]}"
     for type in ELM_TYPES
-        classie.remove $element, type
-      classie.add $element, "#{ELM_TYPES[element]}"
+        $element.classList.remove(type)
+      $element.classList.add("#{ELM_TYPES[element]}")
     return $element
 
 
@@ -399,7 +402,7 @@ class @Game
     $tile = @getTileElm xi, yi, cx, cy
     if !(value is undefined or value is null)
       if $tile
-        return if classie.has $tile, TILE_TYPES[value]
+        return if $tile.classList.contains(TILE_TYPES[value])
         # CHANGE TILE AT
         @removeListener $tile
         @changeTileElm($tile, xi, yi, cx, cy, value)
@@ -437,8 +440,8 @@ class @Game
   @changeTileElm: ($tile, xi, yi, cx, cy, value) ->
     console.log "changed tile at x:#{xi} y:#{yi}"
     for type in TILE_TYPES
-        classie.remove $tile, type
-      classie.add $tile, "#{TILE_TYPES[value]}"
+        $tile.classList.remove(type)
+      $tile.classList.add("#{TILE_TYPES[value]}")
     return $tile
 
 
@@ -469,8 +472,8 @@ class @Game
 
   @setTileKlass: ($tile, xi, yi, cx, cy, value) ->
     for dir in TILE_DIRECTIONS
-      classie.remove $tile, dir
-    classie.remove $tile, 'none'
+      $tile.classList.remove(dir)
+    $tile.classList.remove('none')
 
     klass = @getNeightbors(value, xi, yi, cx, cy)
     $tile.className += klass
@@ -502,10 +505,10 @@ class @Game
           elm   = @getTileElm( xi-1, yi-1, cx, cy)
 
         if @isNeightbor(tile, tile_type)
-          classie.add elm, 'se' if elm?
+          elm.classList.add('se') if elm?
           return true
         else if elm?
-          classie.remove elm, 'se'
+          elm.classList.remove('se')
         return false
 
       when 'n'  
@@ -517,10 +520,10 @@ class @Game
           elm   = @getTileElm( xi,   yi-1, cx, cy)
 
         if @isNeightbor(tile, tile_type)
-          classie.add elm, 's' if elm?
+          elm.classList.add('s') if elm?
           return true
         else if elm?
-          classie.remove elm, 's'
+          elm.classList.remove('s')
         return false
 
       when 'ne' 
@@ -538,10 +541,10 @@ class @Game
           elm   = @getTileElm( xi+1, yi-1, cx, cy)
 
         if @isNeightbor(tile, tile_type)
-          classie.add elm, 'sw' if elm?
+          elm.classList.add('sw') if elm?
           return true
         else if elm?
-          classie.remove elm, 'sw'
+          elm.classList.remove('sw')
         return false
         
       when 'e'  
@@ -553,10 +556,10 @@ class @Game
           elm   = @getTileElm( xi+1, yi,   cx, cy)
 
         if @isNeightbor(tile, tile_type)
-          classie.add elm, 'w' if elm?
+          elm.classList.add('w') if elm?
           return true
         else if elm?
-          classie.remove elm, 'w'  
+          elm.classList.remove('w')
         return false
         
       when 'se' 
@@ -574,10 +577,10 @@ class @Game
           elm   = @getTileElm( xi+1, yi+1, cx, cy)
 
         if @isNeightbor(tile, tile_type)
-          classie.add elm, 'nw' if elm?
+          elm.classList.add('nw') if elm?
           return true
         else if elm?
-          classie.remove elm, 'nw'
+          elm.classList.remove('nw')
         return false
 
       when 's'
@@ -589,10 +592,10 @@ class @Game
           elm   = @getTileElm( xi,   yi+1, cx, cy)
 
         if @isNeightbor(tile, tile_type)
-          classie.add elm, 'n' if elm?
+          elm.classList.add('n') if elm?
           return true
         else if elm?
-          classie.remove elm, 'n'
+          elm.classList.remove('n')
         return false
 
       when 'sw' 
@@ -610,10 +613,10 @@ class @Game
           elm   = @getTileElm( xi-1, yi+1, cx, cy)
 
         if @isNeightbor(tile, tile_type)
-          classie.add elm, 'ne' if elm?
+          elm.classList.add('ne') if elm?
           return true
         else if elm?
-          classie.remove elm, 'ne'
+          elm.classList.remove('ne')
         return false
 
       when 'w'
@@ -625,10 +628,10 @@ class @Game
           elm   = @getTileElm( xi-1, yi,   cx, cy)
 
         if @isNeightbor(tile, tile_type)
-          classie.add elm, 'e' if elm?
+          elm.classList.add('e') if elm?
           return true
         else if elm?
-          classie.remove elm, 'e'
+          elm.classList.remove('e')
         return false
 
       else 

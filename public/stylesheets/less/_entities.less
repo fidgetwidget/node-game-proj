@@ -6,40 +6,6 @@
 .entity {
   .tile;
 
-  &.player {
-    top:    @DISPLAY_SIZE/2;
-    left:   @DISPLAY_SIZE/2;
-
-    background-image: url('../images/entities.png');
-    // background-position: 0 -@TILESIZE*2;
-    .background-pos(0, 2);
-    width: @TILESIZE*2;
-    height: @TILESIZE*2;
-    margin-top:-@TILESIZE/2;
-    margin-left:-@TILESIZE/2;
-
-    &.n {
-      // background-position-x: -@TILESIZE*2;
-      .background-pos(2, 2);
-    }
-    &.s {
-      // background-position-x: 0; 
-      .background-pos(0, 2);
-    }
-    &.w {
-      // background-position-x: -@TILESIZE*4; 
-      .background-pos(4, 2);
-    }
-    &.e {
-      // background-position-x: -@TILESIZE*4;
-      .background-pos(4, 2);
-      // temp: I need to change it to not use a flipped sprite, but a unique one
-              transform: scaleX(-1);
-         -moz-transform: scaleX(-1);        
-      -webkit-transform: scaleX(-1);
-    }
-  }
-
   &.tree {
     background-color: transparent;
     background-image: url('../images/elements.png');

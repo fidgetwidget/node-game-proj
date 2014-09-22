@@ -3,9 +3,13 @@ html
   head
     title= title
     link(rel='stylesheet', href='/stylesheets/style.css')
-    script(src='/javascripts/lib/underscore.min.js')
-    script(src='/javascripts/lib/classie.js')
-    script(src='/javascripts/lib/jquery.min.js')
+
+    script(src='//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js')
+    script(src='//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.map')
+    script(src='//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js')
+    script(src='//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.map')
+
+    script(src='/javascripts/lib/pollyfills.js')
     script(src='/socket.io/socket.io.js')
   body
 

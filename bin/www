@@ -9,5 +9,5 @@ var server = app.listen( app.get('port'), function() {
   });
 
 // Socket IO communication for real time multiplayer
-var messaging = require('../lib/messaging');
-messaging(server);
+var io = require('../lib/Game').io;
+io(server);

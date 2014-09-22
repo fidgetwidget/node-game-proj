@@ -17,8 +17,8 @@ class @Tree extends Entity
     @
 
 
-  addSelf: (game) =>
-    super(game)
+  addSelf: (game, cx, cy) =>
+    super(game, cx, cy)
     game.setElement_at(@x, @y, @cx, @cy, _.indexOf(ELM_TYPES, 'tree'))
     @_$elm = game.getElementElm @x, @y, @cx, @cy
     

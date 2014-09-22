@@ -10,13 +10,14 @@
 }
 
 .tile-offset(@target, @n, @i: -@n) when (@i =< @n) {
+  @t: ~"@{target}";
   &.x@{i} {
-    .@{target} {
+    @{t} {
       left: -(@i * @TILESIZE);
     }
   }
   &.y@{i} {
-    .@{target} {
+    @{t} {
       top: -(@i * @TILESIZE);
     }
   }
@@ -74,30 +75,22 @@
     -webkit-transform: translate3D(0,0,0);
   }
 
-  .tile-offset(chunk,     @CHUNKSIZE);
+  
+
+  .entities {
+    z-index: 100;
+    .chunk-offset-x(32);
+  }
+
+  .tile-offset('.chunk', @CHUNKSIZE/2);
+  .tile-offset('.entities .entity', @CHUNKSIZE/2);
+
   .players {
     position: absolute;
-    z-index: 999;
+    z-index: 90;
   }
 
 }
-
-.tile,
-.entity {
-  position: absolute;
-  box-sizing: border-box;
-}
-.tile {
-  .tile-pos( @CHUNKSIZE );
-  width: @TILESIZE;
-  height: @TILESIZE;
-
-  &.top     { border-top:     1px solid #aaa; }
-  &.left    { border-left:    1px solid #aaa; }
-  &.bottom  { border-bottom:  1px solid #aaa; }
-  &.right   { border-right:   1px solid #aaa; }
-}
-
 
 #main {
   .tiles,

@@ -27,7 +27,7 @@ class @PlayerEntity extends Entity
 
     @tool = 'none'
     @facing = SOUTH
-    @inventory = new PlayerInventory(this)
+    # @inventory = new PlayerInventory(this)
     @actions = new PlayerActions(this)
     
     @bindEvents()
@@ -35,7 +35,7 @@ class @PlayerEntity extends Entity
 
 
   addSelf: (game) =>
-    game.$playerLayer.appendChild @$elm
+    game.$players.appendChild @$elm
 
 
   # attach events the player should be listenting to
@@ -59,9 +59,9 @@ class @PlayerEntity extends Entity
   face: (dir) ->
     # only change it when it changes
     unless @facing is dir
-      classie.removeClass @$elm, @facing
+      @$elm.classList.remove(@facing)
       @facing = dir
-      classie.addClass @$elm, @facing
+      @$elm.classList.add(@facing)
     @
 
   getXFacing: () ->
@@ -183,7 +183,7 @@ class @PlayerEntity extends Entity
   collectItems: (x, y) ->
     item = Game.getItem(x, y, @cx, @cy)
     if item != undefined and item != null
-      @inventory.addItem(item.type, item.count)
+      # @inventory.addItem(item.type, item.count)
       Game.removeItem(x, y, @cx, @cy)
 
        
