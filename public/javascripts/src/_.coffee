@@ -47,7 +47,7 @@ this.FACING = [
 this.DIR_LEFT   = [ LEFT_KEY, A_KEY ]
 this.DIR_UP     = [ UP_KEY, W_KEY ]  
 this.DIR_RIGHT  = [ RIGHT_KEY, D_KEY ]
-this.DIR_DOWN   = [ DOWN_KEY, W_KEY ]
+this.DIR_DOWN   = [ DOWN_KEY, S_KEY ]
 
 this.DIR_TO_FACING = {
   DIR_LEFT: WEST
