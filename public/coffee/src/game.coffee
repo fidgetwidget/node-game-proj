@@ -42,8 +42,14 @@ class @Game
     @chunksElm = {}
 
     Game.$viewport = document.getElementById 'main'
+    # adding a layer to position everything correctly in the scene
     Game.$background = enchant.Group()
     game.rootScene.addChild(Game.$background)
+    Game.$background.x = game.width/2
+    Game.$background.y = game.height/2
+    # adding a layer to position all objects (except player) for apparent movement
+    Game.$backgroundObjects = enchant.Group()
+    Game.$background.addChild(Game.$backgroundObjects)
 
     @$players = document.createElement('div')
     @$players.className = 'players'
@@ -163,8 +169,8 @@ class @Game
       marginTop:  "#{GRID_HEIGHT*-cy}px"
       marginLeft: "#{GRID_HEIGHT*-cx}px"
       })
-    Game.$background.x = - x * TILE_SIZE
-    Game.$background.y = - y * TILE_SIZE
+    Game.$backgroundObjects.x = - x * TILE_SIZE
+    Game.$backgroundObjects.y = - y * TILE_SIZE
 
   # Unload a chunk
   @_unloadChunk: (cx, cy, unsub=true) ->
@@ -237,7 +243,7 @@ class @Game
     return @entities[type][name]
 
 
-  # Remoge an Entity
+  # Remove an Entity
   @removeEntity: (entitiy) ->
     type = entitiy.type
     return false unless @entities[type]
@@ -341,7 +347,7 @@ class @Game
 
   # add the tile elm to the dom
   @addElementElm: (xi, yi, cx, cy, element) ->
-    console.log("addElementElm")
+    console.log("addElementElm ",element)
     $element = @makeElement(cx, cy, xi, yi, ELM_TYPES[element])
     @chunksElm[cx][cy].$elements.appendChild $element
     return $element
@@ -361,8 +367,16 @@ class @Game
 
 
   @makeElement: (cx, cy, xi, yi, element_type) ->
-    #console.log("makeElement")
+    console.log("makeElement ", element_type, "at", xi,yi)
     r = _.random(0,3)
+    $spriteEntity = new Sprite(16, 16)
+    $spriteEntity.image = game.assets["images/elements.png"]
+    $spriteEntity.frame = ELM_SPRITEINDEX[ELM_TYPES.indexOf(element_type)]
+    console.log("frame ",$spriteEntity.frame)
+    $spriteEntity.scale = 2
+    Game.$backgroundObjects.addChild($spriteEntity)
+    $spriteEntity.x = xi * TILE_SIZE
+    $spriteEntity.y = yi * TILE_SIZE
     $element = document.createElement('div')
     $element.className = "elm #{element_type} x#{xi} y#{yi} cx#{cx} cy#{cy} r#{r}"
     return $element
@@ -447,14 +461,14 @@ class @Game
   @addTileElm: (xi, yi, cx, cy, value) ->
     #console.log("addTileElm at ", xi,yi)
     $tile = @makeTile(cx, cy, xi, yi, TILE_TYPES[value])
-    $tileSprite = @makeTileSprite(cx, cy, xi, yi, TILE_TYPES[value])
-    Game.$background.addChild($tileSprite)
+    $tileSprite = @makeTileSprite(cx, cy, xi, yi, TILE_INDEX[value])
+    Game.$backgroundObjects.addChild($tileSprite)
     @chunksElm[cx][cy].$tiles.appendChild $tile
     return $tile
 
   # alter the tile elm to match the new value
   @changeTileElm: ($tile, xi, yi, cx, cy, value) ->
-    console.log "changed tile at x:#{xi} y:#{yi}"
+    #console.log "changed tile at x:#{xi} y:#{yi}"
     for type in TILE_TYPES
         $tile.classList.remove(type)
       $tile.classList.add("#{TILE_TYPES[value]}")
@@ -467,17 +481,17 @@ class @Game
 
 
   @makeTile: (cx, cy, xi, yi, tile_type) ->
-    console.log("makeTile - creating a tile at", xi,yi)
+    #console.log("makeTile - creating a tile at", xi,yi)
     r = _.random(0,3)
     $tile = document.createElement('div')
     $tile.className = "tile #{tile_type} x#{xi} y#{yi} cx#{cx} cy#{cy} r#{r}"
     return $tile
 
   @makeTileSprite: (cx, cy, xi, yi, tile_type) ->
-    console.log("makeTileSprite - creating a tile at", xi,yi, "type", tile_type)
+    #console.log("makeTileSprite - creating a tile at", xi,yi, "type", tile_type)
     $tile = new Sprite(16, 16)
     $tile.image = game.assets["images/tiles.png"]
-    $tile.frame = 1
+    $tile.frame = tile_type
     $tile.scale = 2
     console.log("sprite scale", $tile.scale, "size ",$tile.width,$tile.height)
     $tile.x = xi * TILE_SIZE;

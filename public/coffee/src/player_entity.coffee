@@ -36,7 +36,7 @@ class @PlayerEntity extends Entity
 
   addSelf: (toGame) =>
     toGame.$players.appendChild @$elm
-    game.rootScene.addChild(@$spriteEntity)
+    Game.$background.addChild(@$spriteEntity)
 
 
   # attach events the player should be listenting to

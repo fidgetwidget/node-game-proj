@@ -29,12 +29,12 @@ class @Entity
   # Entity Constructor
   #
   constructor: (@type, @name, @x=0, @y=0) ->
-    console.log("constructor entity")
+    console.log("constructor entity type", @type)
     @$spriteEntity = new Sprite(32, 32)
     @$spriteEntity.image = game.assets["images/entities.png"]
-    @$spriteEntity.frame = 8
+    @$spriteEntity.frame = ELM_SPRITEINDEX[ELM_TYPES.indexOf(@type)]
     @$spriteEntity.scale = 2
-    #game.rootScene.addChild(@$spriteEntity)
+    #Game.$background.addChild(@$spriteEntity)
     @$elm = document.createElement('div')
     @$elm.className = "entity #{@type} "
 

@@ -87,15 +87,19 @@
 
   this.NONE = 'none';
 
-  this.ELM_TYPES = ['soil', 'wateredSoil', 'weed', '_0', 'stump', 'bush', 'branch', 'stones', 'rock', 'ore', 'fence', '_1', 'stick', 'roots', 'thicket', 'grass', 'tree'];
+  this.ELM_SPRITEINDEX = ['soil', 'wateredSoil', 'weed', '_0', 19, 35, 17, 49, 48, 51, 21, '_1', 'stick', 19, 19, 'grass', 'tree', 8];
 
-  this.COLLIDER_ELMS = [false, false, true, false, true, true, true, false, true, true, true, true, false, true, true, false, true];
+  this.ELM_TYPES = ['soil', 'wateredSoil', 'weed', '_0', 'stump', 'bush', 'branch', 'stones', 'rock', 'ore', 'fence', '_1', 'stick', 'roots', 'thicket', 'grass', 'tree', 'player'];
+
+  this.COLLIDER_ELMS = [false, false, true, false, true, true, true, false, true, true, true, true, false, true, true, false, true, false];
 
   this.ITEM_TYPES = ['small_stick', 'sharp_stick', 'small_stone', 'sharp_stone', 'large_stone', 'large_stick', 'wood', 'stone'];
 
   this.TILE_DIRECTIONS = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
 
   this.TILE_TYPES = ['dirt', 'grass', 'sand', 'worn_path', 'hole', 'dirt_cliff', 'rock_cliff', 'mud', 'water'];
+
+  this.TILE_INDEX = [0, 1, 4, 7, 33, 36, 39, 65, 68];
 
   this.COLLIDER_TILES = [false, false, false, false, true, true, true, false, true];
 
@@ -467,10 +471,10 @@
       this.removeSelf = __bind(this.removeSelf, this);
       this.addSelf = __bind(this.addSelf, this);
       this.rename = __bind(this.rename, this);
-      console.log("constructor entity");
+      console.log("constructor entity type", this.type);
       this.$spriteEntity = new Sprite(32, 32);
       this.$spriteEntity.image = game.assets["images/entities.png"];
-      this.$spriteEntity.frame = 8;
+      this.$spriteEntity.frame = ELM_SPRITEINDEX[ELM_TYPES.indexOf(this.type)];
       this.$spriteEntity.scale = 2;
       this.$elm = document.createElement('div');
       this.$elm.className = "entity " + this.type + " ";
@@ -601,6 +605,10 @@
       Game.$viewport = document.getElementById('main');
       Game.$background = enchant.Group();
       game.rootScene.addChild(Game.$background);
+      Game.$background.x = game.width / 2;
+      Game.$background.y = game.height / 2;
+      Game.$backgroundObjects = enchant.Group();
+      Game.$background.addChild(Game.$backgroundObjects);
       this.$players = document.createElement('div');
       this.$players.className = 'players';
       this.$entities = document.createElement('div');
@@ -733,8 +741,8 @@
         marginTop: "" + (GRID_HEIGHT * -cy) + "px",
         marginLeft: "" + (GRID_HEIGHT * -cx) + "px"
       });
-      Game.$background.x = -x * TILE_SIZE;
-      return Game.$background.y = -y * TILE_SIZE;
+      Game.$backgroundObjects.x = -x * TILE_SIZE;
+      return Game.$backgroundObjects.y = -y * TILE_SIZE;
     };
 
     Game._unloadChunk = function(cx, cy, unsub) {
@@ -958,7 +966,7 @@
 
     Game.addElementElm = function(xi, yi, cx, cy, element) {
       var $element;
-      console.log("addElementElm");
+      console.log("addElementElm ", element);
       $element = this.makeElement(cx, cy, xi, yi, ELM_TYPES[element]);
       this.chunksElm[cx][cy].$elements.appendChild($element);
       return $element;
@@ -981,8 +989,17 @@
     };
 
     Game.makeElement = function(cx, cy, xi, yi, element_type) {
-      var $element, r;
+      var $element, $spriteEntity, r;
+      console.log("makeElement ", element_type, "at", xi, yi);
       r = _.random(0, 3);
+      $spriteEntity = new Sprite(16, 16);
+      $spriteEntity.image = game.assets["images/elements.png"];
+      $spriteEntity.frame = ELM_SPRITEINDEX[ELM_TYPES.indexOf(element_type)];
+      console.log("frame ", $spriteEntity.frame);
+      $spriteEntity.scale = 2;
+      Game.$backgroundObjects.addChild($spriteEntity);
+      $spriteEntity.x = xi * TILE_SIZE;
+      $spriteEntity.y = yi * TILE_SIZE;
       $element = document.createElement('div');
       $element.className = "elm " + element_type + " x" + xi + " y" + yi + " cx" + cx + " cy" + cy + " r" + r;
       return $element;
@@ -1069,15 +1086,14 @@
     Game.addTileElm = function(xi, yi, cx, cy, value) {
       var $tile, $tileSprite;
       $tile = this.makeTile(cx, cy, xi, yi, TILE_TYPES[value]);
-      $tileSprite = this.makeTileSprite(cx, cy, xi, yi, TILE_TYPES[value]);
-      Game.$background.addChild($tileSprite);
+      $tileSprite = this.makeTileSprite(cx, cy, xi, yi, TILE_INDEX[value]);
+      Game.$backgroundObjects.addChild($tileSprite);
       this.chunksElm[cx][cy].$tiles.appendChild($tile);
       return $tile;
     };
 
     Game.changeTileElm = function($tile, xi, yi, cx, cy, value) {
       var type, _i, _len;
-      console.log("changed tile at x:" + xi + " y:" + yi);
       for (_i = 0, _len = TILE_TYPES.length; _i < _len; _i++) {
         type = TILE_TYPES[_i];
         $tile.classList.remove(type);
@@ -1095,7 +1111,6 @@
 
     Game.makeTile = function(cx, cy, xi, yi, tile_type) {
       var $tile, r;
-      console.log("makeTile - creating a tile at", xi, yi);
       r = _.random(0, 3);
       $tile = document.createElement('div');
       $tile.className = "tile " + tile_type + " x" + xi + " y" + yi + " cx" + cx + " cy" + cy + " r" + r;
@@ -1104,10 +1119,9 @@
 
     Game.makeTileSprite = function(cx, cy, xi, yi, tile_type) {
       var $tile;
-      console.log("makeTileSprite - creating a tile at", xi, yi, "type", tile_type);
       $tile = new Sprite(16, 16);
       $tile.image = game.assets["images/tiles.png"];
-      $tile.frame = 1;
+      $tile.frame = tile_type;
       $tile.scale = 2;
       console.log("sprite scale", $tile.scale, "size ", $tile.width, $tile.height);
       $tile.x = xi * TILE_SIZE;
@@ -2006,7 +2020,7 @@
 
     PlayerEntity.prototype.addSelf = function(toGame) {
       toGame.$players.appendChild(this.$elm);
-      return game.rootScene.addChild(this.$spriteEntity);
+      return Game.$background.addChild(this.$spriteEntity);
     };
 
     PlayerEntity.prototype.bindEvents = function() {
