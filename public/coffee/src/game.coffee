@@ -475,9 +475,11 @@ class @Game
 
   @makeTileSprite: (cx, cy, xi, yi, tile_type) ->
     console.log("makeTileSprite - creating a tile at", xi,yi, "type", tile_type)
-    $tile = new Sprite(32, 32)
+    $tile = new Sprite(16, 16)
     $tile.image = game.assets["images/tiles.png"]
     $tile.frame = 1
+    $tile.scale = 2
+    console.log("sprite scale", $tile.scale, "size ",$tile.width,$tile.height)
     $tile.x = xi * TILE_SIZE;
     $tile.y = yi * TILE_SIZE;
     return $tile

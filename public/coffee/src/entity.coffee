@@ -31,9 +31,10 @@ class @Entity
   constructor: (@type, @name, @x=0, @y=0) ->
     console.log("constructor entity")
     @$spriteEntity = new Sprite(32, 32)
-    @$spriteEntity.image = game.assets["res/entities.png"]
+    @$spriteEntity.image = game.assets["images/entities.png"]
     @$spriteEntity.frame = 8
-    game.rootScene.addChild(@$spriteEntity)
+    @$spriteEntity.scale = 2
+    #game.rootScene.addChild(@$spriteEntity)
     @$elm = document.createElement('div')
     @$elm.className = "entity #{@type} "
 

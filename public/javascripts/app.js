@@ -469,9 +469,9 @@
       this.rename = __bind(this.rename, this);
       console.log("constructor entity");
       this.$spriteEntity = new Sprite(32, 32);
-      this.$spriteEntity.image = game.assets["res/entities.png"];
+      this.$spriteEntity.image = game.assets["images/entities.png"];
       this.$spriteEntity.frame = 8;
-      game.rootScene.addChild(this.$spriteEntity);
+      this.$spriteEntity.scale = 2;
       this.$elm = document.createElement('div');
       this.$elm.className = "entity " + this.type + " ";
       if (Game._debug) {
@@ -1105,9 +1105,11 @@
     Game.makeTileSprite = function(cx, cy, xi, yi, tile_type) {
       var $tile;
       console.log("makeTileSprite - creating a tile at", xi, yi, "type", tile_type);
-      $tile = new Sprite(32, 32);
+      $tile = new Sprite(16, 16);
       $tile.image = game.assets["images/tiles.png"];
       $tile.frame = 1;
+      $tile.scale = 2;
+      console.log("sprite scale", $tile.scale, "size ", $tile.width, $tile.height);
       $tile.x = xi * TILE_SIZE;
       $tile.y = yi * TILE_SIZE;
       return $tile;
