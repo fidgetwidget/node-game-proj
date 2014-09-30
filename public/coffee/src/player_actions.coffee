@@ -65,6 +65,9 @@ class @PlayerActions
 
 
   actOnTile: (tile_type, x, y, cx, cy, alt=false) ->
+    # Game.randomWorld(0,0);
+    # Game.saveChunk(0,0);
+
     # depending on the type of tile, do something
     # and update the state of the tile in the game.
 

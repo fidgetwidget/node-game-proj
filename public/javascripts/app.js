@@ -445,6 +445,10 @@
 
     Entity.prototype.$elm = void 0;
 
+    Entity.prototype.sprite = void 0;
+
+    Entity.prototype.$sprite = void 0;
+
     Entity.prototype.width = 32;
 
     Entity.prototype.height = 32;
@@ -463,6 +467,11 @@
       this.removeSelf = __bind(this.removeSelf, this);
       this.addSelf = __bind(this.addSelf, this);
       this.rename = __bind(this.rename, this);
+      console.log("constructor entity");
+      this.$spriteEntity = new Sprite(32, 32);
+      this.$spriteEntity.image = game.assets["res/entities.png"];
+      this.$spriteEntity.frame = 8;
+      game.rootScene.addChild(this.$spriteEntity);
       this.$elm = document.createElement('div');
       this.$elm.className = "entity " + this.type + " ";
       if (Game._debug) {
@@ -471,6 +480,9 @@
     }
 
     Entity.prototype.setPosition = function() {
+      this.$spriteEntity.x = this.y * TILE_SIZE - this.offsetY;
+      this.$spriteEntity.y = this.y * TILE_SIZE - this.offsetY;
+      console.log("position ", this.$spriteEntity.x, this.$spriteEntity.y);
       this.$elm.className = "entity " + this.type + " cx" + this.cx + " cy" + this.cy;
       this.$elm.style.top = "" + ((this.y * TILE_SIZE) - this.offsetY) + "px";
       this.$elm.style.left = "" + ((this.y * TILE_SIZE) - this.offsetY) + "px";
@@ -587,6 +599,8 @@
       this.listeners = {};
       this.chunksElm = {};
       Game.$viewport = document.getElementById('main');
+      Game.$background = enchant.Group();
+      game.rootScene.addChild(Game.$background);
       this.$players = document.createElement('div');
       this.$players.className = 'players';
       this.$entities = document.createElement('div');
@@ -685,6 +699,7 @@
 
     Game.addChunkElm = function(cx, cy) {
       var $chnkElm;
+      console.log("addChunkElm");
       $chnkElm = new ChunkElm(this.$viewport, cx, cy);
       if (!this.chunksElm[cx]) {
         this.chunksElm[cx] = {};
@@ -707,16 +722,19 @@
     };
 
     Game.setCenter = function(x, y, cx, cy) {
+      console.log("set center ", x, y);
       this.$viewport.classList.remove("x" + this.centerX);
       this.$viewport.classList.remove("y" + this.centerY);
       this.centerX = x - HALF_WIDTH;
       this.centerY = y - HALF_HEIGHT;
       this.$viewport.classList.add("x" + this.centerX);
       this.$viewport.classList.add("y" + this.centerY);
-      return $(this.$viewport).find('.chunk').css({
+      $(this.$viewport).find('.chunk').css({
         marginTop: "" + (GRID_HEIGHT * -cy) + "px",
         marginLeft: "" + (GRID_HEIGHT * -cx) + "px"
       });
+      Game.$background.x = -x * TILE_SIZE;
+      return Game.$background.y = -y * TILE_SIZE;
     };
 
     Game._unloadChunk = function(cx, cy, unsub) {
@@ -780,6 +798,7 @@
 
     Game.setTilesBaseClass = function(chunk) {
       var $tiles, typ, _i, _len;
+      console.log("setTilesBaseClass");
       $tiles = this.chunksElm[chunk.x][chunk.y].$tiles;
       for (_i = 0, _len = TILE_TYPES.length; _i < _len; _i++) {
         typ = TILE_TYPES[_i];
@@ -790,6 +809,7 @@
 
     Game.addEntity = function(entity, cx, cy) {
       var type;
+      console.log("addEntity");
       type = entity.type;
       if (!this.entities[type]) {
         this.entities[type] = {};
@@ -888,6 +908,7 @@
 
     Game.setElement = function(x, y, element) {
       var cx, cy, xi, yi;
+      console.log("setElement");
       xi = Math.floor(x / TILE_SIZE);
       yi = Math.floor(y / TILE_SIZE);
       cx = Math.floor(x / (CHUNK_WIDTH * TILE_SIZE));
@@ -937,6 +958,7 @@
 
     Game.addElementElm = function(xi, yi, cx, cy, element) {
       var $element;
+      console.log("addElementElm");
       $element = this.makeElement(cx, cy, xi, yi, ELM_TYPES[element]);
       this.chunksElm[cx][cy].$elements.appendChild($element);
       return $element;
@@ -988,6 +1010,7 @@
 
     Game.setTile = function(x, y, value) {
       var cx, cy, xi, yi;
+      console.log("set tile");
       xi = Math.floor(x / TILE_SIZE);
       yi = Math.floor(y / TILE_SIZE);
       cx = Math.floor(x / (CHUNK_WIDTH * TILE_SIZE));
@@ -1044,8 +1067,10 @@
     };
 
     Game.addTileElm = function(xi, yi, cx, cy, value) {
-      var $tile;
+      var $tile, $tileSprite;
       $tile = this.makeTile(cx, cy, xi, yi, TILE_TYPES[value]);
+      $tileSprite = this.makeTileSprite(cx, cy, xi, yi, TILE_TYPES[value]);
+      Game.$background.addChild($tileSprite);
       this.chunksElm[cx][cy].$tiles.appendChild($tile);
       return $tile;
     };
@@ -1070,9 +1095,21 @@
 
     Game.makeTile = function(cx, cy, xi, yi, tile_type) {
       var $tile, r;
+      console.log("makeTile - creating a tile at", xi, yi);
       r = _.random(0, 3);
       $tile = document.createElement('div');
       $tile.className = "tile " + tile_type + " x" + xi + " y" + yi + " cx" + cx + " cy" + cy + " r" + r;
+      return $tile;
+    };
+
+    Game.makeTileSprite = function(cx, cy, xi, yi, tile_type) {
+      var $tile;
+      console.log("makeTileSprite - creating a tile at", xi, yi, "type", tile_type);
+      $tile = new Sprite(32, 32);
+      $tile.image = game.assets["images/tiles.png"];
+      $tile.frame = 1;
+      $tile.x = xi * TILE_SIZE;
+      $tile.y = yi * TILE_SIZE;
       return $tile;
     };
 
@@ -1965,8 +2002,9 @@
       this;
     }
 
-    PlayerEntity.prototype.addSelf = function(game) {
-      return game.$players.appendChild(this.$elm);
+    PlayerEntity.prototype.addSelf = function(toGame) {
+      toGame.$players.appendChild(this.$elm);
+      return game.rootScene.addChild(this.$spriteEntity);
     };
 
     PlayerEntity.prototype.bindEvents = function() {

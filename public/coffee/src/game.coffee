@@ -42,6 +42,8 @@ class @Game
     @chunksElm = {}
 
     Game.$viewport = document.getElementById 'main'
+    Game.$background = enchant.Group()
+    game.rootScene.addChild(Game.$background)
 
     @$players = document.createElement('div')
     @$players.className = 'players'
@@ -130,6 +132,7 @@ class @Game
     return this
 
   @addChunkElm: (cx, cy) ->
+    console.log("addChunkElm")
     $chnkElm = new ChunkElm(@$viewport, cx, cy)
     @chunksElm[cx] = {} unless @chunksElm[cx]
     @chunksElm[cx][cy] = $chnkElm
@@ -148,6 +151,7 @@ class @Game
 
   # Set Center
   @setCenter: (x, y, cx, cy) ->
+    console.log("set center ",x,y)
     @$viewport.classList.remove("x#{@centerX}")
     @$viewport.classList.remove("y#{@centerY}")
     @centerX = x - HALF_WIDTH
@@ -159,7 +163,8 @@ class @Game
       marginTop:  "#{GRID_HEIGHT*-cy}px"
       marginLeft: "#{GRID_HEIGHT*-cx}px"
       })
-    
+    Game.$background.x = - x * TILE_SIZE
+    Game.$background.y = - y * TILE_SIZE
 
   # Unload a chunk
   @_unloadChunk: (cx, cy, unsub=true) ->
@@ -197,6 +202,7 @@ class @Game
 
 
   @setTilesBaseClass: (chunk) ->
+    console.log("setTilesBaseClass")
     $tiles = @chunksElm[chunk.x][chunk.y].$tiles
     for typ in TILE_TYPES
         $tiles.classList.remove(typ)
@@ -204,6 +210,7 @@ class @Game
 
   # Insert an entity to the game
   @addEntity: (entity, cx, cy) ->
+    console.log("addEntity")
     type = entity.type
     unless @entities[type]
       @entities[type] = {}  
@@ -289,6 +296,7 @@ class @Game
     return @getElement_at xi, yi, cx, cy
 
   @setElement: (x, y, element) ->
+    console.log("setElement")
     xi = Math.floor(x / TILE_SIZE)
     yi = Math.floor(y / TILE_SIZE)
     cx = Math.floor(x / (CHUNK_WIDTH*TILE_SIZE))
@@ -302,6 +310,7 @@ class @Game
 
 
   @setElement_at: (xi, yi, cx, cy, element, dontSave=false) ->
+    #console.log("setElement_at")
     return null if @chunks[cx] is undefined or @chunks[cx][cy] is undefined
     $element = @getElementElm xi, yi, cx, cy
     if !(element is undefined or element is null)
@@ -332,6 +341,7 @@ class @Game
 
   # add the tile elm to the dom
   @addElementElm: (xi, yi, cx, cy, element) ->
+    console.log("addElementElm")
     $element = @makeElement(cx, cy, xi, yi, ELM_TYPES[element])
     @chunksElm[cx][cy].$elements.appendChild $element
     return $element
@@ -351,6 +361,7 @@ class @Game
 
 
   @makeElement: (cx, cy, xi, yi, element_type) ->
+    #console.log("makeElement")
     r = _.random(0,3)
     $element = document.createElement('div')
     $element.className = "elm #{element_type} x#{xi} y#{yi} cx#{cx} cy#{cy} r#{r}"
@@ -382,6 +393,7 @@ class @Game
 
   # set the tile with the given pixel x, y
   @setTile: (x, y, value) ->
+    console.log("set tile")
     xi = Math.floor(x / TILE_SIZE)
     yi = Math.floor(y / TILE_SIZE)
     cx = Math.floor(x / (CHUNK_WIDTH*TILE_SIZE))
@@ -397,6 +409,7 @@ class @Game
 
   # set the value of a tile at the given coords
   @setTile_at: (xi, yi, cx, cy, value, dontSave=false) ->
+    #console.log("setTile_at")
     return null if @chunks.length < cx or @chunks[cx]?.length < cy
 
     $tile = @getTileElm xi, yi, cx, cy
@@ -432,7 +445,10 @@ class @Game
 
   # add the tile elm to the dom
   @addTileElm: (xi, yi, cx, cy, value) ->
+    #console.log("addTileElm at ", xi,yi)
     $tile = @makeTile(cx, cy, xi, yi, TILE_TYPES[value])
+    $tileSprite = @makeTileSprite(cx, cy, xi, yi, TILE_TYPES[value])
+    Game.$background.addChild($tileSprite)
     @chunksElm[cx][cy].$tiles.appendChild $tile
     return $tile
 
@@ -451,9 +467,19 @@ class @Game
 
 
   @makeTile: (cx, cy, xi, yi, tile_type) ->
+    console.log("makeTile - creating a tile at", xi,yi)
     r = _.random(0,3)
     $tile = document.createElement('div')
     $tile.className = "tile #{tile_type} x#{xi} y#{yi} cx#{cx} cy#{cy} r#{r}"
+    return $tile
+
+  @makeTileSprite: (cx, cy, xi, yi, tile_type) ->
+    console.log("makeTileSprite - creating a tile at", xi,yi, "type", tile_type)
+    $tile = new Sprite(32, 32)
+    $tile.image = game.assets["images/tiles.png"]
+    $tile.frame = 1
+    $tile.x = xi * TILE_SIZE;
+    $tile.y = yi * TILE_SIZE;
     return $tile
 
   # do any work regarding a tile being added/changed
