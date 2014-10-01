@@ -469,7 +469,7 @@
       this.rename = __bind(this.rename, this);
       console.log("constructor entity");
       this.$spriteEntity = new Sprite(32, 32);
-      this.$spriteEntity.image = game.assets["res/entities.png"];
+      this.$spriteEntity.image = game.assets["images/entities.png"];
       this.$spriteEntity.frame = 8;
       game.rootScene.addChild(this.$spriteEntity);
       this.$elm = document.createElement('div');

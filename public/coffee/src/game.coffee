@@ -43,6 +43,7 @@ class @Game
 
     Game.$viewport = document.getElementById 'main'
     Game.$background = enchant.Group()
+
     game.rootScene.addChild(Game.$background)
 
     @$players = document.createElement('div')

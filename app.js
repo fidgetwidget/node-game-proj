@@ -76,5 +76,4 @@ mongoose.connect(mongoUriString, function(err, res) {
   }
 });
 
-
 module.exports = app;

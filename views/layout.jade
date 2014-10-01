@@ -34,10 +34,7 @@ html
 
     script. 
 
-      
-
       enchant();
-
 
       var $loading = $('#loading');
       var $content = $('#content');
@@ -45,14 +42,13 @@ html
 
       $(window).load( function() {
 
-      game = new Core(320, 320);
+      game = new Core(512, 512);
       game.rootScene.backgroundColor = 'red';
-      game.preload("res/entities.png");
+      game.preload("images/entities.png");
       game.preload("images/tiles.png");
       console.log("test 1");
 
       game.onload = function(){
-
         Game.init()
           .loadChunks(-1,-1)
           .loadChunks(0,-1)
