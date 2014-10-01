@@ -48,6 +48,7 @@ class @Game
     enchantGame.rootScene.addChild(Game.$background)
     Game.$background.x = enchantGame.width/2
     Game.$background.y = enchantGame.height/2
+
     # adding a layer to position all objects (except player) for apparent movement
     Game.$backgroundObjects = enchant.Group()
     Game.$background.addChild(Game.$backgroundObjects)

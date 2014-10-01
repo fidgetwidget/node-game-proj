@@ -46,11 +46,15 @@ body > #loading {
   }
 }
 
-body > #content {
-  .content-center;
-  position: relative;
-  // height: 768px;
-  height: @DISPLAY_SIZE;
+body {
+
+  &> #content {
+    .content-center;
+    width: @DISPLAY_SIZE*2;
+    height: @DISPLAY_SIZE;
+    position: relative;
+    display: flex;
+  }
 }
 
 .clearfix {

@@ -31,10 +31,18 @@ class @Entity
   constructor: (@type, @name, @x=0, @y=0) ->
     console.log("constructor entity type", @type)
     @$spriteEntity = new Sprite(32, 32)
+<<<<<<< HEAD
     @$spriteEntity.image = enchantGame.assets["images/entities.png"]
+=======
+    @$spriteEntity.image = game.assets["images/entities.png"]
+
+    # game.rootScene.addChild(@$spriteEntity)
+
+>>>>>>> 21a07d169cd11cf6eaeae59495a0b90b5cf5b082
     @$spriteEntity.frame = ELM_SPRITEINDEX[ELM_TYPES.indexOf(@type)]
     @$spriteEntity.scale = 2
     #Game.$background.addChild(@$spriteEntity)
+
     @$elm = document.createElement('div')
     @$elm.className = "entity #{@type} "
 
