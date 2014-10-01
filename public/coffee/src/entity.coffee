@@ -31,7 +31,7 @@ class @Entity
   constructor: (@type, @name, @x=0, @y=0) ->
     console.log("constructor entity type", @type)
     @$spriteEntity = new Sprite(32, 32)
-    @$spriteEntity.image = game.assets["images/entities.png"]
+    @$spriteEntity.image = enchantGame.assets["images/entities.png"]
     @$spriteEntity.frame = ELM_SPRITEINDEX[ELM_TYPES.indexOf(@type)]
     @$spriteEntity.scale = 2
     #Game.$background.addChild(@$spriteEntity)

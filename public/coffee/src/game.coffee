@@ -41,12 +41,13 @@ class @Game
     @listeners = {}
     @chunksElm = {}
 
+    # setup the layers
     Game.$viewport = document.getElementById 'main'
     # adding a layer to position everything correctly in the scene
     Game.$background = enchant.Group()
-    game.rootScene.addChild(Game.$background)
-    Game.$background.x = game.width/2
-    Game.$background.y = game.height/2
+    enchantGame.rootScene.addChild(Game.$background)
+    Game.$background.x = enchantGame.width/2
+    Game.$background.y = enchantGame.height/2
     # adding a layer to position all objects (except player) for apparent movement
     Game.$backgroundObjects = enchant.Group()
     Game.$background.addChild(Game.$backgroundObjects)
@@ -66,13 +67,17 @@ class @Game
     Game._height = Game.$viewport.offsetHeight
     Game._gridHeight = Game._height / TILE_SIZE
 
+    # array for chunks
     @chunks = {}
+
+    # connect to the server
     @connect()
 
     console.log "Game.init() complete." if Game._debug
     return Game  
 
-
+  # Initialize socket communications
+  #
   @connect: () ->
     @socket = io.connect('/')
 
@@ -94,6 +99,9 @@ class @Game
       )
 
   # Create a random World
+  #
+  # TODO: remove from client
+  #
   @randomWorld: (cx, cy) ->
     
     @chunks[cx] = {} unless @chunks[cx]
@@ -137,17 +145,21 @@ class @Game
 
     return this
 
+  #
+  #
   @addChunkElm: (cx, cy) ->
     console.log("addChunkElm")
     $chnkElm = new ChunkElm(@$viewport, cx, cy)
     @chunksElm[cx] = {} unless @chunksElm[cx]
     @chunksElm[cx][cy] = $chnkElm
     return $chnkElm;
-
+  #
+  #
   @hasChunk: (cx, cy) ->
     return @chunks[cx] isnt undefined and @chunks[cx][cy] isnt undefined
 
   # Create Player
+  #
   @createPlayer: () ->
     x = 0 #|| Game._gridWidth/2
     y = 0 #|| Game._gridHeight/2
@@ -155,7 +167,8 @@ class @Game
     @addPlayer p1
     @setCenter p1.x, p1.y, p1.cx, p1.cy
 
-  # Set Center
+  # Move the scene to the center (apparent player movement)
+  #
   @setCenter: (x, y, cx, cy) ->
     console.log("set center ",x,y)
     @$viewport.classList.remove("x#{@centerX}")
@@ -173,6 +186,7 @@ class @Game
     Game.$backgroundObjects.y = - y * TILE_SIZE
 
   # Unload a chunk
+  #
   @_unloadChunk: (cx, cy, unsub=true) ->
 
     @socket.emit('unsubscribe', { room: 'c_'+cx+'_'+cy }) if unsub
@@ -185,12 +199,15 @@ class @Game
 
       @chunks[cx][cy] = null
 
+  # Clear all tiles of a chunk
   @_removeAllTiles: (cx, cy) ->
     $tiles = @chunksElm[cx][cy].$tiles.querySelectorAll ".tile.cx#{cx}.cy#{cy}"
     if $tiles
       for $tile in $tiles
         $tile.parentNode.removeChild $tile
 
+  # Clean all element of a chunk
+  #
   @_removeAllElements: (cx, cy) ->
     $elms = @chunksElm[cx][cy].$elements.querySelectorAll ".elm.cx#{cx}.cy#{cy}"
     if $elms
@@ -198,6 +215,7 @@ class @Game
         $elm.parentNode.removeChild $elm
 
   # Load a Chunk
+  #
   @_loadChunk: (cx, cy, chunk=null) ->
     @chunks[cx] = {} unless @chunks[cx]
     if chunk
@@ -206,7 +224,8 @@ class @Game
     else
       @chunks[cx][cy] = undefined
 
-
+  #
+  #
   @setTilesBaseClass: (chunk) ->
     console.log("setTilesBaseClass")
     $tiles = @chunksElm[chunk.x][chunk.y].$tiles
@@ -215,6 +234,7 @@ class @Game
       $tiles.classList.add(TILE_TYPES[chunk.base])
 
   # Insert an entity to the game
+  #
   @addEntity: (entity, cx, cy) ->
     console.log("addEntity")
     type = entity.type
@@ -226,11 +246,14 @@ class @Game
 
     return entity
 
+  #
+  #
   @addTree: (cx, cy, x, y, treeType) ->
     entity = new Tree(treeType, x, y, cx, cy)
     Game.addEntity(entity, cx, cy)
 
-
+  #
+  #
   @addPlayer: (player) ->
     @players[player.name] = player
     player.addSelf this
@@ -238,6 +261,7 @@ class @Game
     return player
 
   # Get the entity of a given type and name
+  #
   @getEntity: (type, name) ->
     return null unless @entities[type]
     return @entities[type][name]
@@ -370,7 +394,7 @@ class @Game
     console.log("makeElement ", element_type, "at", xi,yi)
     r = _.random(0,3)
     $spriteEntity = new Sprite(16, 16)
-    $spriteEntity.image = game.assets["images/elements.png"]
+    $spriteEntity.image = enchantGame.assets["images/elements.png"]
     $spriteEntity.frame = ELM_SPRITEINDEX[ELM_TYPES.indexOf(element_type)]
     console.log("frame ",$spriteEntity.frame)
     $spriteEntity.scale = 2
@@ -490,7 +514,7 @@ class @Game
   @makeTileSprite: (cx, cy, xi, yi, tile_type) ->
     #console.log("makeTileSprite - creating a tile at", xi,yi, "type", tile_type)
     $tile = new Sprite(16, 16)
-    $tile.image = game.assets["images/tiles.png"]
+    $tile.image = enchantGame.assets["images/tiles.png"]
     $tile.frame = tile_type
     $tile.scale = 2
     console.log("sprite scale", $tile.scale, "size ",$tile.width,$tile.height)

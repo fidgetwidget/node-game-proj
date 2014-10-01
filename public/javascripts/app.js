@@ -473,7 +473,7 @@
       this.rename = __bind(this.rename, this);
       console.log("constructor entity type", this.type);
       this.$spriteEntity = new Sprite(32, 32);
-      this.$spriteEntity.image = game.assets["images/entities.png"];
+      this.$spriteEntity.image = enchantGame.assets["images/entities.png"];
       this.$spriteEntity.frame = ELM_SPRITEINDEX[ELM_TYPES.indexOf(this.type)];
       this.$spriteEntity.scale = 2;
       this.$elm = document.createElement('div');
@@ -604,9 +604,9 @@
       this.chunksElm = {};
       Game.$viewport = document.getElementById('main');
       Game.$background = enchant.Group();
-      game.rootScene.addChild(Game.$background);
-      Game.$background.x = game.width / 2;
-      Game.$background.y = game.height / 2;
+      enchantGame.rootScene.addChild(Game.$background);
+      Game.$background.x = enchantGame.width / 2;
+      Game.$background.y = enchantGame.height / 2;
       Game.$backgroundObjects = enchant.Group();
       Game.$background.addChild(Game.$backgroundObjects);
       this.$players = document.createElement('div');
@@ -993,7 +993,7 @@
       console.log("makeElement ", element_type, "at", xi, yi);
       r = _.random(0, 3);
       $spriteEntity = new Sprite(16, 16);
-      $spriteEntity.image = game.assets["images/elements.png"];
+      $spriteEntity.image = enchantGame.assets["images/elements.png"];
       $spriteEntity.frame = ELM_SPRITEINDEX[ELM_TYPES.indexOf(element_type)];
       console.log("frame ", $spriteEntity.frame);
       $spriteEntity.scale = 2;
@@ -1120,7 +1120,7 @@
     Game.makeTileSprite = function(cx, cy, xi, yi, tile_type) {
       var $tile;
       $tile = new Sprite(16, 16);
-      $tile.image = game.assets["images/tiles.png"];
+      $tile.image = enchantGame.assets["images/tiles.png"];
       $tile.frame = tile_type;
       $tile.scale = 2;
       console.log("sprite scale", $tile.scale, "size ", $tile.width, $tile.height);
@@ -2024,6 +2024,25 @@
     };
 
     PlayerEntity.prototype.bindEvents = function() {
+      Game.$background.on("touchstart", function(evt) {
+        console.log("touched background start");
+      });
+      Game.$background.on("touchend", function(evt) {
+        if (evt.x - Game.$background.x + TILE_SIZE < 0) {
+          console.log("touched on player left");
+          this.move(DIR_LEFT);
+        } else if (evt.x - Game.$background.x - TILE_SIZE > 0) {
+          console.log("touched on player right");
+          this.move(DIR_RIGHT);
+        }
+        if (evt.y - Game.$background.y + TILE_SIZE < 0) {
+          console.log("touched on player top");
+          this.move(DIR_UP);
+        } else if (evt.y - Game.$background.y - TILE_SIZE > 0) {
+          console.log("touched on player bottom");
+          this.move(DIR_DOWN);
+        }
+      });
       return document.addEventListener('keyup', (function(_this) {
         return function(e) {
           var _ref, _ref1;

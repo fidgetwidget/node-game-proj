@@ -45,14 +45,13 @@ html
 
       $(window).load( function() {
 
-      game = new Core(320, 320);
-      game.rootScene.backgroundColor = 'red';
-      game.preload("images/entities.png");
-      game.preload("images/tiles.png");
-      game.preload("images/elements.png");
-      console.log("test 1");
+      enchantGame = new Core(320, 320);
+      enchantGame.rootScene.backgroundColor = 'red';
+      enchantGame.preload("images/entities.png");
+      enchantGame.preload("images/tiles.png");
+      enchantGame.preload("images/elements.png");
 
-      game.onload = function(){
+      enchantGame.onload = function(){
 
         Game.init()
           .loadChunks(-1,-1)
@@ -65,7 +64,7 @@ html
         $loading.find('.text').hide()
         $loading.fadeOut(1400)
       }
-      game.start();
+      enchantGame.start();
       console.log("game started");
 
         
