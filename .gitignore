@@ -1,8 +1,10 @@
 
 bower_components/*
 node_modules/*
+data/*
 
 nodeGameProj.sublime-project
 nodeGameProj.sublime-workspace
 public/images/tiles.pdn
 .DS_Store
+*.log
