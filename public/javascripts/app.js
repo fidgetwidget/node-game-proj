@@ -726,7 +726,26 @@
       y = 0;
       p1 = new PlayerEntity(null, x, y);
       this.addPlayer(p1);
-      return this.setCenter(p1.x, p1.y, p1.cx, p1.cy);
+      this.setCenter(p1.x, p1.y, p1.cx, p1.cy);
+      Game.$background.addEventListener("touchstart", function(evt) {
+        console.log("touched background start");
+      });
+      return Game.$background.addEventListener("touchend", function(evt) {
+        if (evt.x - Game.$background.x + TILE_SIZE < 0) {
+          console.log("touched on player left");
+          Game.players[0].move(DIR_LEFT);
+        } else if (evt.x - Game.$background.x - TILE_SIZE > 0) {
+          console.log("touched on player right");
+          Game.players[0].move(DIR_RIGHT);
+        }
+        if (evt.y - Game.$background.y + TILE_SIZE < 0) {
+          console.log("touched on player top");
+          Game.players[0].move(DIR_UP);
+        } else if (evt.y - Game.$background.y - TILE_SIZE > 0) {
+          console.log("touched on player 0 bottom");
+          Game.players[0].move(DIR_DOWN);
+        }
+      });
     };
 
     Game.setCenter = function(x, y, cx, cy) {
@@ -2024,25 +2043,6 @@
     };
 
     PlayerEntity.prototype.bindEvents = function() {
-      Game.$background.on("touchstart", function(evt) {
-        console.log("touched background start");
-      });
-      Game.$background.on("touchend", function(evt) {
-        if (evt.x - Game.$background.x + TILE_SIZE < 0) {
-          console.log("touched on player left");
-          this.move(DIR_LEFT);
-        } else if (evt.x - Game.$background.x - TILE_SIZE > 0) {
-          console.log("touched on player right");
-          this.move(DIR_RIGHT);
-        }
-        if (evt.y - Game.$background.y + TILE_SIZE < 0) {
-          console.log("touched on player top");
-          this.move(DIR_UP);
-        } else if (evt.y - Game.$background.y - TILE_SIZE > 0) {
-          console.log("touched on player bottom");
-          this.move(DIR_DOWN);
-        }
-      });
       return document.addEventListener('keyup', (function(_this) {
         return function(e) {
           var _ref, _ref1;
@@ -2118,6 +2118,7 @@
         }
       }
       if (__indexOf.call(DIR_DOWN, dir) >= 0) {
+        console.log("down");
         if (this.facing === SOUTH) {
           this.check(this.x, this.y + 1);
         } else {

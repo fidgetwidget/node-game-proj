@@ -42,32 +42,6 @@ class @PlayerEntity extends Entity
   # attach events the player should be listenting to
   bindEvents: () ->
 
-    Game.$background.on "touchstart", (evt) ->
-      console.log("touched background start")
-      return
-
-    Game.$background.on "touchend", (evt) ->
-      #console.log("touched background end ",evt.x,evt.y)
-      #console.log("touched relative position ",evt.x - Game.$background.x,evt.y - Game.$background.y)
-      #console.log("player relative position ",Game.$backgroundObjects.x,Game.$backgroundObjects.y)
-      # check where the click was made relatively to player (backGroundObjects)
-      # adding the tile size as a dampner
-      if evt.x - Game.$background.x + TILE_SIZE < 0
-        console.log("touched on player left")
-        @move DIR_LEFT
-      else if evt.x - Game.$background.x - TILE_SIZE > 0
-        console.log("touched on player right")
-        @move DIR_RIGHT
-      
-      if evt.y - Game.$background.y + TILE_SIZE < 0
-        console.log("touched on player top")
-        @move DIR_UP
-
-      else if evt.y - Game.$background.y - TILE_SIZE > 0
-        console.log("touched on player bottom")
-        @move DIR_DOWN
-      return
-
     document.addEventListener 'keyup', (e) =>
       if e.which in DIRECTIONS
         e.preventDefault()
@@ -130,9 +104,9 @@ class @PlayerEntity extends Entity
         @face EAST
 
     if dir in DIR_DOWN
+      console.log("down")
       if @facing is SOUTH
         @check @x, @y+1
-          
       else
         @face SOUTH
     
