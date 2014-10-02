@@ -1017,8 +1017,8 @@
       console.log("frame ", $spriteEntity.frame);
       $spriteEntity.scale = 2;
       Game.$backgroundObjects.addChild($spriteEntity);
-      $spriteEntity.x = xi * TILE_SIZE;
-      $spriteEntity.y = yi * TILE_SIZE;
+      $spriteEntity.x = xi * TILE_SIZE + cx * CHUNK_HEIGHT * TILE_SIZE;
+      $spriteEntity.y = yi * TILE_SIZE + cy * CHUNK_HEIGHT * TILE_SIZE;
       $element = document.createElement('div');
       $element.className = "elm " + element_type + " x" + xi + " y" + yi + " cx" + cx + " cy" + cy + " r" + r;
       return $element;
@@ -1142,9 +1142,9 @@
       $tile.image = enchantGame.assets["images/tiles.png"];
       $tile.frame = tile_type;
       $tile.scale = 2;
-      console.log("sprite scale", $tile.scale, "size ", $tile.width, $tile.height);
-      $tile.x = xi * TILE_SIZE;
-      $tile.y = yi * TILE_SIZE;
+      console.log("adding tile for chunk", cx, cy, "position ", xi, yi);
+      $tile.x = xi * TILE_SIZE + cx * CHUNK_HEIGHT * TILE_SIZE;
+      $tile.y = yi * TILE_SIZE + cy * CHUNK_HEIGHT * TILE_SIZE;
       return $tile;
     };
 

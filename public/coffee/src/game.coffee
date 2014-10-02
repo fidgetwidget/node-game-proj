@@ -425,8 +425,8 @@ class @Game
     console.log("frame ",$spriteEntity.frame)
     $spriteEntity.scale = 2
     Game.$backgroundObjects.addChild($spriteEntity)
-    $spriteEntity.x = xi * TILE_SIZE
-    $spriteEntity.y = yi * TILE_SIZE
+    $spriteEntity.x = xi * TILE_SIZE + cx * CHUNK_HEIGHT * TILE_SIZE
+    $spriteEntity.y = yi * TILE_SIZE + cy * CHUNK_HEIGHT * TILE_SIZE
     $element = document.createElement('div')
     $element.className = "elm #{element_type} x#{xi} y#{yi} cx#{cx} cy#{cy} r#{r}"
     return $element
@@ -509,10 +509,9 @@ class @Game
 
   # add the tile elm to the dom
   @addTileElm: (xi, yi, cx, cy, value) ->
-    #console.log("addTileElm at ", xi,yi)
+    #console.log("addTileElm at ", xi,yim "chunk ",cx,cy)
     $tile = @makeTile(cx, cy, xi, yi, TILE_TYPES[value])
-    $tileSprite = @makeTileSprite(cx, cy, xi, yi, TILE_INDEX[value])
-    Game.$backgroundObjects.addChild($tileSprite)
+    Game.$backgroundObjects.addChild($tile.sprite)
     @chunksElm[cx][cy].$tiles.appendChild $tile
     return $tile
 
@@ -535,17 +534,15 @@ class @Game
     r = _.random(0,3)
     $tile = document.createElement('div')
     $tile.className = "tile #{tile_type} x#{xi} y#{yi} cx#{cx} cy#{cy} r#{r}"
-    return $tile
-
-  @makeTileSprite: (cx, cy, xi, yi, tile_type) ->
-    #console.log("makeTileSprite - creating a tile at", xi,yi, "type", tile_type)
-    $tile = new Sprite(16, 16)
-    $tile.image = enchantGame.assets["images/tiles.png"]
-    $tile.frame = tile_type
-    $tile.scale = 2
-    console.log("sprite scale", $tile.scale, "size ",$tile.width,$tile.height)
-    $tile.x = xi * TILE_SIZE;
-    $tile.y = yi * TILE_SIZE;
+    # adding the sprite
+    $tileSprite = new Sprite(16, 16)
+    $tileSprite.image = enchantGame.assets["images/tiles.png"]
+    $tileSprite.frame = TILE_INDEX[value]
+    $tileSprite.scale = 2
+    console.log("adding tile for chunk",cx,cy,"position ",xi,yi)
+    $tileSprite.x = xi * TILE_SIZE + cx * CHUNK_HEIGHT * TILE_SIZE;
+    $tileSprite.y = yi * TILE_SIZE + cy * CHUNK_HEIGHT * TILE_SIZE;
+    $tile.sprite = $tileSprite
     return $tile
 
   # do any work regarding a tile being added/changed

@@ -177,8 +177,8 @@ class @PlayerEntity extends Entity
     unless Game.hasChunk(cx, cy)
       console.log "making new chunk at x: #{cx} y: #{cy}"
       Game.loadChunks(cx, cy)
-      # Game.randomWorld(cx, cy)
-      # Game.saveChunk(cx, cy)
+      #Game.randomWorld(cx, cy)
+      #Game.saveChunk(cx, cy)
 
 
 
