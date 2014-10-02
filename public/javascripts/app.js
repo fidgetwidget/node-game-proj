@@ -1103,10 +1103,9 @@
     };
 
     Game.addTileElm = function(xi, yi, cx, cy, value) {
-      var $tile, $tileSprite;
+      var $tile;
       $tile = this.makeTile(cx, cy, xi, yi, TILE_TYPES[value]);
-      $tileSprite = this.makeTileSprite(cx, cy, xi, yi, TILE_INDEX[value]);
-      Game.$backgroundObjects.addChild($tileSprite);
+      Game.$backgroundObjects.addChild($tile.sprite);
       this.chunksElm[cx][cy].$tiles.appendChild($tile);
       return $tile;
     };
@@ -1129,22 +1128,19 @@
     };
 
     Game.makeTile = function(cx, cy, xi, yi, tile_type) {
-      var $tile, r;
+      var $tile, $tileSprite, r, value;
       r = _.random(0, 3);
       $tile = document.createElement('div');
       $tile.className = "tile " + tile_type + " x" + xi + " y" + yi + " cx" + cx + " cy" + cy + " r" + r;
-      return $tile;
-    };
-
-    Game.makeTileSprite = function(cx, cy, xi, yi, tile_type) {
-      var $tile;
-      $tile = new Sprite(16, 16);
-      $tile.image = enchantGame.assets["images/tiles.png"];
-      $tile.frame = tile_type;
-      $tile.scale = 2;
+      $tileSprite = new Sprite(16, 16);
+      $tileSprite.image = enchantGame.assets["images/tiles.png"];
+      value = _.indexOf(TILE_TYPES, tile_type);
+      $tileSprite.frame = TILE_INDEX[value];
+      $tileSprite.scale = 2;
       console.log("adding tile for chunk", cx, cy, "position ", xi, yi);
-      $tile.x = xi * TILE_SIZE + cx * CHUNK_HEIGHT * TILE_SIZE;
-      $tile.y = yi * TILE_SIZE + cy * CHUNK_HEIGHT * TILE_SIZE;
+      $tileSprite.x = xi * TILE_SIZE + cx * CHUNK_HEIGHT * TILE_SIZE;
+      $tileSprite.y = yi * TILE_SIZE + cy * CHUNK_HEIGHT * TILE_SIZE;
+      $tile.sprite = $tileSprite;
       return $tile;
     };
 

@@ -537,6 +537,7 @@ class @Game
     # adding the sprite
     $tileSprite = new Sprite(16, 16)
     $tileSprite.image = enchantGame.assets["images/tiles.png"]
+    value = _.indexOf(TILE_TYPES, tile_type)
     $tileSprite.frame = TILE_INDEX[value]
     $tileSprite.scale = 2
     console.log("adding tile for chunk",cx,cy,"position ",xi,yi)
