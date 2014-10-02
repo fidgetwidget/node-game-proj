@@ -8,3 +8,4 @@ nodeGameProj.sublime-workspace
 public/images/tiles.pdn
 .DS_Store
 *.log
+javascripts/app.js
