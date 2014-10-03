@@ -20,8 +20,10 @@ class @Game
 
   @listeners:   undefined
 
-  @centerX:     0
-  @centerY:     0
+  @centerX:      0
+  @centerY:      0
+  @centerChunkX: 0
+  @centerChunkY: 0
   
   @_height:     0
   @_width:      0
@@ -53,6 +55,28 @@ class @Game
     Game.$backgroundObjects = enchant.Group()
     Game.$background.addChild(Game.$backgroundObjects)
 
+    # Layers for to handle chunk pre-loading/display
+    Game.$groupRight1 = enchant.Group()
+    Game.$groupRight2 = enchant.Group()
+    Game.$groupLeft1 = enchant.Group()
+    Game.$groupLeft2 = enchant.Group()
+    Game.$groupSE = Game.$groupRight1
+    Game.$groupNE = Game.$groupRight2
+    Game.$groupSW = Game.$groupLeft1
+    Game.$groupNW = Game.$groupLeft2
+    Game.$backgroundObjects.addChild(Game.$groupRight1)
+    Game.$backgroundObjects.addChild(Game.$groupRight2)
+    Game.$backgroundObjects.addChild(Game.$groupLeft1)
+    Game.$backgroundObjects.addChild(Game.$groupLeft2)
+    Game.$groupLeft2.x = - enchantGame.width
+    Game.$groupLeft2.y = - enchantGame.height
+    Game.$groupLeft1.x = - enchantGame.width
+    Game.$groupLeft1.y = 0
+    Game.$groupRight1.x = 0 
+    Game.$groupRight1.y = 0 
+    Game.$groupRight2.x = 0
+    Game.$groupRight2.y = - enchantGame.height
+
     @$players = document.createElement('div')
     @$players.className = 'players'
     @$entities = document.createElement('div')
@@ -63,6 +87,8 @@ class @Game
 
     # TODO: create the chunkElms
 
+    @centerChunkX = 0
+    @centerChunkY = 0
     Game._width = Game.$viewport.offsetWidth
     Game._gridWidth = Game._width / TILE_SIZE
     Game._height = Game.$viewport.offsetHeight
@@ -99,57 +125,29 @@ class @Game
           console.error 'elements changed error'
       )
 
-  # Create a random World
   #
-  # TODO: remove from client
   #
-  @randomWorld: (cx, cy) ->
-    
-    @chunks[cx] = {} unless @chunks[cx]
-    chunk = new Chunk(cx, cy)
-
-    @addChunkElm(cx, cy)
-
-    @chunks[cx][cy] = chunk
-
-    @setTilesBaseClass chunk
-      
-    for i in [0...32]
-      rx = _.random(0,CHUNK_WIDTH-1)
-      ry = _.random(0,CHUNK_HEIGHT-1)
-      rv = _.random(1,12)
-      elm_type = null
-      switch rv
-        when 0, 1
-          elm_type = 4
-        when 2, 3, 4
-          elm_type = 5
-        when 5
-          elm_type = 10
-        when 6, 7, 8
-          elm_type = 7
-        when 9
-          elm_type = 8
-        when 10
-          elm_type = 9
-        when 11, 12
-          elm_type = 6
-
-      unless elm_type is null
-        Game.setElement_at(rx, ry, cx, cy, elm_type)
-    
-    for i in [0...128]
-      rx = _.random( 0, CHUNK_WIDTH-1 )
-      ry = _.random( 0, CHUNK_HEIGHT-1 )
-      
-      Game.setTile_at(rx, ry, cx, cy, 1, true)
-
-    return this
+  @findLayerFromChunkCoordinate: (cx, cy) ->
+    console.log("looking for layer for chunk ",cx,cy,"center chunk is ",@centerChunkX,@centerChunkY)
+    $layer = undefined
+    if (cx == @centerChunkX && cy == @centerChunkY)
+      $layer = Game.$groupSE # SE
+    else if (cx < @centerChunkX && cy == @centerChunkY)
+      $layer = Game.$groupSW #initial SW
+    else if (cx == @centerChunkX && cy < @centerChunkY)
+      $layer = Game.$groupNE # NE
+    else if (cx < @centerChunkX && cy < @centerChunkY)
+      $layer = Game.$groupNW #initialy NW
+    return $layer
+  
+  @updateChunks: () ->
+    console.log("chunk changed")
+    return
 
   #
   #
   @addChunkElm: (cx, cy) ->
-    console.log("addChunkElm")
+    #console.log("addChunkElm")
     $chnkElm = new ChunkElm(@$viewport, cx, cy)
     @chunksElm[cx] = {} unless @chunksElm[cx]
     @chunksElm[cx][cy] = $chnkElm
@@ -168,12 +166,12 @@ class @Game
     @addPlayer p1
     @setCenter p1.x, p1.y, p1.cx, p1.cy
 
-    Game.$background.addEventListener "touchstart", (evt) ->
-      console.log("touched background start")
+    enchantGame.rootScene.on "touchstart", (evt) ->
+      console.log("touched start")
       return
 
-    Game.$background.addEventListener "touchend", (evt) ->
-      #console.log("touched background end ",evt.x,evt.y)
+    enchantGame.rootScene.on "touchend", (evt) ->
+      console.log("touched background end ",evt.x,evt.y)
       #console.log("touched relative position ",evt.x - Game.$background.x,evt.y - Game.$background.y)
       #console.log("player relative position ",Game.$backgroundObjects.x,Game.$backgroundObjects.y)
       # check where the click was made relatively to player (backGroundObjects)
@@ -208,8 +206,53 @@ class @Game
       marginTop:  "#{GRID_HEIGHT*-cy}px"
       marginLeft: "#{GRID_HEIGHT*-cx}px"
       })
-    Game.$backgroundObjects.x = - x * TILE_SIZE
-    Game.$backgroundObjects.y = - y * TILE_SIZE
+    # switching layer for chunk when chunk not visible anymore (vertical)
+    if ((cy < @centerChunkY && y < CHUNK_HEIGHT/2) || (cy == @centerChunkY && y > CHUNK_HEIGHT/2)) #player in top half of the N layer or bottom of S
+      console.log("switching chunk vertically")
+      # switching layers NE -> SE NW -> SW
+
+      if (@findLayerFromChunkCoordinate(@centerChunkX,@centerChunkY) == Game.$groupRight1)
+        Game.$groupRight2.y = 0
+        Game.$groupLeft2.y = 0
+        Game.$groupRight1.y = - enchantGame.height
+        Game.$groupLeft1.y = - enchantGame.height
+        while Game.$groupRight1.firstChild
+          Game.$groupRight1.removeChild Game.$groupRight1.firstChild
+        while Game.$groupLeft1.firstChild
+          Game.$groupLeft1.removeChild Game.$groupLeft1.firstChild
+        Game.$groupSE = Game.$groupRight2
+        Game.$groupNE = Game.$groupRight1
+        Game.$groupSW = Game.$groupLeft2
+        Game.$groupNW = Game.$groupLeft1
+      else
+        Game.$groupRight2.y = - enchantGame.height
+        Game.$groupLeft2.y = - enchantGame.height
+        Game.$groupRight1.y = 0
+        Game.$groupLeft1.y = 0
+        while Game.$groupRight2.firstChild
+          Game.$groupRight2.removeChild Game.$groupRight2.firstChild
+        while Game.$groupLeft2.firstChild
+          Game.$groupLeft2.removeChild Game.$groupLeft2.firstChild
+        Game.$groupSE = Game.$groupRight1
+        Game.$groupNE = Game.$groupRight2
+        Game.$groupSW = Game.$groupLeft1
+        Game.$groupNW = Game.$groupLeft2
+
+      # reset centerChunkY
+      @centerChunkY = cy
+      @loadChunks(cx, cy+(@centerChunkY+cy)) #-1
+      @loadChunks(cx-1, cy+(@centerChunkY+cy))
+
+    # move the layer offsetting with chunck position  
+    if (cx == @centerChunkX) 
+      Game.$backgroundObjects.x = - x * TILE_SIZE
+    else if (cx < @centerChunkX )
+      Game.$backgroundObjects.x = - (x - (@centerChunkX - cx) * CHUNK_WIDTH) * TILE_SIZE
+    if (cy == @centerChunkY)
+      Game.$backgroundObjects.y = - y * TILE_SIZE
+    else if (cy < @centerChunkY)
+      Game.$backgroundObjects.y = - (y - (@centerChunkY - cy) * CHUNK_HEIGHT) * TILE_SIZE
+
 
   # Unload a chunk
   #
@@ -253,7 +296,7 @@ class @Game
   #
   #
   @setTilesBaseClass: (chunk) ->
-    console.log("setTilesBaseClass")
+    #console.log("setTilesBaseClass")
     $tiles = @chunksElm[chunk.x][chunk.y].$tiles
     for typ in TILE_TYPES
         $tiles.classList.remove(typ)
@@ -262,7 +305,7 @@ class @Game
   # Insert an entity to the game
   #
   @addEntity: (entity, cx, cy) ->
-    console.log("addEntity")
+    #console.log("addEntity")
     type = entity.type
     unless @entities[type]
       @entities[type] = {}  
@@ -397,7 +440,7 @@ class @Game
 
   # add the tile elm to the dom
   @addElementElm: (xi, yi, cx, cy, element) ->
-    console.log("addElementElm ",element)
+    #console.log("addElementElm ",element)
     $element = @makeElement(cx, cy, xi, yi, ELM_TYPES[element])
     @chunksElm[cx][cy].$elements.appendChild $element
     return $element
@@ -417,16 +460,18 @@ class @Game
 
 
   @makeElement: (cx, cy, xi, yi, element_type) ->
-    console.log("makeElement ", element_type, "at", xi,yi)
+    #console.log("makeElement ", element_type, "at", xi,yi)
     r = _.random(0,3)
     $spriteEntity = new Sprite(16, 16)
     $spriteEntity.image = enchantGame.assets["images/elements.png"]
     $spriteEntity.frame = ELM_SPRITEINDEX[ELM_TYPES.indexOf(element_type)]
-    console.log("frame ",$spriteEntity.frame)
+    #console.log("frame ",$spriteEntity.frame)
     $spriteEntity.scale = 2
-    Game.$backgroundObjects.addChild($spriteEntity)
-    $spriteEntity.x = xi * TILE_SIZE + cx * CHUNK_HEIGHT * TILE_SIZE
-    $spriteEntity.y = yi * TILE_SIZE + cy * CHUNK_HEIGHT * TILE_SIZE
+    # find the layer where to display
+    $layer = @findLayerFromChunkCoordinate(cx,cy)
+    $layer.addChild($spriteEntity)
+    $spriteEntity.x = xi * TILE_SIZE
+    $spriteEntity.y = yi * TILE_SIZE 
     $element = document.createElement('div')
     $element.className = "elm #{element_type} x#{xi} y#{yi} cx#{cx} cy#{cy} r#{r}"
     return $element
@@ -440,7 +485,6 @@ class @Game
       when 'wateredSoil'
         @addListener 'wateredSoil', $element, xi, yi, cx, cy
     return @
-
 
   #
   # Tiles
@@ -511,7 +555,8 @@ class @Game
   @addTileElm: (xi, yi, cx, cy, value) ->
     #console.log("addTileElm at ", xi,yim "chunk ",cx,cy)
     $tile = @makeTile(cx, cy, xi, yi, TILE_TYPES[value])
-    Game.$backgroundObjects.addChild($tile.sprite)
+    $layer = @findLayerFromChunkCoordinate(cx,cy)
+    $layer.addChild($tile.sprite)
     @chunksElm[cx][cy].$tiles.appendChild $tile
     return $tile
 
@@ -541,8 +586,8 @@ class @Game
     $tileSprite.frame = TILE_INDEX[value]
     $tileSprite.scale = 2
     console.log("adding tile for chunk",cx,cy,"position ",xi,yi)
-    $tileSprite.x = xi * TILE_SIZE + cx * CHUNK_HEIGHT * TILE_SIZE;
-    $tileSprite.y = yi * TILE_SIZE + cy * CHUNK_HEIGHT * TILE_SIZE;
+    $tileSprite.x = xi * TILE_SIZE;
+    $tileSprite.y = yi * TILE_SIZE;
     $tile.sprite = $tileSprite
     return $tile
 
