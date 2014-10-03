@@ -8,6 +8,7 @@ var TileCtrl    = require('../controllers/tileCtrl.js')
 
 router.post(    '/',                                      ChunkCtrl.post );
 router.get(     '/:chunk_x_y.:format',                    ChunkCtrl.get );
+router.delete(  '/:chunk_x_y.:format',                 	  ChunkCtrl.del );
 
 router.post(    '/:chunk_x_y/tiles.:format?',             TileCtrl.post );
 router.delete(  '/:chunk_x_y/tiles.:format?',             TileCtrl.del );
