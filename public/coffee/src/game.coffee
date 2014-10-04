@@ -128,7 +128,7 @@ class @Game
   #
   #
   @findLayerFromChunkCoordinate: (cx, cy) ->
-    console.log("looking for layer for chunk ",cx,cy,"center chunk is ",@centerChunkX,@centerChunkY)
+    #console.log("looking for layer for chunk ",cx,cy,"center chunk is ",@centerChunkX,@centerChunkY)
     $layer = undefined
     if (cx == @centerChunkX && cy == @centerChunkY)
       $layer = Game.$groupSE # SE
@@ -194,7 +194,11 @@ class @Game
   # Move the scene to the center (apparent player movement)
   #
   @setCenter: (x, y, cx, cy) ->
-    console.log("set center ",x,y)
+    if Game.$groupSE == Game.$groupRight1
+      position = "1 bottom 2 top"
+    else
+      position = "2 bottom 1 top"
+    console.log("set center #{x},#{y} chunk #{cx},#{cy} layers positon #{position}")
     @$viewport.classList.remove("x#{@centerX}")
     @$viewport.classList.remove("y#{@centerY}")
     @centerX = x - HALF_WIDTH
@@ -207,43 +211,42 @@ class @Game
       marginLeft: "#{GRID_HEIGHT*-cx}px"
       })
     # switching layer for chunk when chunk not visible anymore (vertical)
-    if ((cy < @centerChunkY && y < CHUNK_HEIGHT/2) || (cy == @centerChunkY && y > CHUNK_HEIGHT/2)) #player in top half of the N layer or bottom of S
-      console.log("switching chunk vertically")
+    #player in top half of the N layer or bottom of S #
+    if (cy == @centerChunkY && y > CHUNK_HEIGHT/2)
+      console.log("changing chunk going down")
+    if ((cy < @centerChunkY && y < CHUNK_HEIGHT/2) || (cy == @centerChunkY && y > CHUNK_HEIGHT/2)) 
+      console.log("switching chunk vertically cy=#{cy} centerChunkY=#{@centerChunkY}")
       # switching layers NE -> SE NW -> SW
-
+      # emptying the layer that will become the next layer
       if (@findLayerFromChunkCoordinate(@centerChunkX,@centerChunkY) == Game.$groupRight1)
-        Game.$groupRight2.y = 0
-        Game.$groupLeft2.y = 0
-        Game.$groupRight1.y = - enchantGame.height
-        Game.$groupLeft1.y = - enchantGame.height
-        while Game.$groupRight1.firstChild
-          Game.$groupRight1.removeChild Game.$groupRight1.firstChild
-        while Game.$groupLeft1.firstChild
-          Game.$groupLeft1.removeChild Game.$groupLeft1.firstChild
-        Game.$groupSE = Game.$groupRight2
-        Game.$groupNE = Game.$groupRight1
-        Game.$groupSW = Game.$groupLeft2
-        Game.$groupNW = Game.$groupLeft1
+        @emptyLayer(Game.$groupRight1)
+        @emptyLayer(Game.$groupLeft1)
       else
-        Game.$groupRight2.y = - enchantGame.height
-        Game.$groupLeft2.y = - enchantGame.height
-        Game.$groupRight1.y = 0
-        Game.$groupLeft1.y = 0
-        while Game.$groupRight2.firstChild
-          Game.$groupRight2.removeChild Game.$groupRight2.firstChild
-        while Game.$groupLeft2.firstChild
-          Game.$groupLeft2.removeChild Game.$groupLeft2.firstChild
-        Game.$groupSE = Game.$groupRight1
-        Game.$groupNE = Game.$groupRight2
-        Game.$groupSW = Game.$groupLeft1
-        Game.$groupNW = Game.$groupLeft2
+        @emptyLayer(Game.$groupRight2)
+        @emptyLayer(Game.$groupLeft2)
+      # switching position of layers
+      @switchLayer(Game.$groupRight1, Game.$groupRight2)
+      @switchLayer(Game.$groupLeft1, Game.$groupLeft2)
+      # and updating reference
+      @switchLayerReferenceUpDown()
 
+      
+      # load the next chunks
+      if (cy == @centerChunkY && y > CHUNK_HEIGHT/2)
+        console.log("now in chunk (#{@centerChunkX},#{@centerChunkY} loading chunk #{@centerChunkY+cy+1}")
+        @loadChunks(cx, (cy+cy-@centerChunkY+1))
+        @loadChunks(cx-1, (cy+cy-@centerChunkY+1))
+      else
+        console.log("now in chunk (#{@centerChunkX},#{@centerChunkY} loading chunk #{@centerChunkY+cy}")
+        @loadChunks(cx, (cy+cy-@centerChunkY))
+        @loadChunks(cx-1, (cy+cy-@centerChunkY))
       # reset centerChunkY
-      @centerChunkY = cy
-      @loadChunks(cx, cy+(@centerChunkY+cy)) #-1
-      @loadChunks(cx-1, cy+(@centerChunkY+cy))
+      if (cy == @centerChunkY && y > CHUNK_HEIGHT/2)
+        @centerChunkY = cy + 1
+      else
+        @centerChunkY = cy
 
-    # move the layer offsetting with chunck position  
+    # move the layer offsetting with chunk position  
     if (cx == @centerChunkX) 
       Game.$backgroundObjects.x = - x * TILE_SIZE
     else if (cx < @centerChunkX )
@@ -253,6 +256,30 @@ class @Game
     else if (cy < @centerChunkY)
       Game.$backgroundObjects.y = - (y - (@centerChunkY - cy) * CHUNK_HEIGHT) * TILE_SIZE
 
+  #
+  @switchLayer: (layer1, layer2) ->
+    tempX = layer1.x
+    tempY = layer1.y
+    layer1.x = layer2.x
+    layer1.y = layer2.y
+    layer2.x = tempX
+    layer2.y = tempY
+
+  @emptyLayer: (layer) ->
+    while layer.firstChild
+      layer.removeChild layer.firstChild
+
+  @switchLayerReferenceUpDown: () ->
+    if Game.$groupSE == Game.$groupRight1
+      Game.$groupSE = Game.$groupRight2
+      Game.$groupNE = Game.$groupRight1
+      Game.$groupSW = Game.$groupLeft2
+      Game.$groupNW = Game.$groupLeft1 
+    else
+      Game.$groupSE = Game.$groupRight1
+      Game.$groupNE = Game.$groupRight2
+      Game.$groupSW = Game.$groupLeft1
+      Game.$groupNW = Game.$groupLeft2
 
   # Unload a chunk
   #
@@ -448,7 +475,7 @@ class @Game
   # alter the tile elm to match the new value
   @changeElementElm: ($element, xi, yi, cx, cy, element) ->
     was = @chunks[cx][cy].getElement(xi, yi)
-    console.log "changed element at x:#{xi} y:#{yi} from: #{ELM_TYPES[was]}  to: #{ELM_TYPES[element]}"
+    #console.log "changed element at x:#{xi} y:#{yi} from: #{ELM_TYPES[was]}  to: #{ELM_TYPES[element]}"
     for type in ELM_TYPES
         $element.classList.remove(type)
       $element.classList.add("#{ELM_TYPES[element]}")
@@ -585,7 +612,7 @@ class @Game
     value = _.indexOf(TILE_TYPES, tile_type)
     $tileSprite.frame = TILE_INDEX[value]
     $tileSprite.scale = 2
-    console.log("adding tile for chunk",cx,cy,"position ",xi,yi)
+    #console.log("adding tile for chunk",cx,cy,"position ",xi,yi)
     $tileSprite.x = xi * TILE_SIZE;
     $tileSprite.y = yi * TILE_SIZE;
     $tile.sprite = $tileSprite
