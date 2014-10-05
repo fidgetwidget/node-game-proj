@@ -1,9 +1,9 @@
 var express   = require('express');
 var router    = express.Router();
 
-var ChunkCtrl   = require('../controllers/chunkCtrl.js')
-var ElementCtrl = require('../controllers/elementCtrl.js')
-var TileCtrl    = require('../controllers/tileCtrl.js')
+var ChunkCtrl   = require('../controllers/chunk_ctrl.js')
+var ElementCtrl = require('../controllers/element_ctrl.js')
+var TileCtrl    = require('../controllers/tile_ctrl.js')
 
 
 router.post(    '/',                                      ChunkCtrl.post );

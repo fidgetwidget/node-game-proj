@@ -9,8 +9,18 @@ module.exports = (grunt) ->
           'public/javascripts/app.js':
             [ 'public/coffee/*.coffee', 'public/coffee/src/*.coffee' ]
 
+      coffee_to_js:
+        options:
+          bare: true
+        expand:   true
+        flatten:  false
+        cwd:      'src'
+        src:      ['**/*.coffee']
+        dest:     ''
+        ext:      '.js'
+
     watch:
-      files: 'public/coffee/*.coffee'
+      files: '**/*.coffee'
       tasks:
         [ 'coffee' ]
 
