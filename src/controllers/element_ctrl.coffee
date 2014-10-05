@@ -28,12 +28,12 @@ class ElementCtrl
 
         now = Date.now()
         #  search for the element in question
-        ent = chnk._elements.filter (element) ->
-            if (element.x is ex and element.y is ey) 
-              element.value = ev
-              element.updated = now
-              return element
-          .pop()
+        ent = chnk._elements.filter( (element) ->
+          if (element.x is ex and element.y is ey) 
+            element.value = ev
+            element.updated = now
+            return element
+          ).pop()
 
         # if the element isn't there, then create a new one
         if (!ent) 
@@ -71,6 +71,7 @@ class ElementCtrl
         # There must be a better way to do this with coffee syntax 
         index = -1
         i = 0
+        elm = null
         while (i < chnk._elements.length and index < 0)
           elm = chnk._elements[i]
           if (elm.x is ex and elm.y is ey)

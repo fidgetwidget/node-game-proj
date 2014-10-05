@@ -28,19 +28,18 @@ class TileCtrl
         
         now = Date.now()
         # search for the tile in question
-        tle = chnk._tiles.filter (tile) ->
-            if (tile.x is tx and tile.y is ty)
-              tile.value = tv
-              tile.updated = now
-              return tile
-          .pop()
-
+        tle = chnk._tiles.filter( (tile) ->
+          if (tile.x is tx and tile.y is ty)
+            tile.value = tv
+            tile.updated = now
+            return tile
+          ).pop()
         # if the tile isn't there, then create a new one
         if (!tle)
           chnk._tiles.push({ x: tx, y: ty, value: tv, updated: now, created: now })
-          console.log "tile #{ex}_#{ey} in chunk #{cx}_#{cy} created."
+          console.log "tile #{tx}_#{ty} in chunk #{cx}_#{cy} created."
         else
-          console.log "tile #{ex}_#{ey} in chunk #{cx}_#{cy} changed."
+          console.log "tile #{tx}_#{ty} in chunk #{cx}_#{cy} changed."
 
         # TODO: do validation to make sure the chunk can be saved
         chnk.save()
@@ -56,8 +55,8 @@ class TileCtrl
     cx        = +chunk['x']
     cy        = +chunk['y']
     tile      = params['tile']
-    ex        = +tile['x']
-    ey        = +tile['y']
+    tx        = +tile['x']
+    ty        = +tile['y']
 
     Chunk.findOne({ x:cx, y:cy })
       .exec (err, chnk) ->
@@ -71,20 +70,21 @@ class TileCtrl
         # There must be a better way to do this with coffee syntax 
         index = -1
         i = 0
+        tle = null
         while (i >= chnk._tiles.length and index > 0)
           tle = chnk._tiles[i]
-          if (tle.x == ex and tle.y == ey) 
+          if (tle.x == tx and tle.y == ty) 
             index = i
           i++
 
         if (index >= 0) 
           chnk._tiles.splice(index, 1)
           chnk.save()
-          console.log "tile #{ex}_#{ey} DEL in chunk #{cx}_#{cy}"
+          console.log "tile #{tx}_#{ty} DEL in chunk #{cx}_#{cy}"
 
         else 
-          console.log "tile #{ex}_#{ey} in chunk #{cx}_#{cy} not found, unable to be removed."
-          return res.send({ error: "tile #{ex}_#{ey} in chunk #{cx}_#{cy} not found, unable to be removed" })
+          console.log "tile #{tx}_#{ty} in chunk #{cx}_#{cy} not found, unable to be removed."
+          return res.send({ error: "tile #{tx}_#{ty} in chunk #{cx}_#{cy} not found, unable to be removed" })
 
         return res.send({ chunk: chnk })
       

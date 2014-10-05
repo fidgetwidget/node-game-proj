@@ -22,7 +22,7 @@ TileCtrl = (function() {
     tx = +tile['x'];
     ty = +tile['y'];
     tv = +tile['value'];
-    Chunk.findOne({
+    return Chunk.findOne({
       x: cx,
       y: cy
     }).exec(function(err, chnk) {
@@ -38,29 +38,29 @@ TileCtrl = (function() {
         });
       }
       now = Date.now();
-      return tle = chnk._tiles.filter(function(tile) {
+      tle = chnk._tiles.filter(function(tile) {
         if (tile.x === tx && tile.y === ty) {
           tile.value = tv;
           tile.updated = now;
           return tile;
         }
       }).pop();
-    });
-    if (!tle) {
-      chnk._tiles.push({
-        x: tx,
-        y: ty,
-        value: tv,
-        updated: now,
-        created: now
+      if (!tle) {
+        chnk._tiles.push({
+          x: tx,
+          y: ty,
+          value: tv,
+          updated: now,
+          created: now
+        });
+        console.log("tile " + tx + "_" + ty + " in chunk " + cx + "_" + cy + " created.");
+      } else {
+        console.log("tile " + tx + "_" + ty + " in chunk " + cx + "_" + cy + " changed.");
+      }
+      chnk.save();
+      res.send({
+        chunk: chnk
       });
-      console.log("tile " + ex + "_" + ey + " in chunk " + cx + "_" + cy + " created.");
-    } else {
-      console.log("tile " + ex + "_" + ey + " in chunk " + cx + "_" + cy + " changed.");
-    }
-    chnk.save();
-    res.send({
-      chunk: chnk
     });
   };
 
@@ -68,14 +68,14 @@ TileCtrl = (function() {
   /* DELETE ACTION */
 
   TileCtrl.del = function(req, res) {
-    var chunk, cx, cy, ex, ey, params, tile;
+    var chunk, cx, cy, params, tile, tx, ty;
     params = req['body'];
     chunk = params['chunk'];
     cx = +chunk['x'];
     cy = +chunk['y'];
     tile = params['tile'];
-    ex = +tile['x'];
-    ey = +tile['y'];
+    tx = +tile['x'];
+    ty = +tile['y'];
     return Chunk.findOne({
       x: cx,
       y: cy
@@ -94,9 +94,10 @@ TileCtrl = (function() {
       }
       index = -1;
       i = 0;
+      tle = null;
       while (i >= chnk._tiles.length && index > 0) {
         tle = chnk._tiles[i];
-        if (tle.x === ex && tle.y === ey) {
+        if (tle.x === tx && tle.y === ty) {
           index = i;
         }
         i++;
@@ -104,11 +105,11 @@ TileCtrl = (function() {
       if (index >= 0) {
         chnk._tiles.splice(index, 1);
         chnk.save();
-        console.log("tile " + ex + "_" + ey + " DEL in chunk " + cx + "_" + cy);
+        console.log("tile " + tx + "_" + ty + " DEL in chunk " + cx + "_" + cy);
       } else {
-        console.log("tile " + ex + "_" + ey + " in chunk " + cx + "_" + cy + " not found, unable to be removed.");
+        console.log("tile " + tx + "_" + ty + " in chunk " + cx + "_" + cy + " not found, unable to be removed.");
         return res.send({
-          error: "tile " + ex + "_" + ey + " in chunk " + cx + "_" + cy + " not found, unable to be removed"
+          error: "tile " + tx + "_" + ty + " in chunk " + cx + "_" + cy + " not found, unable to be removed"
         });
       }
       return res.send({

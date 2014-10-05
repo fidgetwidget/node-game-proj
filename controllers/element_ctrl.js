@@ -22,7 +22,7 @@ ElementCtrl = (function() {
     ex = +element['x'];
     ey = +element['y'];
     ev = +element['value'];
-    Chunk.findOne({
+    return Chunk.findOne({
       x: cx,
       y: cy
     }).exec(function(err, chnk) {
@@ -38,29 +38,29 @@ ElementCtrl = (function() {
         });
       }
       now = Date.now();
-      return ent = chnk._elements.filter(function(element) {
+      ent = chnk._elements.filter(function(element) {
         if (element.x === ex && element.y === ey) {
           element.value = ev;
           element.updated = now;
           return element;
         }
       }).pop();
-    });
-    if (!ent) {
-      chnk._elements.push({
-        x: ex,
-        y: ey,
-        value: ev,
-        updated: now,
-        created: now
+      if (!ent) {
+        chnk._elements.push({
+          x: ex,
+          y: ey,
+          value: ev,
+          updated: now,
+          created: now
+        });
+        console.log("element " + ex + "_" + ey + " in chunk " + cx + "_" + cy + " created.");
+      } else {
+        console.log("element " + ex + "_" + ey + " in chunk " + cx + "_" + cy + " changed.");
+      }
+      chnk.save();
+      res.send({
+        chunk: chnk
       });
-      console.log("element " + ex + "_" + ey + " in chunk " + cx + "_" + cy + " created.");
-    } else {
-      console.log("element " + ex + "_" + ey + " in chunk " + cx + "_" + cy + " changed.");
-    }
-    chnk.save();
-    res.send({
-      chunk: chnk
     });
   };
 
@@ -94,6 +94,7 @@ ElementCtrl = (function() {
       }
       index = -1;
       i = 0;
+      elm = null;
       while (i < chnk._elements.length && index < 0) {
         elm = chnk._elements[i];
         if (elm.x === ex && elm.y === ey) {
