@@ -1,4 +1,4 @@
-class Game
+class Main
 
   @current_connections: 0
 
@@ -9,16 +9,16 @@ class Game
 
       ### CONNECTIONS ###
 
-      # on 'connection'
+      # on 'connection' 
       console.log "new connection."
-      Game.current_connections++
-      console.log "total connections #{Game.current_connections}"
+      Main.current_connections++
+      console.log "total connections #{Main.current_connections}"
 
 
       socket.on 'disconnect', () ->
         console.log "disconnection."
-        Game.current_connections--
-        console.log "total connections #{Game.current_connections}"
+        Main.current_connections--
+        console.log "total connections #{Main.current_connections}"
 
 
 
@@ -56,4 +56,4 @@ class Game
 
 
 
-module.exports = Game;
+module.exports = Main;

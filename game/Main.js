@@ -1,23 +1,23 @@
-var Game;
+var Main;
 
-Game = (function() {
-  function Game() {}
+Main = (function() {
+  function Main() {}
 
-  Game.current_connections = 0;
+  Main.current_connections = 0;
 
-  Game.io = function(server) {
+  Main.io = function(server) {
     var io;
     io = require('socket.io')(server);
     return io.on('connection', function(socket) {
 
       /* CONNECTIONS */
       console.log("new connection.");
-      Game.current_connections++;
-      console.log("total connections " + Game.current_connections);
+      Main.current_connections++;
+      console.log("total connections " + Main.current_connections);
       socket.on('disconnect', function() {
         console.log("disconnection.");
-        Game.current_connections--;
-        return console.log("total connections " + Game.current_connections);
+        Main.current_connections--;
+        return console.log("total connections " + Main.current_connections);
       });
 
       /* SUBSCRIPTION EVENTS */
@@ -44,8 +44,8 @@ Game = (function() {
     });
   };
 
-  return Game;
+  return Main;
 
 })();
 
-module.exports = Game;
+module.exports = Main;

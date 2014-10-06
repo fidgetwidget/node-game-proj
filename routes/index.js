@@ -1,9 +1,13 @@
-var express = require('express');
-var router = express.Router();
+var express, router;
 
-/* GET home page. */
+express = require('express');
+
+router = express.Router();
+
 router.get('/', function(req, res) {
-  res.render('index', { title: 'Express' });
+  return res.render('index', {
+    title: 'Node Game Proj'
+  });
 });
 
 module.exports = router;

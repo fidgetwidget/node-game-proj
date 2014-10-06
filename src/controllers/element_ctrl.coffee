@@ -11,7 +11,7 @@ class ElementCtrl
 
     params    = req['body']
     chunk     = params['chunk']
-    cx        = +chunk['x']
+    cx        = +chunk['x'] # the + is a more efficient than doing parseInt() but gives you the same results
     cy        = +chunk['y']
     element   = params['element']
     ex        = +element['x']
