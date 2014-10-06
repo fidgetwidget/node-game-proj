@@ -212,18 +212,31 @@ class @Game
       })
     # switching layer for chunk when chunk not visible anymore (vertical)
     #player in top half of the N layer or bottom of S #
-    if (cy == @centerChunkY && y > CHUNK_HEIGHT/2)
-      console.log("changing chunk going down")
+
+    # if player cross the middle of the chunk vertically (only the current chunk is visible)
     if ((cy < @centerChunkY && y < CHUNK_HEIGHT/2) || (cy == @centerChunkY && y > CHUNK_HEIGHT/2)) 
-      console.log("switching chunk vertically cy=#{cy} centerChunkY=#{@centerChunkY}")
-      # switching layers NE -> SE NW -> SW
-      # emptying the layer that will become the next layer
-      if (@findLayerFromChunkCoordinate(@centerChunkX,@centerChunkY) == Game.$groupRight1)
-        @emptyLayer(Game.$groupRight1)
-        @emptyLayer(Game.$groupLeft1)
+      if (cy == @centerChunkY && y > CHUNK_HEIGHT/2)
+        console.log("changing chunk going down")
+        # if main is 1 then empty 2
+        if (@findLayerFromChunkCoordinate(@centerChunkX,@centerChunkY) == Game.$groupRight1)
+          @emptyLayer(Game.$groupRight2)
+          @emptyLayer(Game.$groupLeft2)
+        else
+          @emptyLayer(Game.$groupRight1)
+          @emptyLayer(Game.$groupLeft1)
       else
-        @emptyLayer(Game.$groupRight2)
-        @emptyLayer(Game.$groupLeft2)
+        console.log("changing chunk going up")
+        # emptying the layer that will become the next layer
+        # if main is 1 then empty 2
+        if (@findLayerFromChunkCoordinate(@centerChunkX,@centerChunkY) == Game.$groupRight1)
+          @emptyLayer(Game.$groupRight1)
+          @emptyLayer(Game.$groupLeft1)
+        else
+          @emptyLayer(Game.$groupRight2)
+          @emptyLayer(Game.$groupLeft2)
+
+      console.log("switching chunk vertically cy=#{cy} centerChunkY=#{@centerChunkY}")
+      
       # switching position of layers
       @switchLayer(Game.$groupRight1, Game.$groupRight2)
       @switchLayer(Game.$groupLeft1, Game.$groupLeft2)
@@ -240,11 +253,12 @@ class @Game
         console.log("now in chunk (#{@centerChunkX},#{@centerChunkY} loading chunk #{@centerChunkY+cy}")
         @loadChunks(cx, (cy+cy-@centerChunkY))
         @loadChunks(cx-1, (cy+cy-@centerChunkY))
+
       # reset centerChunkY
       if (cy == @centerChunkY && y > CHUNK_HEIGHT/2)
-        @centerChunkY = cy + 1
+        @centerChunkY = cy+1 # going down
       else
-        @centerChunkY = cy
+        @centerChunkY = cy  # going up
 
     # move the layer offsetting with chunk position  
     if (cx == @centerChunkX) 
