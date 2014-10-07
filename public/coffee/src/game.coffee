@@ -211,54 +211,59 @@ class @Game
       marginLeft: "#{GRID_HEIGHT*-cx}px"
       })
     # switching layer for chunk when chunk not visible anymore (vertical)
-    #player in top half of the N layer or bottom of S #
-
     # if player cross the middle of the chunk vertically (only the current chunk is visible)
-    if ((cy < @centerChunkY && y < CHUNK_HEIGHT/2) || (cy == @centerChunkY && y > CHUNK_HEIGHT/2)) 
-      if (cy == @centerChunkY && y > CHUNK_HEIGHT/2)
-        console.log("changing chunk going down")
-        # if main is 1 then empty 2
-        if (@findLayerFromChunkCoordinate(@centerChunkX,@centerChunkY) == Game.$groupRight1)
-          @emptyLayer(Game.$groupRight2)
-          @emptyLayer(Game.$groupLeft2)
-        else
-          @emptyLayer(Game.$groupRight1)
-          @emptyLayer(Game.$groupLeft1)
-      else
-        console.log("changing chunk going up")
-        # emptying the layer that will become the next layer
-        # if main is 1 then empty 2
-        if (@findLayerFromChunkCoordinate(@centerChunkX,@centerChunkY) == Game.$groupRight1)
-          @emptyLayer(Game.$groupRight1)
-          @emptyLayer(Game.$groupLeft1)
-        else
-          @emptyLayer(Game.$groupRight2)
-          @emptyLayer(Game.$groupLeft2)
+    playerGoingUp = false
+    playerGoingDown = false
+    playerGoingRight = false
+    playerGoingLeft = false
 
-      console.log("switching chunk vertically cy=#{cy} centerChunkY=#{@centerChunkY}")
-      
-      # switching position of layers
-      @switchLayer(Game.$groupRight1, Game.$groupRight2)
-      @switchLayer(Game.$groupLeft1, Game.$groupLeft2)
-      # and updating reference
-      @switchLayerReferenceUpDown()
+    if (cy < @centerChunkY && y < CHUNK_HEIGHT/2)
+      playerGoingUp = true
+      layerToRemoveLeft = Game.$groupSW
+      layerToRemoveRight = Game.$groupSE
+      coordNextChunkY = cy+cy-@centerChunkY
+      @centerChunkY = cy
+    else if (cy == @centerChunkY && y > CHUNK_HEIGHT/2)
+      playerGoingDown = true
+      layerToRemoveLeft = Game.$groupNW
+      layerToRemoveRight = Game.$groupNE
+      coordNextChunkY = cy+cy-@centerChunkY+1
+      @centerChunkY = cy+1
+    else if (cx < @centerChunkX && x < CHUNK_WIDTH/2)
+      console.log("left")
+      playerGoingLeft = true
+      layerToRemoveTop = Game.$groupNE
+      layerToRemoveBottom = Game.$groupSE
+      coordNextChunkX = cx+cx-@centerChunkX
+      @centerChunkX = cx
+    else if (cx == @centerChunkX && x > CHUNK_WIDTH/2)
+      console.log("right")
+      playerGoingRight = true
+      layerToRemoveTop = Game.$groupNW
+      layerToRemoveBottom = Game.$groupSW
+      coordNextChunkX = cx+cx-@centerChunkX+1
+      @centerChunkX = cx+1
 
-      
-      # load the next chunks
-      if (cy == @centerChunkY && y > CHUNK_HEIGHT/2)
-        console.log("now in chunk (#{@centerChunkX},#{@centerChunkY} loading chunk #{@centerChunkY+cy+1}")
-        @loadChunks(cx, (cy+cy-@centerChunkY+1))
-        @loadChunks(cx-1, (cy+cy-@centerChunkY+1))
-      else
-        console.log("now in chunk (#{@centerChunkX},#{@centerChunkY} loading chunk #{@centerChunkY+cy}")
-        @loadChunks(cx, (cy+cy-@centerChunkY))
-        @loadChunks(cx-1, (cy+cy-@centerChunkY))
+    
+    if (playerGoingUp || playerGoingDown) 
+      # emptying the layer that will become the next layer
+      @emptyLayer(layerToRemoveLeft)
+      @emptyLayer(layerToRemoveRight)
+      # switching layers
+      @switchLayersUpDown()
+      # load next chunk
+      @loadChunks(cx, coordNextChunkY)
+      @loadChunks(cx-1, coordNextChunkY)
 
-      # reset centerChunkY
-      if (cy == @centerChunkY && y > CHUNK_HEIGHT/2)
-        @centerChunkY = cy+1 # going down
-      else
-        @centerChunkY = cy  # going up
+    if (playerGoingLeft || playerGoingRight) 
+      # emptying the layer that will become the next layer
+      @emptyLayer(layerToRemoveTop)
+      @emptyLayer(layerToRemoveBottom)
+      # switching layers
+      @switchLayersLeftRight()
+      # load next chunk
+      @loadChunks(coordNextChunkX, cy)
+      @loadChunks(coordNextChunkX, cy-1)
 
     # move the layer offsetting with chunk position  
     if (cx == @centerChunkX) 
@@ -283,17 +288,26 @@ class @Game
     while layer.firstChild
       layer.removeChild layer.firstChild
 
-  @switchLayerReferenceUpDown: () ->
-    if Game.$groupSE == Game.$groupRight1
-      Game.$groupSE = Game.$groupRight2
-      Game.$groupNE = Game.$groupRight1
-      Game.$groupSW = Game.$groupLeft2
-      Game.$groupNW = Game.$groupLeft1 
-    else
-      Game.$groupSE = Game.$groupRight1
-      Game.$groupNE = Game.$groupRight2
-      Game.$groupSW = Game.$groupLeft1
-      Game.$groupNW = Game.$groupLeft2
+  @switchLayersUpDown: () ->
+    @switchLayer(Game.$groupRight1, Game.$groupRight2)
+    @switchLayer(Game.$groupLeft1, Game.$groupLeft2)
+    tempLayer = Game.$groupSE
+    Game.$groupSE = Game.$groupNE
+    Game.$groupNE = tempLayer
+    tempLayer = Game.$groupSW
+    Game.$groupSW = Game.$groupNW
+    Game.$groupNW = tempLayer 
+
+
+  @switchLayersLeftRight: () ->
+    @switchLayer(Game.$groupRight1, Game.$groupLeft1)
+    @switchLayer(Game.$groupRight2, Game.$groupLeft2)
+    tempLayer = Game.$groupSE
+    Game.$groupSE = Game.$groupSW
+    Game.$groupSW = tempLayer
+    tempLayer = Game.$groupNW
+    Game.$groupNW = Game.$groupNE
+    Game.$groupNE = tempLayer 
 
   # Unload a chunk
   #
