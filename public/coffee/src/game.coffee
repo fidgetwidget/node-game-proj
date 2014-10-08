@@ -194,11 +194,40 @@ class @Game
   # Move the scene to the center (apparent player movement)
   #
   @setCenter: (x, y, cx, cy) ->
-    if Game.$groupSE == Game.$groupRight1
-      position = "1 bottom 2 top"
-    else
-      position = "2 bottom 1 top"
-    console.log("set center #{x},#{y} chunk #{cx},#{cy} layers positon #{position}")
+    if (Game.$groupSW == Game.$groupRight1)
+      sw = "r1"  
+    else if (Game.$groupSW == Game.$groupRight2)
+      sw = "r2"
+    else if (Game.$groupSW == Game.$groupLeft1)
+      sw = "l1"
+    else if (Game.$groupSW == Game.$groupLeft2)
+      sw = "l2"
+    if (Game.$groupSE == Game.$groupRight1)
+      se = "r1"  
+    else if (Game.$groupSE == Game.$groupRight2)
+      se = "r2"
+    else if (Game.$groupSE == Game.$groupLeft1)
+      se = "l1"
+    else if (Game.$groupSE == Game.$groupLeft2)
+      se = "l2"
+    if (Game.$groupNE == Game.$groupRight1)
+      ne = "r1"  
+    else if (Game.$groupNE == Game.$groupRight2)
+      ne = "r2"
+    else if (Game.$groupNE == Game.$groupLeft1)
+      ne = "l1"
+    else if (Game.$groupNE == Game.$groupLeft2)
+      ne = "l2"
+    if (Game.$groupNW == Game.$groupRight1)
+      nw = "r1"  
+    else if (Game.$groupNW == Game.$groupRight2)
+      nw = "r2"
+    else if (Game.$groupNW == Game.$groupLeft1)
+      nw = "l1"
+    else if (Game.$groupNW == Game.$groupLeft2)
+      nw = "l2"
+    console.log("se #{se}/sw #{sw}/nw #{nw}/ne #{ne}")
+    console.log("set center #{x},#{y} of chunk #{cx},#{cy} SW chunk in #{@centerChunkX},#{@centerChunkY}")
     @$viewport.classList.remove("x#{@centerX}")
     @$viewport.classList.remove("y#{@centerY}")
     @centerX = x - HALF_WIDTH
@@ -222,27 +251,28 @@ class @Game
       layerToRemoveLeft = Game.$groupSW
       layerToRemoveRight = Game.$groupSE
       coordNextChunkY = cy+cy-@centerChunkY
-      @centerChunkY = cy
+      #@centerChunkY = cy
     else if (cy == @centerChunkY && y > CHUNK_HEIGHT/2)
       playerGoingDown = true
       layerToRemoveLeft = Game.$groupNW
       layerToRemoveRight = Game.$groupNE
       coordNextChunkY = cy+cy-@centerChunkY+1
-      @centerChunkY = cy+1
+      #@centerChunkY = cy+1
     else if (cx < @centerChunkX && x < CHUNK_WIDTH/2)
       console.log("left")
       playerGoingLeft = true
       layerToRemoveTop = Game.$groupNE
       layerToRemoveBottom = Game.$groupSE
       coordNextChunkX = cx+cx-@centerChunkX
-      @centerChunkX = cx
+      #@centerChunkX = cx
     else if (cx == @centerChunkX && x > CHUNK_WIDTH/2)
       console.log("right")
       playerGoingRight = true
       layerToRemoveTop = Game.$groupNW
       layerToRemoveBottom = Game.$groupSW
       coordNextChunkX = cx+cx-@centerChunkX+1
-      @centerChunkX = cx+1
+      #console.log("next chunk #{coordNextChunkX},#{cy}")
+      #@centerChunkX = cx+1
 
     
     if (playerGoingUp || playerGoingDown) 
@@ -262,8 +292,19 @@ class @Game
       # switching layers
       @switchLayersLeftRight()
       # load next chunk
-      @loadChunks(coordNextChunkX, cy)
-      @loadChunks(coordNextChunkX, cy-1)
+      @loadChunks(coordNextChunkX, @centerChunkY)
+      console.log("next chunk #{coordNextChunkX},#{@centerChunkY}")
+      @loadChunks(coordNextChunkX, @centerChunkY-1)
+      console.log("next chunk #{coordNextChunkX},#{@centerChunkY-1}")
+
+    if (playerGoingUp)
+      @centerChunkY = cy
+    else if (playerGoingDown)
+      @centerChunkY = cy+1
+    else if (playerGoingLeft)
+      @centerChunkX = cx
+    else if (playerGoingRight)
+      @centerChunkX = cx+1
 
     # move the layer offsetting with chunk position  
     if (cx == @centerChunkX) 
@@ -300,6 +341,22 @@ class @Game
 
 
   @switchLayersLeftRight: () ->
+    #if (Game.$groupSE == Game.$groupRight1 && Game.$groupSW == Game.$groupLeft1)
+    #  console.log("SE=R1/SW=L1")
+    #  @switchLayer(Game.$groupRight1, Game.$groupLeft1)
+    #  @switchLayer(Game.$groupRight2, Game.$groupLeft2)
+    #else if (Game.$groupSE == Game.$groupRight1 && Game.$groupSW == Game.$groupLeft2)
+    #  console.log("SE=R1/SW=L2")
+    #  @switchLayer(Game.$groupRight1, Game.$groupLeft2)
+    #  @switchLayer(Game.$groupRight2, Game.$groupLeft1)
+    #else if (Game.$groupSE == Game.$groupRight2 && Game.$groupSW == Game.$groupLeft1)
+    #  console.log("SE=R2/SW=L1")
+    #  @switchLayer(Game.$groupRight2, Game.$groupLeft1)
+    #  @switchLayer(Game.$groupRight1, Game.$groupLeft2)
+    #else if (Game.$groupSE == Game.$groupRight2 && Game.$groupSW == Game.$groupLeft2)
+    #  console.log("SE=R2/SW=L12")
+    #  @switchLayer(Game.$groupRight2, Game.$groupLeft2)
+    #  @switchLayer(Game.$groupRight1, Game.$groupLeft1)
     @switchLayer(Game.$groupRight1, Game.$groupLeft1)
     @switchLayer(Game.$groupRight2, Game.$groupLeft2)
     tempLayer = Game.$groupSE
