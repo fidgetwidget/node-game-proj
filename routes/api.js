@@ -30,5 +30,4 @@ router.get('/:chunk_x_y/elements.:format', ElementCtrl.get);
 
 router.get('/:chunk_x_y/elements/:elm_x_y.:format', ElementCtrl.get);
 
-
 module.exports = router;
