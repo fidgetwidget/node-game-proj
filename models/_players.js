@@ -1,13 +1,16 @@
-var ObjectId, Schema, elementSchema, mongoose;
+var Container, Schema, mongoose, playerSchema;
 
 mongoose = require('mongoose');
 
 Schema = mongoose.Schema;
 
-ObjectId = mongoose.Schema.Types.ObjectId;
+Container = require('./_containers.js');
 
-elementSchema = new Schema({
-  chunk: ObjectId,
+playerSchema = new Schema({
+  name: {
+    type: String,
+    "default": ''
+  },
   created: {
     type: Date,
     "default": Date.now
@@ -24,13 +27,18 @@ elementSchema = new Schema({
     type: Number,
     "default": 0
   },
-  value: {
+  cx: {
     type: Number,
     "default": 0
-  }
+  },
+  cy: {
+    type: Number,
+    "default": 0
+  },
+  _containers: [Container.Schema]
 });
 
 module.exports = {
-  Model: mongoose.model('Element', elementSchema),
-  Schema: elementSchema
+  Model: mongoose.model('Player', playerSchema),
+  Schema: playerSchema
 };

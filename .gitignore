@@ -6,6 +6,8 @@ data/*
 nodeGameProj.sublime-project
 nodeGameProj.sublime-workspace
 public/images/tiles.pdn
+
+data/*
 .DS_Store
 *.log
 javascripts/app.js

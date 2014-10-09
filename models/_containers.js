@@ -1,13 +1,12 @@
-var ObjectId, Schema, elementSchema, mongoose;
+var Item, Schema, containerSchema, mongoose;
 
 mongoose = require('mongoose');
 
 Schema = mongoose.Schema;
 
-ObjectId = mongoose.Schema.Types.ObjectId;
+Item = require('./_items.js');
 
-elementSchema = new Schema({
-  chunk: ObjectId,
+containerSchema = new Schema({
   created: {
     type: Date,
     "default": Date.now
@@ -16,21 +15,22 @@ elementSchema = new Schema({
     type: Date,
     "default": Date.now
   },
-  x: {
+  type: {
     type: Number,
     "default": 0
   },
-  y: {
+  rows: {
     type: Number,
-    "default": 0
+    "default": 1
   },
-  value: {
+  columns: {
     type: Number,
-    "default": 0
-  }
+    "default": 1
+  },
+  _items: [Item.Schema]
 });
 
 module.exports = {
-  Model: mongoose.model('Element', elementSchema),
-  Schema: elementSchema
+  Model: mongoose.model('Container', containerSchema),
+  Schema: containerSchema
 };

@@ -1,20 +1,41 @@
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
-var ObjectId = mongoose.Schema.Types.ObjectId;
+var Element, Item, ObjectId, Schema, Tile, chunkSchema, mongoose;
 
-var Tile = require('./_tiles.js');
-var Element = require('./_elements.js');
-var Item = require('./_items.js');
+mongoose = require('mongoose');
 
-var chunkSchema = new Schema({
-  created:    { type: Date,   default: Date.now },
-  updated:    { type: Date,   default: Date.now },
-  x:          { type: Number, default: 0 },
-  y:          { type: Number, default: 0 },
-  base:       { type: Number, default: 0 },
-  _tiles:     [Tile.Schema],
-  _elements:  [Element.Schema],
-  _items:     [Item.Schema]
+Schema = mongoose.Schema;
+
+ObjectId = mongoose.Schema.Types.ObjectId;
+
+Tile = require('./_tiles.js');
+
+Element = require('./_elements.js');
+
+Item = require('./_items.js');
+
+chunkSchema = new Schema({
+  created: {
+    type: Date,
+    "default": Date.now
+  },
+  updated: {
+    type: Date,
+    "default": Date.now
+  },
+  x: {
+    type: Number,
+    "default": 0
+  },
+  y: {
+    type: Number,
+    "default": 0
+  },
+  base: {
+    type: Number,
+    "default": 0
+  },
+  _tiles: [Tile.Schema],
+  _elements: [Element.Schema],
+  _items: [Item.Schema]
 });
 
 module.exports = {
