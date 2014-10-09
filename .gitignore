@@ -11,3 +11,4 @@ data/*
 .DS_Store
 *.log
 javascripts/app.js
+public/javascripts/app.js
