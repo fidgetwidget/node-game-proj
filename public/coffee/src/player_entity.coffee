@@ -35,7 +35,7 @@ class @PlayerEntity extends Entity
 
 
   addSelf: (toGame) =>
-    toGame.$players.appendChild @$elm
+    #toGame.$players.appendChild @$elm
     Game.$background.addChild(@$spriteEntity)
 
 

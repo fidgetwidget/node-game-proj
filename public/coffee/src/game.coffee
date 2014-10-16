@@ -11,9 +11,6 @@ class @Game
   @entities:    undefined
   @players:     undefined
   @chunks:      undefined
-  @chunksElm:   undefined
-
-  @$viewport:  undefined
   
   @$entities:   undefined
   @$players:    undefined
@@ -44,7 +41,7 @@ class @Game
     @chunksElm = {}
 
     # setup the layers
-    Game.$viewport = document.getElementById 'main'
+    #Game.$viewport = document.getElementById 'main'
     # adding a layer to position everything correctly in the scene
     Game.$background = enchant.Group()
     enchantGame.rootScene.addChild(Game.$background)
@@ -77,22 +74,20 @@ class @Game
     Game.$groupRight2.x = 0
     Game.$groupRight2.y = - enchantGame.height
 
-    @$players = document.createElement('div')
-    @$players.className = 'players'
-    @$entities = document.createElement('div')
-    @$entities.className = 'entities'    
+    #@$players = document.createElement('div')
+    #@$players.className = 'players'
+    #@$entities = document.createElement('div')
+    #@$entities.className = 'entities'    
 
-    Game.$viewport.appendChild @$players
-    Game.$viewport.appendChild @$entities
-
-    # TODO: create the chunkElms
+    #Game.$viewport.appendChild @$players
+    #Game.$viewport.appendChild @$entities
 
     @centerChunkX = 0
     @centerChunkY = 0
-    Game._width = Game.$viewport.offsetWidth
-    Game._gridWidth = Game._width / TILE_SIZE
-    Game._height = Game.$viewport.offsetHeight
-    Game._gridHeight = Game._height / TILE_SIZE
+    #Game._width = Game.$viewport.offsetWidth
+    #Game._gridWidth = Game._width / TILE_SIZE
+    #Game._height = Game.$viewport.offsetHeight
+    #Game._gridHeight = Game._height / TILE_SIZE
 
     # array for chunks
     @chunks = {}
@@ -228,17 +223,17 @@ class @Game
       nw = "l2"
     console.log("se #{se}/sw #{sw}/nw #{nw}/ne #{ne}")
     console.log("set center #{x},#{y} of chunk #{cx},#{cy} SW chunk in #{@centerChunkX},#{@centerChunkY}")
-    @$viewport.classList.remove("x#{@centerX}")
-    @$viewport.classList.remove("y#{@centerY}")
+    #@$viewport.classList.remove("x#{@centerX}")
+    #@$viewport.classList.remove("y#{@centerY}")
     @centerX = x - HALF_WIDTH
     @centerY = y - HALF_HEIGHT
-    @$viewport.classList.add("x#{@centerX}")
-    @$viewport.classList.add("y#{@centerY}")
+    #@$viewport.classList.add("x#{@centerX}")
+    #@$viewport.classList.add("y#{@centerY}")
 
-    $(@$viewport).find('.chunk').css({
-      marginTop:  "#{GRID_HEIGHT*-cy}px"
-      marginLeft: "#{GRID_HEIGHT*-cx}px"
-      })
+    #$(@$viewport).find('.chunk').css({
+    #  marginTop:  "#{GRID_HEIGHT*-cy}px"
+    #  marginLeft: "#{GRID_HEIGHT*-cx}px"
+    #  })
     # switching layer for chunk when chunk not visible anymore (vertical)
     # if player cross the middle of the chunk vertically (only the current chunk is visible)
     playerGoingUp = false
@@ -366,6 +361,13 @@ class @Game
     Game.$groupNW = Game.$groupNE
     Game.$groupNE = tempLayer 
 
+  ### CHUNK ###
+
+  #
+  @getChunkType: (cx, cy) ->
+    return -1 if @chunks.length < cx or @chunks[cx]?.length < cy
+    return @chunks[cx][cy].base
+
   # Unload a chunk
   #
   @_unloadChunk: (cx, cy, unsub=true) ->
@@ -382,7 +384,7 @@ class @Game
 
   # Clear all tiles of a chunk
   @_removeAllTiles: (cx, cy) ->
-    $tiles = @chunksElm[cx][cy].$tiles.querySelectorAll ".tile.cx#{cx}.cy#{cy}"
+    $tiles = @chunks[cx][cy].$tiles
     if $tiles
       for $tile in $tiles
         $tile.parentNode.removeChild $tile
@@ -390,7 +392,7 @@ class @Game
   # Clean all element of a chunk
   #
   @_removeAllElements: (cx, cy) ->
-    $elms = @chunksElm[cx][cy].$elements.querySelectorAll ".elm.cx#{cx}.cy#{cy}"
+    $elms = @chunks[cx][cy].$elements
     if $elms
       for $elm in $elms
         $elm.parentNode.removeChild $elm
@@ -401,18 +403,11 @@ class @Game
     @chunks[cx] = {} unless @chunks[cx]
     if chunk
       @chunks[cx][cy] = chunk
-      @setTilesBaseClass chunk
+      #@setTilesBaseClass chunk
     else
       @chunks[cx][cy] = undefined
 
-  #
-  #
-  @setTilesBaseClass: (chunk) ->
-    #console.log("setTilesBaseClass")
-    $tiles = @chunksElm[chunk.x][chunk.y].$tiles
-    for typ in TILE_TYPES
-        $tiles.classList.remove(typ)
-      $tiles.classList.add(TILE_TYPES[chunk.base])
+  ### ENTITY ###
 
   # Insert an entity to the game
   #
@@ -459,7 +454,7 @@ class @Game
 
 
   #
-  # Items
+  # ITEMS
   #
   # TODO: allow for multiple items in a tile
   
@@ -496,7 +491,7 @@ class @Game
 
 
   #
-  # Elements
+  # ELEMENTS
   #
 
   @getElement: (x, y) ->
@@ -517,27 +512,29 @@ class @Game
 
   @getElement_at: (xi, yi, cx, cy) ->
     return null if @chunks[cx] is undefined or @chunks[cx][cy] is undefined
-    return @chunks[cx][cy].getElement(xi, yi)
+    return @chunks[cx][cy].getElement(xi,yi)
 
 
-  @setElement_at: (xi, yi, cx, cy, element, dontSave=false) ->
+  @setElement_at: (xi, yi, cx, cy, elementType, dontSave=false) ->
     #console.log("setElement_at")
     return null if @chunks[cx] is undefined or @chunks[cx][cy] is undefined
-    $element = @getElementElm xi, yi, cx, cy
-    if !(element is undefined or element is null)
+    $element = @chunks[cx][cy].getElement(xi,yi) #@getElementElm xi, yi, cx, cy
+    #console.log("returned #{element}")
+    if !(elementType is undefined or elementType is null)
+      #console.log("!#{element}!")
       if $element
-        return if $element.classList.contains(ELM_TYPES[element])
+        return if $element.type == ELM_TYPES[elementType]
         # CHANGE TILE AT
         @removeListener $element
-        @changeElementElm($element, xi, yi, cx, cy, element)
+        @changeElement($element, xi, yi, cx, cy, elementType)
       else
         # INSERT TILE AT
-        $element = @addElementElm(xi, yi, cx, cy, element)
+        $element = @createElement(xi, yi, cx, cy, elementType)
 
-      @saveElement(cx, cy, xi, yi, element) unless dontSave
+      @saveElement(cx, cy, xi, yi, elementType) unless dontSave
 
       # Init on non remove
-      @initElement($element, xi, yi, cx, cy, element)
+      @initElement($element, xi, yi, cx, cy, elementType)
 
     else
       #REMOVE TILE AT
@@ -547,45 +544,33 @@ class @Game
 
         @removeElement(cx, cy, xi, yi)
           
-    return @chunks[cx][cy].setElement(xi, yi, element)
+    return @chunks[cx][cy].setElement(xi, yi, elementType)
 
 
   # add the tile elm to the dom
-  @addElementElm: (xi, yi, cx, cy, element) ->
-    #console.log("addElementElm ",element)
-    $element = @makeElement(cx, cy, xi, yi, ELM_TYPES[element])
-    @chunksElm[cx][cy].$elements.appendChild $element
+  @createElement: (xi, yi, cx, cy, elementType) ->
+    #console.log("addElementElm at #{xi},#{yi} in chunk #{cx},#{cy} type #{elementType} index #{ELM_TYPES[elementType]}")
+    $element = new Element(xi,yi,ELM_TYPES[elementType])
+    $spriteElement = new Sprite(16, 16)
+    $spriteElement.image = enchantGame.assets["images/elements.png"]
+    $spriteElement.frame = ELM_SPRITEINDEX[ELM_TYPES.indexOf(ELM_TYPES[elementType])]
+    #console.log("frame ",$spriteElement.frame)
+    $spriteElement.scale = 2
+    $element.sprite = $spriteElement
+    # find the layer where to display
+    $layer = @findLayerFromChunkCoordinate(cx,cy)
+    $layer.addChild($spriteElement)
+    $spriteElement.x = xi * TILE_SIZE
+    $spriteElement.y = yi * TILE_SIZE 
+    @chunks[cx][cy].setElement(xi,yi,elementType)
     return $element
 
   # alter the tile elm to match the new value
-  @changeElementElm: ($element, xi, yi, cx, cy, element) ->
-    was = @chunks[cx][cy].getElement(xi, yi)
+  @changeElement: ($element, xi, yi, cx, cy, element) ->
+    was = @chunks[cx][cy].getElement(xi,yi)
     #console.log "changed element at x:#{xi} y:#{yi} from: #{ELM_TYPES[was]}  to: #{ELM_TYPES[element]}"
     for type in ELM_TYPES
-        $element.classList.remove(type)
-      $element.classList.add("#{ELM_TYPES[element]}")
-    return $element
-
-
-  @getElementElm: (xi, yi, cx, cy) ->
-    return @chunksElm[cx][cy].$elements.querySelector ".elm.x#{xi}.y#{yi}.cx#{cx}.cy#{cy}"
-
-
-  @makeElement: (cx, cy, xi, yi, element_type) ->
-    #console.log("makeElement ", element_type, "at", xi,yi)
-    r = _.random(0,3)
-    $spriteEntity = new Sprite(16, 16)
-    $spriteEntity.image = enchantGame.assets["images/elements.png"]
-    $spriteEntity.frame = ELM_SPRITEINDEX[ELM_TYPES.indexOf(element_type)]
-    #console.log("frame ",$spriteEntity.frame)
-    $spriteEntity.scale = 2
-    # find the layer where to display
-    $layer = @findLayerFromChunkCoordinate(cx,cy)
-    $layer.addChild($spriteEntity)
-    $spriteEntity.x = xi * TILE_SIZE
-    $spriteEntity.y = yi * TILE_SIZE 
-    $element = document.createElement('div')
-    $element.className = "elm #{element_type} x#{xi} y#{yi} cx#{cx} cy#{cy} r#{r}"
+      $element.type = ELM_TYPES[element]
     return $element
 
   # do any work regarding a tile being added/changed
@@ -599,7 +584,7 @@ class @Game
     return @
 
   #
-  # Tiles
+  # TILES
   #
 
   # get the tile with the given pixel x, y
@@ -624,24 +609,23 @@ class @Game
   # get the tile from the given coords
   @getTile_at: (xi, yi, cx, cy) ->
     return null if @chunks[cx] is undefined or @chunks[cx][cy] is undefined
-    return @chunks[cx][cy].getTile(xi, yi)
-
+    return @chunks[cx][cy].getTile(xi,yi)
 
   # set the value of a tile at the given coords
   @setTile_at: (xi, yi, cx, cy, value, dontSave=false) ->
     #console.log("setTile_at")
     return null if @chunks.length < cx or @chunks[cx]?.length < cy
 
-    $tile = @getTileElm xi, yi, cx, cy
+    $tile = @getTile_at xi, yi, cx, cy
     if !(value is undefined or value is null)
       if $tile
-        return if $tile.classList.contains(TILE_TYPES[value])
+        return if $tile.type == TILE_TYPES[value]
         # CHANGE TILE AT
         @removeListener $tile
-        @changeTileElm($tile, xi, yi, cx, cy, value)
+        @changeTile($tile, xi, yi, cx, cy, value)
       else
         # INSERT TILE AT
-        $tile = @addTileElm(xi, yi, cx, cy, value)
+        $tile = @createTile(xi, yi, cx, cy, value)
 
       @saveTile(cx, cy, xi, yi, value) unless dontSave
 
@@ -658,55 +642,38 @@ class @Game
           
     return @chunks[cx][cy].setTile(xi, yi, value)
 
-
-  @getChunkType: (cx, cy) ->
-    return -1 if @chunks.length < cx or @chunks[cx]?.length < cy
-    return @chunks[cx][cy].base
-
   # add the tile elm to the dom
-  @addTileElm: (xi, yi, cx, cy, value) ->
-    #console.log("addTileElm at ", xi,yim "chunk ",cx,cy)
-    $tile = @makeTile(cx, cy, xi, yi, TILE_TYPES[value])
-    $layer = @findLayerFromChunkCoordinate(cx,cy)
-    $layer.addChild($tile.sprite)
-    @chunksElm[cx][cy].$tiles.appendChild $tile
-    return $tile
-
-  # alter the tile elm to match the new value
-  @changeTileElm: ($tile, xi, yi, cx, cy, value) ->
-    #console.log "changed tile at x:#{xi} y:#{yi}"
-    for type in TILE_TYPES
-        $tile.classList.remove(type)
-      $tile.classList.add("#{TILE_TYPES[value]}")
-    return $tile
-
-
-  @getTileElm: (xi, yi, cx, cy) ->
-    return null if @chunksElm[cx] is undefined or @chunksElm[cx][cy] is undefined
-    return @chunksElm[cx][cy].$tiles.querySelector ".tile.x#{xi}.y#{yi}.cx#{cx}.cy#{cy}"
-
-
-  @makeTile: (cx, cy, xi, yi, tile_type) ->
-    #console.log("makeTile - creating a tile at", xi,yi)
-    r = _.random(0,3)
-    $tile = document.createElement('div')
-    $tile.className = "tile #{tile_type} x#{xi} y#{yi} cx#{cx} cy#{cy} r#{r}"
-    # adding the sprite
+  @createTile: (xi, yi, cx, cy, value) ->
+    #console.log("createTile at #{xi},#{yi} in chunk #{cx},#{cy} type #{value} index #{TILE_INDEX[value]}")
+    $tile = new Tile(xi,yi,TILE_TYPES[value])
+    # create sprite
     $tileSprite = new Sprite(16, 16)
     $tileSprite.image = enchantGame.assets["images/tiles.png"]
-    value = _.indexOf(TILE_TYPES, tile_type)
+    #valueTile = _.indexOf(TILE_TYPES, value)
     $tileSprite.frame = TILE_INDEX[value]
     $tileSprite.scale = 2
-    #console.log("adding tile for chunk",cx,cy,"position ",xi,yi)
     $tileSprite.x = xi * TILE_SIZE;
     $tileSprite.y = yi * TILE_SIZE;
     $tile.sprite = $tileSprite
+    # adding the sprite to the layer
+    $layer = @findLayerFromChunkCoordinate(cx,cy)
+    $layer.addChild($tileSprite)
+    # adding the tile to the chunk
+    @chunks[cx][cy].setTile(xi,yi,$tile)
+    return $tile
+
+  # alter the tile elm to match the new value
+  @changeTile: ($tile, xi, yi, cx, cy, value) ->
+    #console.log "changed tile at x:#{xi} y:#{yi}"
+    #for type in TILE_TYPES
+    #    $tile.classList.remove(type)
+    $tile.type = value #.classList.add("#{TILE_TYPES[value]}")
     return $tile
 
   # do any work regarding a tile being added/changed
   @initTile: ($tile, xi, yi, cx, cy, value) ->
     
-    @setTileKlass($tile, xi, yi, cx, cy, value)
+    #@setTileKlass($tile, xi, yi, cx, cy, value)
 
     switch TILE_TYPES[value]
       when 'soil'
@@ -715,179 +682,7 @@ class @Game
       when 'wateredSoil'
         @addListener 'wateredSoil', $tile, xi, yi, cx, cy
     return @
-
-
-  @setTileKlass: ($tile, xi, yi, cx, cy, value) ->
-    for dir in TILE_DIRECTIONS
-      $tile.classList.remove(dir)
-    $tile.classList.remove('none')
-
-    klass = @getNeightbors(value, xi, yi, cx, cy)
-    $tile.className += klass
-
-
-  @getNeightbors: (tile_type, xi, yi, cx, cy) ->
-    klass = ''
-    for dir in TILE_DIRECTIONS
-      klass += " #{dir}" if @getNeightbor(tile_type, dir, xi, yi, cx, cy)
-    klass = ' none' if klass is ''
-    return klass
-
-
-  @getNeightbor: (tile_type, dir, xi, yi, cx, cy) ->
-    switch dir
-
-      when 'nw' 
-        if xi is 0 and yi is 0
-          tile  = @getTile_at( CHUNK_WIDTH-1, CHUNK_HEIGHT-1, cx-1, cy-1 )
-          elm   = @getTileElm( CHUNK_WIDTH-1, CHUNK_HEIGHT-1, cx-1, cy-1 )
-        else if xi is 0
-          tile  = @getTile_at( CHUNK_WIDTH-1, yi, cx-1, cy )
-          elm   = @getTileElm( CHUNK_WIDTH-1, yi, cx-1, cy )
-        else if yi is 0
-          tile  = @getTile_at( xi, CHUNK_HEIGHT-1, cx, cy-1 )
-          elm   = @getTileElm( xi, CHUNK_HEIGHT-1, cx, cy-1 )
-        else
-          tile  = @getTile_at( xi-1, yi-1, cx, cy)
-          elm   = @getTileElm( xi-1, yi-1, cx, cy)
-
-        if @isNeightbor(tile, tile_type)
-          elm.classList.add('se') if elm?
-          return true
-        else if elm?
-          elm.classList.remove('se')
-        return false
-
-      when 'n'  
-        if yi is 0
-          tile  = @getTile_at( xi, CHUNK_HEIGHT-1, cx, cy-1 )
-          elm   = @getTileElm( xi, CHUNK_HEIGHT-1, cx, cy-1 )
-        else
-          tile  = @getTile_at( xi,   yi-1, cx, cy)
-          elm   = @getTileElm( xi,   yi-1, cx, cy)
-
-        if @isNeightbor(tile, tile_type)
-          elm.classList.add('s') if elm?
-          return true
-        else if elm?
-          elm.classList.remove('s')
-        return false
-
-      when 'ne' 
-        if xi is CHUNK_WIDTH and yi is 0
-          tile  = @getTile_at( 0, CHUNK_HEIGHT-1, cx+1, cy-1)
-          elm   = @getTileElm( 0, CHUNK_HEIGHT-1, cx+1, cy-1)
-        else if xi is CHUNK_WIDTH
-          tile  = @getTile_at( 0, yi-1, cx+1, cy)
-          elm   = @getTileElm( 0, yi-1, cx+1, cy)
-        else if yi is 0
-          tile  = @getTile_at( xi+1, CHUNK_HEIGHT-1, cx, cy-1)
-          elm   = @getTileElm( xi+1, CHUNK_HEIGHT-1, cx, cy-1)
-        else
-          tile  = @getTile_at( xi+1, yi-1, cx, cy)
-          elm   = @getTileElm( xi+1, yi-1, cx, cy)
-
-        if @isNeightbor(tile, tile_type)
-          elm.classList.add('sw') if elm?
-          return true
-        else if elm?
-          elm.classList.remove('sw')
-        return false
-        
-      when 'e'  
-        if xi is CHUNK_WIDTH
-          tile  = @getTile_at( 0, yi,   cx+1, cy)
-          elm   = @getTileElm( 0, yi,   cx+1, cy)
-        else
-          tile  = @getTile_at( xi+1, yi,   cx, cy)
-          elm   = @getTileElm( xi+1, yi,   cx, cy)
-
-        if @isNeightbor(tile, tile_type)
-          elm.classList.add('w') if elm?
-          return true
-        else if elm?
-          elm.classList.remove('w')
-        return false
-        
-      when 'se' 
-        if xi is CHUNK_WIDTH and yi is CHUNK_HEIGHT
-          tile  = @getTile_at( 0, 0, cx+1, cy+1)
-          elm   = @getTileElm( 0, 0, cx+1, cy+1)
-        else if xi is CHUNK_WIDTH
-          tile  = @getTile_at( 0, yi+1, cx+1, cy)
-          elm   = @getTileElm( 0, yi+1, cx+1, cy)
-        else if yi is CHUNK_HEIGHT
-          tile  = @getTile_at( xi+1, 0, cx, cy+1)
-          elm   = @getTileElm( xi+1, 0, cx, cy+1)
-        else
-          tile  = @getTile_at( xi+1, yi+1, cx, cy)
-          elm   = @getTileElm( xi+1, yi+1, cx, cy)
-
-        if @isNeightbor(tile, tile_type)
-          elm.classList.add('nw') if elm?
-          return true
-        else if elm?
-          elm.classList.remove('nw')
-        return false
-
-      when 's'
-        if yi is CHUNK_HEIGHT
-          tile  = @getTile_at( xi,   0, cx, cy+1)
-          elm   = @getTileElm( xi,   0, cx, cy+1)
-        else
-          tile  = @getTile_at( xi,   yi+1, cx, cy)
-          elm   = @getTileElm( xi,   yi+1, cx, cy)
-
-        if @isNeightbor(tile, tile_type)
-          elm.classList.add('n') if elm?
-          return true
-        else if elm?
-          elm.classList.remove('n')
-        return false
-
-      when 'sw' 
-        if xi is 0 and yi is CHUNK_HEIGHT
-          tile  = @getTile_at( CHUNK_WIDTH-1, 0, cx-1, cy+1)
-          elm   = @getTileElm( CHUNK_WIDTH-1, 0, cx-1, cy+1)
-        else if xi is 0
-          tile  = @getTile_at( CHUNK_WIDTH-1, yi+1, cx-1, cy)
-          elm   = @getTileElm( CHUNK_WIDTH-1, yi+1, cx-1, cy)
-        else if yi is CHUNK_WIDTH
-          tile  = @getTile_at( xi-1, 0, cx, cy+1)
-          elm   = @getTileElm( xi-1, 0, cx, cy+1)
-        else
-          tile  = @getTile_at( xi-1, yi+1, cx, cy)
-          elm   = @getTileElm( xi-1, yi+1, cx, cy)
-
-        if @isNeightbor(tile, tile_type)
-          elm.classList.add('ne') if elm?
-          return true
-        else if elm?
-          elm.classList.remove('ne')
-        return false
-
-      when 'w'
-        if xi is 0
-          tile  = @getTile_at( CHUNK_WIDTH-1, yi,   cx-1, cy)
-          elm   = @getTileElm( CHUNK_WIDTH-1, yi,   cx-1, cy)
-        else
-          tile  = @getTile_at( xi-1, yi,   cx, cy)
-          elm   = @getTileElm( xi-1, yi,   cx, cy)
-
-        if @isNeightbor(tile, tile_type)
-          elm.classList.add('e') if elm?
-          return true
-        else if elm?
-          elm.classList.remove('e')
-        return false
-
-      else 
-        return false
-
-
-
-  @isNeightbor: (tile, tile_type) ->
-    return tile is tile_type
+  
 
   # TODO: make this cycle more complex (lower chances, shorter times?, chances based on number of times through?)
   @addListener: (type, $elm, xi, yi, cx, cy) ->
@@ -932,6 +727,7 @@ class @Game
   ## CHUNK
 
   @loadChunks: (cx, cy) ->
+    console.log("loadChunks ${cx},#{cy}")
     cx = cx || 0
     cy = cy || 0
     

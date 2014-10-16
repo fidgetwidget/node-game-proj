@@ -73,9 +73,9 @@ class @Chunk
   #
   # Setter
   #
-  setTile: (x, y, value) ->
+  setTile: (x, y, tileObject) ->
     @tiles[x] = {} unless @tiles[x]
-    if value is null or value is undefined
+    if tileObject is null or tileObject is undefined
       
       if @tiles[x][y]?
         @types["#{TILE_TYPES[@tiles[x][y]]}"]--
@@ -87,12 +87,7 @@ class @Chunk
           delete @tiles[x] if Object.keys(@tiles[x]).length is 0
             
     else
-      if @tiles[x][y]?
-        @types[TILE_TYPES[@tiles[x][y]]]--
-      unless @tiles[x][y] is value
-        @types[TILE_TYPES[value]] = 0 unless @types[TILE_TYPES[value]]
-        @types[TILE_TYPES[value]]++
-        @tiles[x][y] = value
+        @tiles[x][y] = tileObject
     return @
 
   setElement: (x, y, value) ->
