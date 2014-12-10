@@ -34,12 +34,14 @@ class @PlayerEntity extends Entity
     @
 
 
-  addSelf: (game) =>
-    game.$players.appendChild @$elm
+  addSelf: (toGame) =>
+    #toGame.$players.appendChild @$elm
+    Game.$background.addChild(@$spriteEntity)
 
 
   # attach events the player should be listenting to
   bindEvents: () ->
+
     document.addEventListener 'keyup', (e) =>
       if e.which in DIRECTIONS
         e.preventDefault()
@@ -102,13 +104,14 @@ class @PlayerEntity extends Entity
         @face EAST
 
     if dir in DIR_DOWN
+      #console.log("down")
       if @facing is SOUTH
         @check @x, @y+1
-          
       else
         @face SOUTH
     
     @collectItems @x, @y
+    #console.log("setcenter #{@cx},#{@cy}")
     Game.setCenter @x, @y, @cx, @cy
     @
 
@@ -173,10 +176,10 @@ class @PlayerEntity extends Entity
     @cx = cx
     @cy = cy
     unless Game.hasChunk(cx, cy)
-      console.log "making new chunk at x: #{cx} y: #{cy}"
+      #console.log "making new chunk at x: #{cx} y: #{cy}"
       Game.loadChunks(cx, cy)
-      # Game.randomWorld(cx, cy)
-      # Game.saveChunk(cx, cy)
+      #Game.randomWorld(cx, cy)
+      #Game.saveChunk(cx, cy)
 
 
 

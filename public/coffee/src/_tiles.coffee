@@ -25,6 +25,18 @@ this.TILE_TYPES = [
   'water'
 ]
 
+this.TILE_INDEX = [
+  0
+  1
+  4
+  7
+  33
+  36
+  39
+  65
+  68
+]
+
 this.COLLIDER_TILES = [
   false
   false

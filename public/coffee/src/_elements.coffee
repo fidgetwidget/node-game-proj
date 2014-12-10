@@ -2,6 +2,27 @@
 # ELEMENT GLOBAL VARIABLES
 #
 
+this.ELM_SPRITEINDEX = [
+  'soil'
+  'wateredSoil'
+  'weed'
+  '_0'
+  19 #stump
+  35 #bush
+  17 #branch
+  49 #stones
+  48 #rock
+  51 # ore
+  21 # fence
+  '_1'
+  'stick'
+  19 # roots
+  19 # thickets
+  'grass'
+  'tree'
+  8 #player
+  ]
+
 this.ELM_TYPES = [
   'soil'
   'wateredSoil'
@@ -20,6 +41,7 @@ this.ELM_TYPES = [
   'thicket'
   'grass'
   'tree'
+  'player'
 ]
 
 this.COLLIDER_ELMS = [
@@ -40,4 +62,5 @@ this.COLLIDER_ELMS = [
   true  #'thicket'
   false #'grass'
   true  #'tree'
+  false #'player'
 ]

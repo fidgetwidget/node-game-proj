@@ -3,14 +3,20 @@ html
   head
     title= title
     link(rel='stylesheet', href='/stylesheets/style.css')
+    meta(http-equiv="content-type", content="charset=UTF-8")
 
-    script(src='//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js')
-    script(src='//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.map')
-    script(src='//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js')
-    script(src='//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.map')
+    meta(name="viewport", content="width=device-width, user-scalable=no")
+    meta(name="apple-mobile-web-app-capable", content="yes")
+    meta(http-equiv="x-ua-compatible", content="IE=Edge")
+
+    script(src='/javascripts/lib/underscore.js/1.7.0/underscore-min.js')
+    script(src='/javascripts/lib/underscore.js/1.7.0/underscore-min.map')
+    script(src='/javascripts/lib/jquery/1.11.1/jquery.min.js')
+    script(src='/javascripts/lib/jquery/1.11.1/jquery.min.map')
 
     script(src='/javascripts/lib/pollyfills.js')
     script(src='/socket.io/socket.io.js')
+    script(src='/javascripts/lib/enchant.js')
   body
 
     //- header#header
@@ -27,11 +33,22 @@ html
     //-   block footer
 
     script. 
+
+      enchant();
+
       var $loading = $('#loading');
       var $content = $('#content');
       $content.hide()
 
       $(window).load( function() {
+
+        enchantGame = new Core(512, 512);
+        enchantGame.rootScene.backgroundColor = '#AE9363';
+        enchantGame.preload("images/entities.png");
+        enchantGame.preload("images/tiles.png");
+        enchantGame.preload("images/elements.png");
+
+        enchantGame.onload = function(){
 
           Game.init()
             .loadChunks(-1,-1)
@@ -43,6 +60,10 @@ html
           $content.show()
           $loading.find('.text').hide()
           $loading.fadeOut(1400)
+        }
+        enchantGame.start();
+        console.log("game started");
+
 
         });
 

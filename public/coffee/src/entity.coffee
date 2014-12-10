@@ -15,6 +15,9 @@ class @Entity
   elm:      undefined
   $elm:     undefined
 
+  sprite:      undefined
+  $sprite:     undefined
+
   width:    32
   height:   32
   offsetX:  0
@@ -26,6 +29,13 @@ class @Entity
   # Entity Constructor
   #
   constructor: (@type, @name, @x=0, @y=0) ->
+    console.log("constructor entity type", @type)
+    @$spriteEntity = new Sprite(32, 32)
+    @$spriteEntity.image = enchantGame.assets["images/entities.png"]
+    @$spriteEntity.frame = ELM_SPRITEINDEX[ELM_TYPES.indexOf(@type)]
+    @$spriteEntity.scale = 2
+    #Game.$background.addChild(@$spriteEntity)
+
     @$elm = document.createElement('div')
     @$elm.className = "entity #{@type} "
 
@@ -34,6 +44,9 @@ class @Entity
 
 
   setPosition: () ->
+    @$spriteEntity.x = @y*TILE_SIZE - @offsetY
+    @$spriteEntity.y = @y*TILE_SIZE - @offsetY
+    console.log("position ",@$spriteEntity.x,@$spriteEntity.y)
     @$elm.className   = "entity #{@type} cx#{@cx} cy#{@cy}"
     @$elm.style.top   = "#{(@y*TILE_SIZE) - @offsetY}px"
     @$elm.style.left  = "#{(@y*TILE_SIZE) - @offsetY}px"

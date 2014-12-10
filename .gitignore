@@ -1,6 +1,7 @@
 
 bower_components/*
 node_modules/*
+data/*
 
 nodeGameProj.sublime-project
 nodeGameProj.sublime-workspace
@@ -10,3 +11,4 @@ data/*
 .DS_Store
 *.log
 javascripts/app.js
+public/javascripts/app.js

@@ -8,27 +8,12 @@ class @ChunkElm
   $elements:  undefined
   $items:     undefined
 
-  constructor: ($viewport, cx, cy) ->
+  constructor: (cx, cy) ->
 
-    @$viewport = $viewport
+    @tiles = []
+    @elements = []
+    @entities = []
 
-    @$chunk = document.createElement('div')
-    @$chunk.className = "chunk cx#{cx} cy#{cy}"
-
-    @$tiles = document.createElement('div')
-    @$tiles.className = 'tiles'
-
-    @$elements = document.createElement('div')
-    @$elements.className = 'elements'
-
-    @$entities = document.createElement('div')
-    @$entities.className = 'entities'
-
-    @$chunk.appendChild @$tiles
-    @$chunk.appendChild @$elements
-    @$chunk.appendChild @$entities
-
-    @$viewport.appendChild @$chunk
 
     return @
 
