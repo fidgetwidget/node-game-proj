@@ -161,30 +161,33 @@ class @Game
     @addPlayer p1
     @setCenter p1.x, p1.y, p1.cx, p1.cy
 
-    enchantGame.rootScene.on "touchstart", (evt) ->
-      console.log("touched start")
-      return
+    # NOTE: the input events are currently handled in the player_entitiy.coffee class file
+    #       we should move them into an inputs.coffee handler so that all input is in one place
 
-    enchantGame.rootScene.on "touchend", (evt) ->
-      console.log("touched background end ",evt.x,evt.y)
-      #console.log("touched relative position ",evt.x - Game.$background.x,evt.y - Game.$background.y)
-      #console.log("player relative position ",Game.$backgroundObjects.x,Game.$backgroundObjects.y)
-      # check where the click was made relatively to player (backGroundObjects)
-      # adding the tile size as a dampner
-      if evt.x - Game.$background.x + TILE_SIZE < 0
-        console.log("touched on player left")
-        Game.players[0].move DIR_LEFT
-      else if evt.x - Game.$background.x - TILE_SIZE > 0
-        console.log("touched on player right")
-        Game.players[0].move DIR_RIGHT
+    # enchantGame.rootScene.on "touchstart", (evt) ->
+    #   console.log("touched start")
+    #   return
+
+    # enchantGame.rootScene.on "touchend", (evt) ->
+    #   console.log("touched background end ",evt.x,evt.y)
+    #   #console.log("touched relative position ",evt.x - Game.$background.x,evt.y - Game.$background.y)
+    #   #console.log("player relative position ",Game.$backgroundObjects.x,Game.$backgroundObjects.y)
+    #   # check where the click was made relatively to player (backGroundObjects)
+    #   # adding the tile size as a dampner
+    #   if evt.x - Game.$background.x + TILE_SIZE < 0
+    #     console.log("touched on player left")
+    #     Game.players[0].move DIR_LEFT #NOTE: this was breaking, because the play was index on name, not int - I changed it to index on both
+    #   else if evt.x - Game.$background.x - TILE_SIZE > 0
+    #     console.log("touched on player right")
+    #     Game.players[0].move DIR_RIGHT
       
-      if evt.y - Game.$background.y + TILE_SIZE < 0
-        console.log("touched on player top")
-        Game.players[0].move DIR_UP
-      else if evt.y - Game.$background.y - TILE_SIZE > 0
-        console.log("touched on player 0 bottom")
-        Game.players[0].move DIR_DOWN
-      return
+    #   if evt.y - Game.$background.y + TILE_SIZE < 0
+    #     console.log("touched on player top")
+    #     Game.players[0].move DIR_UP
+    #   else if evt.y - Game.$background.y - TILE_SIZE > 0
+    #     console.log("touched on player 0 bottom")
+    #     Game.players[0].move DIR_DOWN
+    #   return
 
   # Move the scene to the center (apparent player movement)
   #
@@ -431,6 +434,7 @@ class @Game
   #
   #
   @addPlayer: (player) ->
+    @players[player.id] = player
     @players[player.name] = player
     player.addSelf this
 

@@ -19,7 +19,8 @@ class @PlayerEntity extends Entity
   @param [name] the name of the player
   ###
   constructor: (name, x, y) ->
-    @name = name || "player#{PlayerEntity.count}"
+    @id = PlayerEntity.count
+    @name = name || "player#{@id}"
     PlayerEntity.count++
     super( "player", @name, x, y )
     @cx = 0
